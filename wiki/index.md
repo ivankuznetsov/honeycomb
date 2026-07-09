@@ -7,6 +7,8 @@ change.
 ## Core Pages
 
 - [[architecture]] - system shape, runtime flows, and important modules.
+- [[command-api-surface]] - documented commands, catalog surface, and current
+  implementation status.
 - [[decisions]] - durable design decisions and tradeoffs.
 - [[dependencies]] - runtime, development, and service dependencies.
 - [[gaps]] - missing, uncertain, or stale wiki coverage.

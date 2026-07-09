@@ -1,8 +1,3 @@
-# Wiki Changelog
-
-Append-only log of all wiki operations.
-
-<!-- BEGIN GENERATED WIKI LOG FRAGMENTS -->
 # 2026-07-09 Command/API Surface Refresh
 
 - Added `wiki/command-api-surface.md` to track the documented catalog URL,
@@ -13,4 +8,3 @@ Append-only log of all wiki operations.
   called honeycombs.
 - Added gaps for the unimplemented Hive install command integration, catalog
   surface, package schema, and security review workflow.
-<!-- END GENERATED WIKI LOG FRAGMENTS -->
