@@ -1,0 +1,9 @@
+{
+  "headless_agent": "codex",
+  "context_agents": [
+    "claude",
+    "codex",
+    "pi"
+  ],
+  "created_by": "hive"
+}
