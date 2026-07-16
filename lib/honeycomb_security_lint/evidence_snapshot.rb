@@ -8,7 +8,7 @@ module HoneycombSecurityLint
 
     module_function
 
-    def export(root:, lint_paths:, checked_at:, tier:)
+    def export(root:, lint_paths:, checked_at:, release_tier:)
       snapshot = File.realpath(root)
       raise Invalid, "evidence snapshot is not a directory" unless File.directory?(snapshot)
       paths = Array(lint_paths)
@@ -18,7 +18,8 @@ module HoneycombSecurityLint
         lint = read_lint(snapshot, path)
         approvals = approvals_for(snapshot, lint)
         ListingEvidenceAdapter.build(
-          lint_evidence: lint, approvals: approvals, checked_at: checked_at, tier: tier
+          lint_evidence: lint, approvals: approvals, checked_at: checked_at,
+          release_tier: release_tier
         ).fetch("records")
       end
       duplicate = records.group_by { |record| record.values_at("name", "version") }

@@ -51,12 +51,12 @@ class SecurityLintEvidenceSnapshotTest < Minitest::Test
 
       document = HoneycombSecurityLint::EvidenceSnapshot.export(
         root: root, lint_paths: [lint_path], checked_at: "2026-07-17T09:00:00Z",
-        tier: "community"
+        release_tier: "community"
       )
 
       assert_equal HoneycombRegistry::ListingEvidence::SCHEMA, document.fetch("schema")
-      assert_equal "approved", document.dig("records", 0, "approval", "status")
-      assert_equal "maintainer", document.dig("records", 0, "approval", "reviewer")
+      assert_equal "approved", document.dig("records", 0, "approvals", 0, "status")
+      assert_equal "maintainer", document.dig("records", 0, "approvals", 0, "reviewer")
       assert_equal document, JSON.parse(HoneycombSecurityLint::Contracts.canonical_json(document))
     end
   end
@@ -67,7 +67,7 @@ class SecurityLintEvidenceSnapshotTest < Minitest::Test
       File.write(outside, HoneycombSecurityLint::Contracts.canonical_json(lint))
       assert_raises(HoneycombSecurityLint::EvidenceSnapshot::Invalid) do
         HoneycombSecurityLint::EvidenceSnapshot.export(
-          root: root, lint_paths: [outside], checked_at: "2026-07-17T09:00:00Z", tier: "community"
+          root: root, lint_paths: [outside], checked_at: "2026-07-17T09:00:00Z", release_tier: "community"
         )
       end
 
@@ -81,7 +81,7 @@ class SecurityLintEvidenceSnapshotTest < Minitest::Test
       File.symlink(File.dirname(outside), File.join(directory, SHA))
       assert_raises(HoneycombSecurityLint::EvidenceSnapshot::Invalid) do
         HoneycombSecurityLint::EvidenceSnapshot.export(
-          root: root, lint_paths: [lint_path], checked_at: "2026-07-17T09:00:00Z", tier: "community"
+          root: root, lint_paths: [lint_path], checked_at: "2026-07-17T09:00:00Z", release_tier: "community"
         )
       end
     ensure

@@ -21,27 +21,44 @@ class CatalogTest < Minitest::Test
     package
   end
 
-  def evidence_record(package, lint: "pass", approval: "approved", head: "d" * 40)
+  def evidence_record(package, lint: "pass", approval: "approved", head: "d" * 40,
+                      release_tier: "community", current_tier: release_tier,
+                      state: "listed", approval_count: 1, verification: nil,
+                      history: [], advisories: [])
     manifest = HoneycombRegistry::SafeYAML.load_file(package.manifest_path)
     release = manifest.fetch("release_sha256")
+    approvals = if approval == "pending"
+                  []
+                else
+                  Array.new(approval_count) do |index|
+                    {
+                      "status" => approval,
+                      "release_sha256" => release,
+                      "head_sha" => head,
+                      "reviewer" => "registry-reviewer-#{index + 1}",
+                      "reviewed_at" => "2026-07-16T11:0#{index}:00Z",
+                      "review_url" => "https://example.test/reviews/#{package.name}-#{package.version}-#{index + 1}",
+                      "evidence_digest" => ("#{index + 1}" * 64)[0, 64]
+                    }
+                  end
+                end
     {
       "name" => package.name,
       "version" => package.version,
-      "tier" => "reviewed",
+      "release_tier" => release_tier,
+      "current_tier" => current_tier,
+      "permission_risk" => manifest.dig("permissions", "risk"),
+      "state" => state,
       "lint" => lint == "pending" ? {"status" => "pending"} : {
         "status" => lint,
         "release_sha256" => release,
         "head_sha" => head,
         "checked_at" => "2026-07-16T10:00:00Z"
       },
-      "approval" => approval == "pending" ? {"status" => "pending"} : {
-        "status" => approval,
-        "release_sha256" => release,
-        "head_sha" => head,
-        "reviewer" => "registry-reviewer",
-        "reviewed_at" => "2026-07-16T11:00:00Z",
-        "review_url" => "https://example.test/reviews/#{package.name}-#{package.version}"
-      }
+      "approvals" => approvals,
+      "verification" => verification,
+      "history" => history,
+      "advisories" => advisories
     }
   end
 
@@ -77,12 +94,18 @@ class CatalogTest < Minitest::Test
 
       refute result.findings.errors?, result.findings.to_h.inspect
       entry = result.document.fetch("entries").fetch(0)
+      schema = JSON.parse(File.read(File.join(ROOT, "schemas", "catalog-v1.json")))
+      assert_equal schema.dig("$defs", "entry", "required").sort, entry.keys.sort
       assert_equal "example", entry["name"]
       assert_equal "1.0.0", entry["latest_version"]
       assert_equal "hive workflow install honeycomb/example", entry["install_command"]
       assert_equal "a" * 40, entry["source_sha"]
       assert_equal "d" * 40, entry.dig("listing_approval", "head_sha")
-      assert_equal "https://example.test/reviews/example-1.0.0", entry["reviews_url"]
+      assert_equal ["registry-reviewer-1"], entry.dig("listing_approval", "approved_by")
+      assert_equal "community", entry["release_tier"]
+      assert_equal "community", entry["current_tier"]
+      assert_equal "listed", entry["state"]
+      assert entry["discoverable"]
       assert_includes entry["package_url"], "/tree/#{"d" * 40}/packages/example/1.0.0"
       refute entry.key?("files")
     end
@@ -93,6 +116,7 @@ class CatalogTest < Minitest::Test
       package = canonical_package(root)
       record = evidence_record(package)
       record["lint"]["release_sha256"] = "f" * 64
+      record["approvals"][0]["release_sha256"] = "f" * 64
       result = HoneycombRegistry::Catalog.build(
         root: root, evidence_path: write_evidence(root, [record])
       )
@@ -104,11 +128,133 @@ class CatalogTest < Minitest::Test
     in_tmpdir do |root|
       package = canonical_package(root)
       record = evidence_record(package)
-      record["approval"]["head_sha"] = "e" * 40
+      record["approvals"][0]["head_sha"] = "e" * 40
       result = HoneycombRegistry::Catalog.build(
         root: root, evidence_path: write_evidence(root, [record])
       )
       assert_includes result.findings.codes, "evidence.head_mismatch"
+    end
+  end
+
+  def test_lifecycle_controls_discovery_latest_and_exact_resolution_without_deleting_history
+    in_tmpdir do |root|
+      listed = canonical_package(root, version: "1.0.0")
+      hidden = canonical_package(root, version: "1.1.0")
+      yanked = canonical_package(root, version: "1.2.0")
+      revoked = canonical_package(root, version: "1.3.0")
+      state_history = lambda do |state, at|
+        [{
+          "kind" => "state", "from" => "listed", "to" => state,
+          "changed_at" => at, "actor" => "registry-maintainer",
+          "reason" => "Lifecycle test", "url" => "https://example.test/history/#{state}"
+        }]
+      end
+      records = [
+        evidence_record(listed),
+        evidence_record(hidden, state: "soft_hidden", history: state_history.call("soft_hidden", "2026-07-17T08:00:00Z")),
+        evidence_record(yanked, state: "yanked", history: state_history.call("yanked", "2026-07-17T09:00:00Z")),
+        evidence_record(
+          revoked, state: "revoked", history: state_history.call("revoked", "2026-07-17T10:00:00Z"),
+          advisories: [{
+            "id" => "HC-2026-001", "title" => "Revoked test release", "severity" => "high",
+            "url" => "https://example.test/advisories/HC-2026-001",
+            "published_at" => "2026-07-17T10:00:00Z"
+          }]
+        )
+      ]
+
+      result = HoneycombRegistry::Catalog.build(
+        root: root, evidence_path: write_evidence(root, records)
+      )
+
+      refute result.findings.errors?, result.findings.to_h.inspect
+      assert_equal %w[1.0.0 1.1.0 1.2.0 1.3.0], result.document["entries"].map { |entry| entry["version"] }
+      assert_equal ["1.0.0"], HoneycombRegistry::Catalog.discovery(result.document).map { |entry| entry["version"] }
+      assert_equal "1.0.0", HoneycombRegistry::Catalog.resolve(result.document, name: "example")["version"]
+      assert_equal "1.0.0", result.document["entries"].first["latest_version"]
+      assert_equal "1.1.0", HoneycombRegistry::Catalog.resolve(result.document, name: "example", version: "1.1.0")["version"]
+      assert_equal "1.2.0", HoneycombRegistry::Catalog.resolve(result.document, name: "example", version: "1.2.0")["version"]
+      error = assert_raises(HoneycombRegistry::Catalog::Revoked) do
+        HoneycombRegistry::Catalog.resolve(result.document, name: "example", version: "1.3.0")
+      end
+      assert_equal "HC-2026-001", error.advisories.first.fetch("id")
+    end
+  end
+
+  def test_high_risk_requires_two_distinct_current_maintainer_approvals
+    in_tmpdir do |root|
+      package = canonical_package(root)
+      workflow = File.join(package.path, "workflow.yml")
+      File.write(workflow, File.read(workflow).sub("permissions: read-only", "permissions: yolo"))
+      generated = HoneycombRegistry::Manifest.generate(package)
+      refute generated.findings.errors?, generated.findings.to_h.inspect
+      one = evidence_record(package, approval_count: 1)
+
+      result = HoneycombRegistry::Catalog.build(
+        root: root, evidence_path: write_evidence(root, [one])
+      )
+      refute result.findings.errors?, result.findings.to_h.inspect
+      assert_empty result.document.fetch("entries")
+
+      two = evidence_record(package, approval_count: 2)
+      result = HoneycombRegistry::Catalog.build(
+        root: root, evidence_path: write_evidence(root, [two])
+      )
+      refute result.findings.errors?, result.findings.to_h.inspect
+      assert_equal %w[registry-reviewer-1 registry-reviewer-2],
+                   result.document.dig("entries", 0, "listing_approval", "approved_by")
+    end
+  end
+
+  def test_verified_evidence_binds_archive_signature_attestation_and_tier_history
+    in_tmpdir do |root|
+      package = canonical_package(root)
+      manifest = HoneycombRegistry::SafeYAML.load_file(package.manifest_path)
+      verification = {
+        "archive_sha256" => HoneycombRegistry::ReleaseVerification.archive_sha256(manifest),
+        "signature" => {
+          "identity" => "https://github.com/hive-sh/honeycomb/.github/workflows/release.yml@refs/tags/v1.0.0",
+          "issuer" => "https://token.actions.githubusercontent.com",
+          "url" => "https://search.sigstore.dev/entry/123"
+        },
+        "attestation" => {
+          "repository" => "hive-sh/honeycomb",
+          "workflow" => "hive-sh/honeycomb/.github/workflows/release.yml@refs/tags/v1.0.0",
+          "url" => "https://github.com/hive-sh/honeycomb/attestations/123"
+        },
+        "verified_at" => "2026-07-16T12:00:00Z"
+      }
+      history = [{
+        "kind" => "tier", "from" => "verified", "to" => "community",
+        "changed_at" => "2026-07-17T08:00:00Z", "actor" => "registry-maintainer",
+        "reason" => "Signer no longer meets current policy",
+        "url" => "https://example.test/history/demotion"
+      }]
+      record = evidence_record(
+        package, release_tier: "verified", current_tier: "community",
+        verification: verification, history: history
+      )
+
+      result = HoneycombRegistry::Catalog.build(
+        root: root, evidence_path: write_evidence(root, [record])
+      )
+      refute result.findings.errors?, result.findings.to_h.inspect
+      assert_equal "verified", result.document.dig("entries", 0, "release_tier")
+      assert_equal "community", result.document.dig("entries", 0, "current_tier")
+      assert_equal history, result.document.dig("entries", 0, "history")
+
+      record["verification"]["archive_sha256"] = "f" * 64
+      result = HoneycombRegistry::Catalog.build(
+        root: root, evidence_path: write_evidence(root, [record])
+      )
+      assert_includes result.findings.codes, "evidence.verification_digest_mismatch"
+
+      record = evidence_record(package)
+      record["permission_risk"] = "moderate"
+      result = HoneycombRegistry::Catalog.build(
+        root: root, evidence_path: write_evidence(root, [record])
+      )
+      assert_includes result.findings.codes, "evidence.permission_risk_mismatch"
     end
   end
 

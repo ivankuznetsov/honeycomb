@@ -162,7 +162,8 @@ Informational and warning findings do not fail a command.
 ## Listing evidence
 
 `honeycomb-catalog` requires an explicit normalized JSON record set. This is an
-input boundary for listing CI, not task 1849's prescribed persistence format:
+input boundary for listing CI; `schemas/listing-evidence-v1.json` describes the
+public shape:
 
 ```json
 {
@@ -171,37 +172,71 @@ input boundary for listing CI, not task 1849's prescribed persistence format:
     {
       "name": "example",
       "version": "1.0.0",
-      "tier": "reviewed",
+      "release_tier": "community",
+      "current_tier": "community",
+      "permission_risk": "low",
+      "state": "listed",
       "lint": {
         "status": "pass",
         "release_sha256": "<64 lowercase hex>",
         "head_sha": "<40 or 64 lowercase hex>",
         "checked_at": "2026-07-16T10:00:00Z"
       },
-      "approval": {
-        "status": "approved",
-        "release_sha256": "<same release>",
-        "head_sha": "<same head>",
-        "reviewer": "registry-reviewer",
-        "reviewed_at": "2026-07-16T11:00:00Z",
-        "review_url": "https://example.test/reviews/example-1.0.0"
-      }
+      "approvals": [
+        {
+          "status": "approved",
+          "release_sha256": "<same release>",
+          "head_sha": "<same head>",
+          "reviewer": "registry-reviewer",
+          "reviewed_at": "2026-07-16T11:00:00Z",
+          "review_url": "https://example.test/reviews/example-1.0.0",
+          "evidence_digest": "<64 lowercase hex>"
+        }
+      ],
+      "verification": null,
+      "history": [],
+      "advisories": []
     }
   ]
 }
 ```
 
-Root, record, lint, and approval keys are strict; JSON duplicate keys are
-rejected. Lint statuses are `pass`, `pending`, and `fail`; approval statuses are
-`approved`, `pending`, and `denied`. Pending verdicts may contain only their
-status. Non-pending verdicts require their identity/audit fields and RFC 3339
-timestamps. A version is eligible only for `pass` plus `approved` bound to its
-current release and the same head SHA.
+Root, record, lint, approval, verification, history, and advisory keys are
+strict; JSON duplicate keys and non-canonical record/reviewer/history/advisory
+ordering are rejected. Lint statuses are `pass`, `pending`, and `fail`.
+Approvals are current reviewer decisions (`approved` or `denied`); an empty
+array represents no approval. Every decision binds the exact release, head,
+reviewed evidence digest, reviewer, timestamp, and review URL. A low or moderate
+risk honeycomb needs one distinct current approval. `risk: high` needs two; any
+current denial leaves it ineligible.
 
-Missing records, a missing verdict, pending, failed lint, or denied approval omit
+Trust and lifecycle are independent:
+
+- `release_tier` is the immutable tier at release; `current_tier` is the current
+  `community` or `verified` classification.
+- `permission_risk` must equal the generated manifest and never derives from a
+  tier or lifecycle state.
+- `state` is exactly `listed`, `soft_hidden`, `yanked`, or `revoked`.
+- `history` starts from the release tier and `listed`, records exact ordered
+  tier/state transitions with actor, reason, time, and URL, and must project the
+  declared current values. This prevents silent demotion or relisting.
+- `advisories` are independently ordered public records. Revocation requires at
+  least one advisory.
+
+A current or historic Verified tier requires `verification`. The immutable
+archive identity is SHA-256 over the canonical release fingerprint plus the
+manifest's complete sorted payload file map. The record also carries an exact
+GitHub Actions keyless signature identity, the GitHub OIDC issuer, signature
+reference, matching Actions attestation repository/workflow identity and
+reference, and an RFC 3339 verification time. Community-only releases may use
+`null`. Digest, workflow, signer, URL, and timestamp mismatches fail closed.
+
+Missing records, pending/failed lint, insufficient approvals, or a denial omit
 the version without failing catalog generation. Malformed/duplicate records,
 unknown package identities, stale release fingerprints, or lint/approval head
-or release disagreement abort the entire build without replacing `catalog.json`.
+or release disagreement, permission-risk drift, invalid verification, broken
+history, or missing revocation advisories abort the entire build without
+replacing `catalog.json`.
 
 ## `honeycomb-catalog/v1`
 
@@ -214,22 +249,28 @@ The root document is:
 }
 ```
 
-Each eligible version gets a flat entry with these exact projections:
+Each dual-gated version remains in the canonical catalog, including
+soft-hidden, yanked, and revoked history. `schemas/catalog-v1.json` describes the
+output. Entries carry these projections:
 
 | Field | Source |
 |---|---|
 | `name`, `version`, `description`, `author`, `license`, `hive_min_version`, `permissions` | Validated manifest. |
-| `latest_version` | Highest eligible SemVer for the same name. |
-| `tier` | Listing evidence. |
+| `latest_version` | Highest dual-gated `listed` SemVer for the same name, or `null`. |
+| `release_tier`, `current_tier`, `permission_risk`, `state` | Independent listing evidence fields. |
+| `discoverable`, `exact_resolution` | Derived lifecycle behavior. |
+| `verification`, `history`, `advisories` | Strict listing evidence copied without reinterpretation. |
 | `install_command` | Fixed `hive workflow install honeycomb/<name>`. |
 | `package_url` | Fixed registry repository URL at the evidence head SHA and exact version path. |
 | `reviews_url` | Approved evidence review URL. |
 | `source_sha` | Manifest `source.revision`. |
-| `listing_approval` | Release SHA, head SHA, lint time, approver, and approval time. |
+| `listing_approval` | Release/head/lint identity plus every qualifying reviewer audit record. |
 
-Entries sort by name then SemVer and every version carries the same eligible
-`latest_version` for its name. The catalog contains no full manifest, package
-file map, generation timestamp, or caller-supplied shell/URL projection.
+Entries sort by name then SemVer. Discovery and implicit latest selection use
+only `listed` entries. Exact resolution remains allowed for `soft_hidden` and
+`yanked`; a `revoked` exact version raises a fail-closed result carrying its
+public advisories. The catalog contains no full manifest, package file map,
+generation timestamp, or caller-supplied shell projection.
 
 ```sh
 ruby script/honeycomb-catalog --evidence path/to/evidence.json

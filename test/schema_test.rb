@@ -84,4 +84,21 @@ class SchemaTest < Minitest::Test
     )
     refute HoneycombRegistry::Schema.validate_manifest(manifest).errors?
   end
+
+  def test_checked_in_catalog_and_listing_evidence_schemas_match_runtime_versions
+    listing = JSON.parse(File.read(File.join(ROOT, "schemas", "listing-evidence-v1.json")))
+    catalog = JSON.parse(File.read(File.join(ROOT, "schemas", "catalog-v1.json")))
+
+    assert_equal HoneycombRegistry::ListingEvidence::SCHEMA,
+                 listing.dig("properties", "schema", "const")
+    assert_equal HoneycombRegistry::Catalog::SCHEMA,
+                 catalog.dig("properties", "schema", "const")
+    assert_equal HoneycombRegistry::ListingEvidence::STATES,
+                 listing.dig("$defs", "record", "properties", "state", "enum")
+    assert_equal HoneycombRegistry::ListingEvidence::TIERS,
+                 listing.dig("$defs", "record", "properties", "release_tier", "enum")
+    fixture = JSON.parse(File.read(fixture_path("listing-evidence", "passing.json")))
+    assert_equal listing.dig("$defs", "record", "required").sort,
+                 fixture.fetch("records").first.keys.sort
+  end
 end

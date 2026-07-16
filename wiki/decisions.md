@@ -68,3 +68,22 @@ local absence warns and explicit `--require-hive` fails.
 
 Consequence: normal author commands remain offline and dependency-light, while
 CI can prove the declared Hive minimum without duplicating Hive's full parser.
+
+## 2026-07-17: Catalog Trust and Lifecycle Are Independent Axes
+
+Context: a single tier string cannot distinguish release-time verification,
+current trust, execution risk, discoverability, exact-version safety, or public
+security advisories. Silently removing non-listed releases would also erase the
+audit trail installers need.
+
+Decision: preserve immutable release tier separately from current tier,
+permission risk, and the closed `listed`/`soft_hidden`/`yanked`/`revoked`
+lifecycle. Retain dual-gated versions and ordered transition/advisory history in
+the canonical catalog. Verified history requires digest-bound GitHub Actions
+signature/attestation evidence; high-risk listing requires two distinct current
+maintainers.
+
+Consequence: discovery/latest use only listed releases, exact soft-hidden and
+yanked resolution remains available, and revoked exact resolution fails closed
+with mandatory public advisories. No trust signal substitutes for lint or human
+approval.

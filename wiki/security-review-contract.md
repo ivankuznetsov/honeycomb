@@ -21,14 +21,22 @@ pass and must land separately.
 ## Normalized reader boundary
 
 `honeycomb-catalog --evidence PATH` accepts
-`honeycomb-listing-evidence/v1`. Each record identifies package name/version and
-tier, with independent lint and approval verdicts. Passing/approved verdicts
-carry:
+`honeycomb-listing-evidence/v1`. Each record identifies honeycomb name/version,
+release/current tier, permission risk, lifecycle state, one lint verdict, a
+current reviewer-decision array, optional verification, ordered history, and
+public advisories. Passing/approved verdicts carry:
 
 - the current generated manifest `release_sha256`;
 - the same exact registry review `head_sha`;
 - RFC 3339 audit times;
-- the human reviewer and review URL for approval.
+- each human reviewer, review URL, and reviewed evidence digest.
+
+Low/moderate risk requires one distinct current approval; high risk requires
+two, and a current denial blocks eligibility. Verified evidence binds the
+immutable archive identity, GitHub OIDC signer, signature reference, Actions
+attestation/workflow, and verification time. Revocation requires a public
+advisory. Tier, risk, lifecycle, verification, and advisory meanings do not
+substitute for lint or human approval.
 
 The reader is strict about object keys, JSON duplicate keys, status values,
 hashes, timestamps, URLs, duplicate records, and discovered package identity.
@@ -52,7 +60,7 @@ The offline exporter selects exact lint snapshots and never infers that the most
 recent historical record is current.
 
 Reviewer/trust policy prose remains owned by task 1850. Signing/attestation,
-promotion, demotion, advisories, yanking, and revocation are separate catalog
+promotion, demotion, advisories, yanking, and revocation use separate catalog
 contract fields rather than implicit lint or approval meanings.
 
 Exact approved suppressions remain visible and are verified by reconstructing

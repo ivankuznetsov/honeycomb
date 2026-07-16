@@ -45,9 +45,10 @@ The shared library has three main flows:
    writes. It optionally loads Hive and calls its public descriptor parser;
    strict mode makes compatibility mandatory.
 3. Catalog generation validates all packages first, strict-loads an explicit
-   normalized evidence record set, omits non-approved versions, rejects stale or
-   contradictory identities, computes eligible SemVer latest values, and
-   atomically replaces `catalog.json`.
+   normalized evidence record set, omits versions without current gates, rejects
+   stale or contradictory identities, retains dual-gated lifecycle history,
+   computes `listed`-only SemVer latest values, and atomically replaces
+   `catalog.json`.
 4. Security lint discovers changed version roots from the exact base/head diff,
    invokes the production validator, scans all bounded text content, statically
    analyzes only instruction surfaces, and emits canonical redacted evidence.
@@ -61,12 +62,16 @@ The shared library has three main flows:
 
 `source.revision`, generated `release_sha256`, and review `head_sha` are separate
 identities. Evidence binds both lint and human approval to the latter two.
+Release/current trust tier, permission risk, lifecycle state, verification,
+history, and advisories remain independent catalog axes. Revoked entries remain
+auditable but exact resolution fails closed with their public advisories.
 
 ## Runtime Flow Status
 
-Author tooling and security-lint CI are shipped. Analyzer code is deterministic
-and offline; only the trusted reporter uses GitHub HTTPS metadata APIs. The
-remaining consumer flow is future work: task 1851 seeds real honeycombs, a
+Author tooling and security-lint CI are shipped. Analyzer/exporter code is
+deterministic and offline; only the trusted reporter and approval issuer use
+GitHub HTTPS metadata APIs. The remaining consumer flow is future work: task
+1851 seeds real honeycombs, a
 static site exposes `hive.sh/honeycombs`, and Hive tasks 1852/1853 implement
 `hive workflow install honeycomb/<name>`. Evidence branch/environment creation
 and protection remain post-merge repository rollout operations.

@@ -51,7 +51,7 @@ class SecurityLintListingApprovalCliTest < Minitest::Test
 
       stdout, stderr, status = capture_command(
         SCRIPT, "export", "--snapshot", root, "--lint", relative_lint,
-        "--checked-at", "2026-07-17T09:00:00Z", "--tier", "community",
+        "--checked-at", "2026-07-17T09:00:00Z", "--release-tier", "community",
         "--output", output
       )
 

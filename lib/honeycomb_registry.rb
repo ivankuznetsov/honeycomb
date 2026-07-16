@@ -12,6 +12,7 @@ require_relative "honeycomb_registry/manifest"
 require_relative "honeycomb_registry/hive_compatibility"
 require_relative "honeycomb_registry/validator"
 require_relative "honeycomb_registry/canonical_json"
+require_relative "honeycomb_registry/release_verification"
 require_relative "honeycomb_registry/listing_evidence"
 require_relative "honeycomb_registry/catalog"
 

@@ -14,7 +14,9 @@ product.
 The repository now ships the independent `honeycomb-manifest/v1` package
 contract, offline Ruby tooling for manifest generation and validation, an
 approval-gated catalog generator, and fork-safe security-lint CI. The root
-catalog is intentionally empty until seed honeycombs land.
+catalog is intentionally empty until seed honeycombs land. Its contract keeps
+Community/Verified history, permission risk, lifecycle state, verification, and
+public advisories independent; only listed versions participate in discovery.
 
 ```sh
 ruby script/honeycomb-manifest --check --all

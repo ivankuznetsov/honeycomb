@@ -60,7 +60,7 @@ class SecurityLintCatalogGateIntegrationTest < Minitest::Test
   def write_listing_evidence(root, lint, approvals)
     document = HoneycombSecurityLint::ListingEvidenceAdapter.build(
       lint_evidence: lint, approvals: approvals,
-      checked_at: "2026-07-16T10:00:00Z", tier: "reviewed"
+      checked_at: "2026-07-16T10:00:00Z", release_tier: "community"
     )
     path = File.join(root, "listing-evidence.json")
     File.write(path, HoneycombSecurityLint::Contracts.canonical_json(document))

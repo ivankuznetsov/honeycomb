@@ -64,6 +64,9 @@ The shipped version layout is:
 ## Catalog and API Status
 
 Root `catalog.json` is a shipped deterministic `honeycomb-catalog/v1` artifact.
-It is empty until task 1851 seeds real packages. `hive.sh/honeycombs` remains a
-documented future static rendering surface; no route, handler, or site code is
-implemented here.
+It carries independent release/current tier, permission risk, lifecycle,
+verification, transition history, and advisory fields. Discovery/latest include
+only listed entries; exact soft-hidden/yanked versions remain resolvable and
+revoked versions fail closed. The file is empty until task 1851 seeds real
+packages. `hive.sh/honeycombs` remains a documented future static rendering
+surface; no route, handler, or site code is implemented here.

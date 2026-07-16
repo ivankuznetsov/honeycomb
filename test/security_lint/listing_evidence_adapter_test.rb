@@ -10,7 +10,7 @@ class SecurityLintListingEvidenceAdapterTest < Minitest::Test
   def lint(finding: nil, suppression: nil)
     package = {
       "identity" => {"name" => "example", "version" => "1.0.0", "path" => "packages/example/1.0.0", "release_sha256" => RELEASE},
-      "validator_findings" => [], "requested_permissions" => {}, "scanned_files" => [],
+      "validator_findings" => [], "requested_permissions" => {"risk" => "low"}, "scanned_files" => [],
       "commands" => [], "hosts" => [], "findings" => finding ? [finding] : [],
       "suppressions" => suppression ? [suppression] : [],
       "counts" => {"hard" => 0, "advisory" => 0, "downgraded" => 0}, "verdict" => "pass"
@@ -41,21 +41,24 @@ class SecurityLintListingEvidenceAdapterTest < Minitest::Test
     record = HoneycombSecurityLint::ListingEvidenceAdapter.build(
       lint_evidence: evidence,
       approvals: [approval(digest: evidence.fetch("artifact_digest"))],
-      checked_at: "2026-07-16T10:00:00Z", tier: "reviewed"
+      checked_at: "2026-07-16T10:00:00Z", release_tier: "community"
     ).fetch("records").first
 
     assert_equal "pass", record.dig("lint", "status")
-    assert_equal "approved", record.dig("approval", "status")
+    assert_equal "approved", record.dig("approvals", 0, "status")
     assert_equal RELEASE, record.dig("lint", "release_sha256")
-    assert_equal SHA, record.dig("approval", "head_sha")
+    assert_equal SHA, record.dig("approvals", 0, "head_sha")
+    assert_equal "community", record["release_tier"]
+    assert_equal "community", record["current_tier"]
+    assert_equal "listed", record["state"]
   end
 
   def test_missing_approval_becomes_pending_but_stale_or_orphaned_approval_fails_closed
     evidence = lint
     pending = HoneycombSecurityLint::ListingEvidenceAdapter.build(
-      lint_evidence: evidence, approvals: [], checked_at: "2026-07-16T10:00:00Z", tier: "reviewed"
+      lint_evidence: evidence, approvals: [], checked_at: "2026-07-16T10:00:00Z", release_tier: "community"
     )
-    assert_equal({"status" => "pending"}, pending.dig("records", 0, "approval"))
+    assert_equal [], pending.dig("records", 0, "approvals")
 
     [
       approval(digest: evidence.fetch("artifact_digest"), head_sha: "e" * 40),
@@ -65,7 +68,7 @@ class SecurityLintListingEvidenceAdapterTest < Minitest::Test
       assert_raises(HoneycombSecurityLint::Contracts::Invalid) do
         HoneycombSecurityLint::ListingEvidenceAdapter.build(
           lint_evidence: evidence, approvals: [stale],
-          checked_at: "2026-07-16T10:00:00Z", tier: "reviewed"
+          checked_at: "2026-07-16T10:00:00Z", release_tier: "community"
         )
       end
     end
@@ -86,7 +89,7 @@ class SecurityLintListingEvidenceAdapterTest < Minitest::Test
 
     document = HoneycombSecurityLint::ListingEvidenceAdapter.build(
       lint_evidence: final, approvals: [approved],
-      checked_at: "2026-07-16T10:00:00Z", tier: "reviewed"
+      checked_at: "2026-07-16T10:00:00Z", release_tier: "community"
     )
 
     assert_equal "pass", document.dig("records", 0, "lint", "status")
@@ -95,8 +98,27 @@ class SecurityLintListingEvidenceAdapterTest < Minitest::Test
     assert_raises(HoneycombSecurityLint::Contracts::Invalid) do
       HoneycombSecurityLint::ListingEvidenceAdapter.build(
         lint_evidence: final, approvals: [orphaned],
-        checked_at: "2026-07-16T10:00:00Z", tier: "reviewed"
+        checked_at: "2026-07-16T10:00:00Z", release_tier: "community"
       )
     end
+  end
+
+  def test_preserves_distinct_maintainer_approvals_for_high_risk_gate
+    evidence = lint
+    evidence["packages"][0]["requested_permissions"]["risk"] = "high"
+    evidence = HoneycombSecurityLint::Evidence.finalize(evidence)
+    first = approval(digest: evidence.fetch("artifact_digest"))
+    second = approval(digest: evidence.fetch("artifact_digest")).merge(
+      "reviewer" => "second-maintainer",
+      "review_url" => "https://example.test/reviews/43"
+    )
+
+    record = HoneycombSecurityLint::ListingEvidenceAdapter.build(
+      lint_evidence: evidence, approvals: [second, first],
+      checked_at: "2026-07-16T10:00:00Z", release_tier: "community"
+    ).fetch("records").first
+
+    assert_equal %w[maintainer second-maintainer], record.fetch("approvals").map { |entry| entry["reviewer"] }
+    assert HoneycombRegistry::ListingEvidence.eligible?(record)
   end
 end

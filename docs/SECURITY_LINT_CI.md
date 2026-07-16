@@ -66,7 +66,7 @@ honeycomb and any trusted assessment surface:
 - `lib/honeycomb_security_lint.rb` or `lib/honeycomb_security_lint/`;
 - `lib/honeycomb_registry.rb` or `lib/honeycomb_registry/`;
 - the `honeycomb-*` validator, manifest, catalog, analyzer, or reporter scripts;
-- `policy/security-lint.yml` or either security/listing approval schema.
+- `policy/security-lint.yml` or any checked-in security/catalog schema.
 
 Land those changes in a separate pull request before using them to assess a
 honeycomb submission.
@@ -118,13 +118,18 @@ ruby script/honeycomb-listing-approval export \
   --snapshot /path/to/honeycomb-evidence \
   --lint lint/<head_sha>/<evidence_digest>.json \
   --checked-at 2026-07-17T09:00:00Z \
-  --tier community \
+  --release-tier community \
   --output /path/to/listing-evidence.json
 ```
 
 The exporter rejects records outside the snapshot, symlinks, oversized or
 non-canonical records, duplicate honeycomb versions, stale identities, and
 orphaned suppressions before emitting `honeycomb-listing-evidence/v1`.
+Its default projection is a listed Community release. The normalized evidence
+schema separately supports release/current tier, lifecycle history, verification,
+and public advisories; high-risk releases retain both distinct maintainer
+approvals. Trust/lifecycle policy changes remain explicit normalized evidence,
+never an inference from lint or a honeycomb-controlled field.
 
 ## Repository setup and rollout
 
