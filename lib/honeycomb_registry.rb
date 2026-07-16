@@ -5,6 +5,10 @@ require_relative "honeycomb_registry/safe_yaml"
 require_relative "honeycomb_registry/semver"
 require_relative "honeycomb_registry/schema"
 require_relative "honeycomb_registry/permissions"
+require_relative "honeycomb_registry/atomic_write"
+require_relative "honeycomb_registry/canonical_yaml"
+require_relative "honeycomb_registry/package"
+require_relative "honeycomb_registry/manifest"
 
 module HoneycombRegistry
   class InvocationError < StandardError; end

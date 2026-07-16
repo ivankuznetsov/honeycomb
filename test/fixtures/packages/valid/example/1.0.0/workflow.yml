@@ -1,0 +1,7 @@
+id: example
+stages:
+  - name: build
+    kind: agent
+    state_file: work.md
+    instruction: instructions/build.md
+    permissions: read-only

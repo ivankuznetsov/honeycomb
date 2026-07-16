@@ -1,0 +1,14 @@
+schema: honeycomb-manifest/v1
+name: example
+version: 1.0.0
+description: An executable example honeycomb
+author:
+  name: Example Author
+  url: https://example.test/authors/example
+license: MIT
+hive_min_version: 0.1.0
+source:
+  url: https://example.test/honeycombs/example
+  revision: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+x-fixture:
+  purpose: end-to-end
