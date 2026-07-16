@@ -16,6 +16,9 @@ require_relative "honeycomb_security_lint/permission_checker"
 require_relative "honeycomb_security_lint/evidence"
 require_relative "honeycomb_security_lint/renderer"
 require_relative "honeycomb_security_lint/runner"
+require_relative "honeycomb_security_lint/artifact_archive"
+require_relative "honeycomb_security_lint/github_client"
+require_relative "honeycomb_security_lint/reporter"
 
 module HoneycombSecurityLint
   VERSION = "1.0.0"

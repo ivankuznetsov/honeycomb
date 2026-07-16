@@ -88,7 +88,7 @@ module HoneycombSecurityLint
     end
 
     def digestable_evidence(value)
-      copy = Marshal.load(Marshal.dump(value))
+      copy = plain_copy(value)
       copy["artifact_digest"] = nil
       canonical_json(copy)
     end
@@ -282,6 +282,17 @@ module HoneycombSecurityLint
         value.keys.sort.each_with_object({}) { |key, sorted| sorted[key] = deep_sort(value[key]) }
       when Array
         value.map { |entry| deep_sort(entry) }
+      else
+        value
+      end
+    end
+
+    def plain_copy(value)
+      case value
+      when Hash
+        value.each_with_object({}) { |(key, child), copy| copy[key] = plain_copy(child) }
+      when Array
+        value.map { |child| plain_copy(child) }
       else
         value
       end
