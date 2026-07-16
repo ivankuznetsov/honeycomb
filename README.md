@@ -12,19 +12,22 @@ product.
   (version, author, permissions summary, sha256 integrity)
 
 The repository now ships the independent `honeycomb-manifest/v1` package
-contract and offline Ruby tooling for manifest generation, validation, and
-approval-gated catalog generation. The root catalog is intentionally empty
-until seed honeycombs land.
+contract, offline Ruby tooling for manifest generation and validation, an
+approval-gated catalog generator, and fork-safe security-lint CI. The root
+catalog is intentionally empty until seed honeycombs land.
 
 ```sh
 ruby script/honeycomb-manifest --check --all
 ruby script/honeycomb-validate --all --json
 ruby script/honeycomb-catalog --check \
   --evidence test/fixtures/listing-evidence/empty.json
+ruby script/honeycomb-security-lint --help
 ruby test/run.rb
 ```
 
 See [the package format](docs/PACKAGE_FORMAT.md) for the complete layout,
 schemas, integrity model, evidence boundary, permission projection, and command
-exit contract. Hive install verbs remain owned by Hive tasks 1852/1853; this
-repository only publishes their future command shape.
+exit contract. See [Security Lint CI](docs/SECURITY_LINT_CI.md) for the
+maintainer gate, analyzer/reporter trust split, required repository settings,
+and SHA-bound review evidence. Hive install verbs remain owned by Hive tasks
+1852/1853; this repository only publishes their future command shape.

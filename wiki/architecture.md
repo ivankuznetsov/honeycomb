@@ -2,8 +2,9 @@
 
 `honeycomb` is a reviewed registry for publishable Hive workflow packages called
 honeycombs. The repository now contains an independent v1 package/manifest
-contract, deterministic derived catalog, and offline author/CI command library.
-It still has no web application, static catalog renderer, or listing workflow.
+contract, deterministic derived catalog, offline author/CI command library, and
+fork-safe security-lint workflows. It still has no web application or static
+catalog renderer.
 
 ## Current Repository Shape
 
@@ -11,6 +12,13 @@ It still has no web application, static catalog renderer, or listing workflow.
   filesystem safety, manifest derivation, validation, Hive compatibility,
   evidence loading, and catalog projection.
 - `script/honeycomb-{manifest,validate,catalog}` are thin public entrypoints.
+- `lib/honeycomb_security_lint/` scans untrusted submitted bytes, renders
+  redacted evidence, adapts approved results to the catalog reader, parses
+  hostile artifacts, and performs trusted GitHub metadata reporting.
+- `script/honeycomb-security-lint` is the unprivileged analyzer entrypoint;
+  `script/honeycomb-security-lint-report` is default-branch reporter plumbing.
+- `.github/workflows/security-lint.yml` and `security-lint-report.yml` implement
+  the read-only analyzer / metadata-write reporter split.
 - `packages/<name>/<semver>/` is the immutable release store; it is empty except
   for `.gitkeep` until seeding work lands.
 - `catalog.json` is canonical generated output and currently contains the empty
@@ -36,13 +44,20 @@ The shared library has three main flows:
    normalized evidence record set, omits non-approved versions, rejects stale or
    contradictory identities, computes eligible SemVer latest values, and
    atomically replaces `catalog.json`.
+4. Security lint discovers changed version roots from the exact base/head diff,
+   invokes the production validator, scans all bounded text content, statically
+   analyzes only instruction surfaces, and emits canonical redacted evidence.
+5. The default-branch reporter verifies the workflow run, current PR head,
+   protected paths, artifact ZIP/digests/schema/identity, then updates one owned
+   comment and the `honeycomb/security-lint` commit status.
 
 `source.revision`, generated `release_sha256`, and review `head_sha` are separate
 identities. Evidence binds both lint and human approval to the latter two.
 
 ## Runtime Flow Status
 
-Author and CI tooling is shipped and offline. The remaining consumer flow is
-future work: task 1849 produces/adapts review evidence, task 1851 seeds real
-honeycombs, a static site exposes `hive.sh/honeycombs`, and Hive tasks 1852/1853
-implement `hive workflow install honeycomb/<name>`.
+Author tooling and security-lint CI are shipped. Analyzer code is deterministic
+and offline; only the trusted reporter uses GitHub HTTPS metadata APIs. The
+remaining consumer flow is future work: task 1850 issues maintainer approvals,
+task 1851 seeds real honeycombs, a static site exposes `hive.sh/honeycombs`, and
+Hive tasks 1852/1853 implement `hive workflow install honeycomb/<name>`.

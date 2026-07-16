@@ -19,6 +19,7 @@ require_relative "honeycomb_security_lint/runner"
 require_relative "honeycomb_security_lint/artifact_archive"
 require_relative "honeycomb_security_lint/github_client"
 require_relative "honeycomb_security_lint/reporter"
+require_relative "honeycomb_security_lint/listing_evidence_adapter"
 
 module HoneycombSecurityLint
   VERSION = "1.0.0"

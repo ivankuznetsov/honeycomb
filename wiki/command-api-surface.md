@@ -26,6 +26,7 @@ Install verbs remain outside this repository with Hive tasks 1852/1853.
 | `ruby script/honeycomb-manifest` | Explicit canonical manifest generation | `--check` |
 | `ruby script/honeycomb-validate` | None | One path or `--all`; `--json`; `--require-hive` |
 | `ruby script/honeycomb-catalog --evidence PATH` | Approval-gated root catalog generation | `--check` |
+| `ruby script/honeycomb-security-lint` | None | PR metadata, gate state, JSON/Markdown output paths |
 
 All commands resolve a repository root independently of the caller's current
 directory. `--root` supports automation/fixtures. Catalog `--output` is accepted
@@ -35,6 +36,12 @@ Exit 0 means success/no error findings, exit 1 means validation or drift errors,
 and exit 2 means invocation/internal failure. Warnings and info do not fail.
 Validator `--json` always emits a stable array of exact `{path, code, message,
 severity}` objects, including exit-2 terminal findings.
+
+Security lint emits `honeycomb.security-lint/v1`. Exit 0 means pass/unchanged,
+exit 1 means blocked/awaiting/expired, and exit 2 means invocation or incomplete
+analysis. `honeycomb-security-lint-report` is trusted workflow plumbing rather
+than an author command; it consumes `GITHUB_EVENT_PATH` and the automatic token
+from a default-branch checkout.
 
 Local Hive absence is a warning; `--require-hive` makes absence an error. Strict
 mode is explicit and never inferred from environment variables.
