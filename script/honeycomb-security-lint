@@ -1,0 +1,77 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "optparse"
+$LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
+require "honeycomb_security_lint"
+
+module HoneycombSecurityLint
+  module CLI
+    module_function
+
+    def run(argv, out: $stdout, err: $stderr)
+      options = {root: File.expand_path("..", __dir__), run_attempt: 1}
+      parser = OptionParser.new do |opts|
+        opts.banner = "Usage: honeycomb-security-lint [options]"
+        opts.on("--root PATH", "Repository root") { |value| options[:root] = value }
+        opts.on("--base SHA", "Pull request base SHA") { |value| options[:base_sha] = value }
+        opts.on("--head SHA", "Pull request head SHA") { |value| options[:head_sha] = value }
+        opts.on("--pr NUMBER", Integer, "Pull request number") { |value| options[:pull_request] = value }
+        opts.on("--event-action ACTION", "Pull request event action") { |value| options[:action] = value }
+        opts.on("--gate STATE", "required, applied, expired, or unchanged") { |value| options[:gate] = value }
+        opts.on("--label-sha SHA", "Head SHA at maintainer label action") { |value| options[:label_sha] = value }
+        opts.on("--run-id NUMBER", Integer, "Workflow run ID") { |value| options[:run_id] = value }
+        opts.on("--run-attempt NUMBER", Integer, "Workflow run attempt") { |value| options[:run_attempt] = value }
+        opts.on("--repository OWNER/REPO", "Origin repository") { |value| options[:repository] = value }
+        opts.on("--approvals PATH", "Optional trusted listing-approval v1 record") { |value| options[:approvals] = value }
+        opts.on("--output PATH", "Write the JSON artifact") { |value| options[:output] = value }
+        opts.on("--comment-output PATH", "Write sticky-comment Markdown") { |value| options[:comment_output] = value }
+        opts.on("--summary-output PATH", "Write job-summary Markdown") { |value| options[:summary_output] = value }
+        opts.on("-h", "--help", "Show help") do
+          out.puts opts
+          return 0
+        end
+      end
+      arguments = parser.parse(argv)
+      raise ArgumentError, "unexpected positional arguments" unless arguments.empty?
+      require_options!(options)
+
+      approvals = if options[:approvals]
+                    Contracts.parse_approvals(File.binread(File.expand_path(options[:approvals], options[:root]))).fetch("approvals")
+                  else
+                    []
+                  end
+      context = options.slice(:pull_request, :base_sha, :head_sha, :action, :gate, :label_sha,
+                              :run_id, :run_attempt, :repository)
+      result = Runner.new(root: options[:root], context: context, approvals: approvals).run
+      renderer = Renderer.new(max_items: Policy.load(File.join(options[:root], "policy", "security-lint.yml")).limits.fetch("max_rendered_items"))
+      write_or_print(options[:output], result.json, out)
+      File.binwrite(options[:comment_output], renderer.comment(result.evidence)) if options[:comment_output]
+      File.binwrite(options[:summary_output], renderer.summary(result.evidence)) if options[:summary_output]
+      result.exit_status
+    rescue OptionParser::ParseError, ArgumentError, Contracts::Invalid, SystemCallError, IOError => e
+      err.puts "honeycomb-security-lint: #{Redactor.sanitize_text(e.message)}"
+      2
+    rescue StandardError => e
+      err.puts "honeycomb-security-lint: internal failure: #{e.class}"
+      2
+    end
+
+    def require_options!(options)
+      {
+        base_sha: "--base SHA", head_sha: "--head SHA", pull_request: "--pr NUMBER",
+        action: "--event-action ACTION", gate: "--gate STATE", run_id: "--run-id NUMBER",
+        repository: "--repository OWNER/REPO"
+      }.each do |key, label|
+        raise ArgumentError, "#{label} is required" unless options[key]
+      end
+      raise ArgumentError, "--gate is invalid" unless %w[required applied expired unchanged].include?(options[:gate])
+    end
+
+    def write_or_print(path, bytes, out)
+      path ? File.binwrite(path, bytes) : out.write(bytes)
+    end
+  end
+end
+
+exit HoneycombSecurityLint::CLI.run(ARGV)

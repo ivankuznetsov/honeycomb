@@ -13,6 +13,9 @@ require_relative "honeycomb_security_lint/command_extractor"
 require_relative "honeycomb_security_lint/network_extractor"
 require_relative "honeycomb_security_lint/rule_engine"
 require_relative "honeycomb_security_lint/permission_checker"
+require_relative "honeycomb_security_lint/evidence"
+require_relative "honeycomb_security_lint/renderer"
+require_relative "honeycomb_security_lint/runner"
 
 module HoneycombSecurityLint
   VERSION = "1.0.0"

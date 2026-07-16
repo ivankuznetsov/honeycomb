@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "json"
+require "digest"
 require "time"
 require "uri"
 
@@ -24,6 +25,13 @@ module HoneycombSecurityLint
     IDENTITY_KEYS = %w[name version path release_sha256].freeze
     COUNT_KEYS = %w[hard advisory downgraded].freeze
     VALIDATOR_FINDING_KEYS = %w[path code message severity].freeze
+    SCANNED_FILE_KEYS = %w[path bytes sha256 kind].freeze
+    COMMAND_KEYS = %w[path line column kind redacted].freeze
+    HOST_KEYS = %w[host path line column declared reason disposition].freeze
+    FINDING_KEYS = %w[rule_id category original_severity disposition path line column fingerprint redacted_evidence message request approval].freeze
+    SUPPRESSION_KEYS = %w[fingerprint reason status approval].freeze
+    FINDING_REQUEST_KEYS = %w[reason].freeze
+    APPROVAL_REFERENCE_KEYS = %w[reviewer reviewed_at review_url evidence_digest].freeze
     APPROVAL_ROOT_KEYS = %w[schema approvals].freeze
     APPROVAL_KEYS = %w[
       name version path release_sha256 head_sha reviewer decision reviewed_at evidence_digest
@@ -57,6 +65,12 @@ module HoneycombSecurityLint
 
     def parse_approvals(bytes)
       validate_approvals(parse_json(bytes))
+    end
+
+    def artifact_digest_valid?(data)
+      digest = data["artifact_digest"]
+      digest.is_a?(String) && SHA256_PATTERN.match?(digest) &&
+        digest == Digest::SHA256.hexdigest(digestable_evidence(data))
     end
 
     def parse_json(bytes)
@@ -141,11 +155,88 @@ module HoneycombSecurityLint
       %w[scanned_files commands hosts findings suppressions].each do |key|
         errors << "#{path}.#{key} must be an array" unless entry[key].is_a?(Array)
       end
+      validate_scanned_files(entry["scanned_files"], "#{path}.scanned_files", errors)
+      validate_commands(entry["commands"], "#{path}.commands", errors)
+      validate_hosts(entry["hosts"], "#{path}.hosts", errors)
+      validate_findings(entry["findings"], "#{path}.findings", errors)
+      validate_suppressions(entry["suppressions"], "#{path}.suppressions", errors)
       unless entry["requested_permissions"].nil? || entry["requested_permissions"].is_a?(Hash)
         errors << "#{path}.requested_permissions must be an object or null"
       end
       counts(entry["counts"], "#{path}.counts", errors)
       enum(entry["verdict"], "#{path}.verdict", %w[pass fail error], errors)
+    end
+
+    def validate_scanned_files(values, path, errors)
+      array(values, path, errors) do |entry, entry_path|
+        object(entry, entry_path, SCANNED_FILE_KEYS, SCANNED_FILE_KEYS, errors)
+        next unless entry.is_a?(Hash)
+        nonempty(entry["path"], "#{entry_path}.path", errors)
+        nonnegative_integer(entry["bytes"], "#{entry_path}.bytes", errors)
+        sha256(entry["sha256"], "#{entry_path}.sha256", errors)
+        enum(entry["kind"], "#{entry_path}.kind", %w[text binary], errors)
+      end
+    end
+
+    def validate_commands(values, path, errors)
+      array(values, path, errors) do |entry, entry_path|
+        object(entry, entry_path, COMMAND_KEYS, COMMAND_KEYS, errors)
+        next unless entry.is_a?(Hash)
+        %w[path kind redacted].each { |key| nonempty(entry[key], "#{entry_path}.#{key}", errors) }
+        positive_integer(entry["line"], "#{entry_path}.line", errors)
+        positive_integer(entry["column"], "#{entry_path}.column", errors)
+      end
+    end
+
+    def validate_hosts(values, path, errors)
+      array(values, path, errors) do |entry, entry_path|
+        object(entry, entry_path, HOST_KEYS, HOST_KEYS, errors)
+        next unless entry.is_a?(Hash)
+        %w[host path disposition].each { |key| nonempty(entry[key], "#{entry_path}.#{key}", errors) }
+        positive_integer(entry["line"], "#{entry_path}.line", errors)
+        positive_integer(entry["column"], "#{entry_path}.column", errors)
+        errors << "#{entry_path}.declared must be boolean" unless [true, false].include?(entry["declared"])
+        errors << "#{entry_path}.reason must be a string or null" unless entry["reason"].nil? || entry["reason"].is_a?(String)
+        enum(entry["disposition"], "#{entry_path}.disposition", %w[hard advisory], errors)
+      end
+    end
+
+    def validate_findings(values, path, errors)
+      array(values, path, errors) do |entry, entry_path|
+        object(entry, entry_path, FINDING_KEYS, FINDING_KEYS, errors)
+        next unless entry.is_a?(Hash)
+        %w[rule_id category original_severity disposition path fingerprint redacted_evidence message].each do |key|
+          nonempty(entry[key], "#{entry_path}.#{key}", errors, allow_empty: key == "redacted_evidence")
+        end
+        enum(entry["original_severity"], "#{entry_path}.original_severity", %w[hard advisory], errors)
+        enum(entry["disposition"], "#{entry_path}.disposition", %w[hard advisory downgraded], errors)
+        positive_integer(entry["line"], "#{entry_path}.line", errors)
+        positive_integer(entry["column"], "#{entry_path}.column", errors)
+        sha256(entry["fingerprint"], "#{entry_path}.fingerprint", errors)
+        validate_nullable_object(entry["request"], "#{entry_path}.request", FINDING_REQUEST_KEYS, errors)
+        validate_nullable_object(entry["approval"], "#{entry_path}.approval", APPROVAL_REFERENCE_KEYS, errors)
+      end
+    end
+
+    def validate_suppressions(values, path, errors)
+      array(values, path, errors) do |entry, entry_path|
+        object(entry, entry_path, SUPPRESSION_KEYS, SUPPRESSION_KEYS, errors)
+        next unless entry.is_a?(Hash)
+        sha256(entry["fingerprint"], "#{entry_path}.fingerprint", errors)
+        nonempty(entry["reason"], "#{entry_path}.reason", errors)
+        enum(entry["status"], "#{entry_path}.status", %w[requested approved orphaned], errors)
+        validate_nullable_object(entry["approval"], "#{entry_path}.approval", APPROVAL_REFERENCE_KEYS, errors)
+      end
+    end
+
+    def validate_nullable_object(value, path, keys, errors)
+      return if value.nil?
+      object(value, path, keys, keys, errors)
+      return unless value.is_a?(Hash)
+      keys.each { |key| nonempty(value[key], "#{path}.#{key}", errors) }
+      sha256(value["evidence_digest"], "#{path}.evidence_digest", errors) if value.key?("evidence_digest")
+      timestamp(value["reviewed_at"], "#{path}.reviewed_at", errors) if value.key?("reviewed_at")
+      safe_url(value["review_url"], "#{path}.review_url", errors) if value.key?("review_url")
     end
 
     def validate_approvals(data)

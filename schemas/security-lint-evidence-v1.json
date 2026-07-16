@@ -74,11 +74,11 @@
         },
         "validator_findings": {"type": "array", "items": {"$ref": "#/$defs/validatorFinding"}},
         "requested_permissions": {"type": ["object", "null"]},
-        "scanned_files": {"type": "array", "items": {"type": "object"}},
-        "commands": {"type": "array", "items": {"type": "object"}},
-        "hosts": {"type": "array", "items": {"type": "object"}},
-        "findings": {"type": "array", "items": {"type": "object"}},
-        "suppressions": {"type": "array", "items": {"type": "object"}},
+        "scanned_files": {"type": "array", "items": {"$ref": "#/$defs/scannedFile"}},
+        "commands": {"type": "array", "items": {"$ref": "#/$defs/command"}},
+        "hosts": {"type": "array", "items": {"$ref": "#/$defs/host"}},
+        "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}},
+        "suppressions": {"type": "array", "items": {"$ref": "#/$defs/suppression"}},
         "counts": {"$ref": "#/$defs/counts"},
         "verdict": {"enum": ["pass", "fail", "error"]}
       }
@@ -92,6 +92,95 @@
         "code": {"type": "string", "minLength": 1},
         "message": {"type": "string"},
         "severity": {"enum": ["error", "warning", "info"]}
+      }
+    },
+    "scannedFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "bytes", "sha256", "kind"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "bytes": {"type": "integer", "minimum": 0},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "kind": {"enum": ["text", "binary"]}
+      }
+    },
+    "command": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "line", "column", "kind", "redacted"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "line": {"type": "integer", "minimum": 1},
+        "column": {"type": "integer", "minimum": 1},
+        "kind": {"type": "string", "minLength": 1},
+        "redacted": {"type": "string", "minLength": 1}
+      }
+    },
+    "host": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["host", "path", "line", "column", "declared", "reason", "disposition"],
+      "properties": {
+        "host": {"type": "string", "minLength": 1},
+        "path": {"type": "string", "minLength": 1},
+        "line": {"type": "integer", "minimum": 1},
+        "column": {"type": "integer", "minimum": 1},
+        "declared": {"type": "boolean"},
+        "reason": {"type": ["string", "null"]},
+        "disposition": {"enum": ["hard", "advisory"]}
+      }
+    },
+    "approvalReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reviewer", "reviewed_at", "review_url", "evidence_digest"],
+      "properties": {
+        "reviewer": {"type": "string", "minLength": 1},
+        "reviewed_at": {"type": "string", "minLength": 1},
+        "review_url": {"type": "string", "minLength": 1},
+        "evidence_digest": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rule_id", "category", "original_severity", "disposition", "path", "line",
+        "column", "fingerprint", "redacted_evidence", "message", "request", "approval"
+      ],
+      "properties": {
+        "rule_id": {"type": "string", "minLength": 1},
+        "category": {"type": "string", "minLength": 1},
+        "original_severity": {"enum": ["hard", "advisory"]},
+        "disposition": {"enum": ["hard", "advisory", "downgraded"]},
+        "path": {"type": "string", "minLength": 1},
+        "line": {"type": "integer", "minimum": 1},
+        "column": {"type": "integer", "minimum": 1},
+        "fingerprint": {"$ref": "#/$defs/sha256"},
+        "redacted_evidence": {"type": "string"},
+        "message": {"type": "string", "minLength": 1},
+        "request": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "object", "additionalProperties": false, "required": ["reason"],
+              "properties": {"reason": {"type": "string", "minLength": 1}}
+            }
+          ]
+        },
+        "approval": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/approvalReference"}]}
+      }
+    },
+    "suppression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fingerprint", "reason", "status", "approval"],
+      "properties": {
+        "fingerprint": {"$ref": "#/$defs/sha256"},
+        "reason": {"type": "string", "minLength": 1},
+        "status": {"enum": ["requested", "approved", "orphaned"]},
+        "approval": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/approvalReference"}]}
       }
     }
   }
