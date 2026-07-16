@@ -1,0 +1,24 @@
+{
+  "schema": "honeycomb-listing-evidence/v1",
+  "records": [
+    {
+      "name": "example",
+      "version": "1.0.0",
+      "tier": "reviewed",
+      "lint": {
+        "status": "pass",
+        "release_sha256": "2260a4a9f7db0df2f6993ee240cfe83d9fb30d72fd09ab4e31e068c8cd73c14f",
+        "head_sha": "dddddddddddddddddddddddddddddddddddddddd",
+        "checked_at": "2026-07-16T10:00:00Z"
+      },
+      "approval": {
+        "status": "approved",
+        "release_sha256": "2260a4a9f7db0df2f6993ee240cfe83d9fb30d72fd09ab4e31e068c8cd73c14f",
+        "head_sha": "dddddddddddddddddddddddddddddddddddddddd",
+        "reviewer": "registry-reviewer",
+        "reviewed_at": "2026-07-16T11:00:00Z",
+        "review_url": "https://example.test/reviews/example-1.0.0"
+      }
+    }
+  ]
+}

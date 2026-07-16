@@ -1,0 +1,31 @@
+schema: "honeycomb-manifest/v1"
+name: "example"
+version: "1.0.0"
+description: "An executable example honeycomb"
+author:
+  name: "Example Author"
+  url: "https://example.test/authors/example"
+license: "MIT"
+hive_min_version: "0.1.0"
+source:
+  url: "https://example.test/honeycombs/example"
+  revision: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+permissions:
+  risk: "low"
+  capabilities:
+    - "filesystem-read"
+  network_hosts: []
+  filesystem_read:
+    - "repository"
+    - "task"
+  filesystem_write: []
+  secrets: []
+files:
+  "packages/example/1.0.0/.registry-note": "4f8fac9675ae2c477ee5b51c033fec8c71eace6b3dd8e56446bdddfa3e6c54c8"
+  "packages/example/1.0.0/README.md": "a850ce238a952f37e6bbdd6b9ef6651d99c0911db8fee0b95ce31c98d7e5034b"
+  "packages/example/1.0.0/instructions/build.md": "abf25213519cfb1dc60e297b31e0685cb20931d1f1d6614d3c29357b1948ad1b"
+  "packages/example/1.0.0/instructions/nested/context.txt": "bc4958f77037e9e7357d96a28079809d42d897cd3981af74a92a7664b5c37642"
+  "packages/example/1.0.0/workflow.yml": "46f9bac069476de94b1684cf6a8b7f85c92a467eb6961ea57216e30f13d31709"
+release_sha256: "2260a4a9f7db0df2f6993ee240cfe83d9fb30d72fd09ab4e31e068c8cd73c14f"
+x-fixture:
+  purpose: "end-to-end"
