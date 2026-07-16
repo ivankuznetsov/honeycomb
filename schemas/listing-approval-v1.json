@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hive.sh/schemas/listing-approval-v1.json",
+  "title": "Honeycomb listing approval v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "approvals"],
+  "properties": {
+    "schema": {"const": "honeycomb.listing-approval/v1"},
+    "approvals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name", "version", "path", "release_sha256", "head_sha", "reviewer",
+          "decision", "reviewed_at", "evidence_digest", "review_url", "notes",
+          "approved_suppressions"
+        ],
+        "properties": {
+          "name": {"type": "string"},
+          "version": {"type": "string"},
+          "path": {"type": "string", "pattern": "^packages/"},
+          "release_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "head_sha": {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
+          "reviewer": {"type": "string", "minLength": 1},
+          "decision": {"enum": ["approved", "denied"]},
+          "reviewed_at": {"type": "string", "format": "date-time"},
+          "evidence_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "review_url": {"type": "string", "format": "uri"},
+          "notes": {"type": "string"},
+          "approved_suppressions": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+          }
+        }
+      }
+    }
+  }
+}

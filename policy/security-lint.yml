@@ -1,0 +1,12 @@
+schema: honeycomb.security-lint-policy/v1
+baseline_network_hosts:
+  - api.github.com
+  - github.com
+  - raw.githubusercontent.com
+fixture_suppressions: []
+limits:
+  max_file_bytes: 1048576
+  max_total_bytes: 10485760
+  max_files: 1000
+  max_artifact_bytes: 2097152
+  max_rendered_items: 50
