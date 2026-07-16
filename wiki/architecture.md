@@ -1,40 +1,48 @@
 # Architecture
 
-`honeycomb` is currently a scaffold for a reviewed library of publishable Hive
-workflow packages called honeycombs. The repository has documentation, LLM wiki
-maintenance files, and Hive task state, but no application source tree,
-executable entrypoint, routes, handlers, package catalog, or CI implementation
-yet.
+`honeycomb` is a reviewed registry for publishable Hive workflow packages called
+honeycombs. The repository now contains an independent v1 package/manifest
+contract, deterministic derived catalog, and offline author/CI command library.
+It still has no web application, static catalog renderer, or listing workflow.
 
 ## Current Repository Shape
 
-- `README.md` is the authoritative public description at this stage.
-- `.hive-state/` contains inbox tasks for the initial registry, review, and
-  catalog work.
-- `wiki/` contains agent-facing project context and update history.
-- `raw/notes/` is reserved for raw notes, currently empty except for
-  `.gitkeep`.
+- `lib/honeycomb_registry/` is the shared Ruby implementation for schemas,
+  filesystem safety, manifest derivation, validation, Hive compatibility,
+  evidence loading, and catalog projection.
+- `script/honeycomb-{manifest,validate,catalog}` are thin public entrypoints.
+- `packages/<name>/<semver>/` is the immutable release store; it is empty except
+  for `.gitkeep` until seeding work lands.
+- `catalog.json` is canonical generated output and currently contains the empty
+  `honeycomb-catalog/v1` document.
+- `policy/spdx-license-ids.txt` is the offline license identifier snapshot.
+- `test/fixtures/` and `test/run.rb` prove the format without a network or gem
+  install.
+- `docs/PACKAGE_FORMAT.md` is the authoritative public format/command contract;
+  `wiki/` records agent-facing architecture and cross-task boundaries.
 
 ## Intended Product Shape
 
-The README describes a honeycomb as a Hive workflow package made from a
-`workflow.yml` descriptor, stage instructions, and a manifest carrying version,
-author, permissions summary, and sha256 integrity information.
+The shared library has three main flows:
 
-The current Hive inbox tasks outline the planned implementation:
+1. Manifest generation safe-loads author metadata and `workflow.yml`, verifies
+   the package boundary, derives the worst-case permission union, hashes every
+   regular payload file except the root manifest, fingerprints the canonical
+   projection, and atomically replaces `manifest.yml`.
+2. Validation performs the same structure/derivation/integrity checks without
+   writes. It optionally loads Hive and calls its public descriptor parser;
+   strict mode makes compatibility mandatory.
+3. Catalog generation validates all packages first, strict-loads an explicit
+   normalized evidence record set, omits non-approved versions, rejects stale or
+   contradictory identities, computes eligible SemVer latest values, and
+   atomically replaces `catalog.json`.
 
-- task 1848: package registry layout, manifest schema, generated `catalog.json`,
-  and validator script;
-- task 1849: security lint CI for submitted packages;
-- task 1850: trust model and review process docs;
-- task 1851: seed catalog entries.
-
-The README notes Hive-side tasks 1852/1853 for install verbs. Those tasks are
-not represented as local implementation in this repository.
+`source.revision`, generated `release_sha256`, and review `head_sha` are separate
+identities. Evidence binds both lint and human approval to the latter two.
 
 ## Runtime Flow Status
 
-There is no confirmed runtime flow in this repository yet. The documented future
-flow is: publish honeycombs to a reviewed catalog, expose them at
-`hive.sh/honeycombs`, and install one through
-`hive workflow install honeycomb/<name>` once the Hive CLI integration exists.
+Author and CI tooling is shipped and offline. The remaining consumer flow is
+future work: task 1849 produces/adapts review evidence, task 1851 seeds real
+honeycombs, a static site exposes `hive.sh/honeycombs`, and Hive tasks 1852/1853
+implement `hive workflow install honeycomb/<name>`.

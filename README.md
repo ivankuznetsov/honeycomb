@@ -11,5 +11,20 @@ product.
 - A *honeycomb* = descriptor (`workflow.yml`) + stage instructions + manifest
   (version, author, permissions summary, sha256 integrity)
 
-Status: scaffolding. Architecture tasks live in `.hive-state` (1848–1851 here,
-1852–1853 in hive).
+The repository now ships the independent `honeycomb-manifest/v1` package
+contract and offline Ruby tooling for manifest generation, validation, and
+approval-gated catalog generation. The root catalog is intentionally empty
+until seed honeycombs land.
+
+```sh
+ruby script/honeycomb-manifest --check --all
+ruby script/honeycomb-validate --all --json
+ruby script/honeycomb-catalog --check \
+  --evidence test/fixtures/listing-evidence/empty.json
+ruby test/run.rb
+```
+
+See [the package format](docs/PACKAGE_FORMAT.md) for the complete layout,
+schemas, integrity model, evidence boundary, permission projection, and command
+exit contract. Hive install verbs remain owned by Hive tasks 1852/1853; this
+repository only publishes their future command shape.

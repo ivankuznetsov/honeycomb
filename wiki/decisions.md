@@ -17,3 +17,54 @@ Consequence: future manifest docs, CLI output, CI comments, README catalog
 sections, and review copy should use "honeycomb" for listed workflow packages.
 The repository should not introduce competing terms such as "package" as the
 primary user-facing name, except where implementation details require it.
+
+## 2026-07-16: Version Directories and Generated Manifests Are the Registry Source
+
+Context: mutable latest-only directories, hand-maintained hash summaries, and
+Git-tag-only history could each make catalog identity ambiguous.
+
+Decision: keep every release at `packages/<name>/<semver>/`. Authors own manifest
+metadata, while explicit generation replaces permissions, the complete file hash
+map, and the release fingerprint with canonical bytes. Validation/check modes
+never write. Merged releases are immutable and corrections use a new SemVer.
+
+Consequence: listing CI must enforce history-based immutability, while local
+tooling proves checkout structure and content identity.
+
+## 2026-07-16: Permissions Publish a Fail-Closed Worst-Case Union
+
+Context: per-stage details alone are cumbersome for consumers, but a coarse tier
+can hide dangerous access.
+
+Decision: publish deterministic risk, capability, network, filesystem, and
+secret sets, while findings attribute each contribution to a stage/reviewer.
+Unbounded default/yolo/Bash access is explicit `*`; unknown permission-bearing
+constructs block generation.
+
+Consequence: consumers get compact risk disclosure without silently narrowing
+future Hive behavior.
+
+## 2026-07-16: Catalog Presence Requires Two Current Review Gates
+
+Context: structural validity alone is not permission to list prompts that may
+run with repository write access.
+
+Decision: catalog generation consumes an explicit normalized evidence record
+set. Eligibility requires passing lint and affirmative human approval bound to
+the same generated release fingerprint and exact review head SHA. Missing or
+negative states omit; malformed/stale/contradictory states abort.
+
+Consequence: task 1849 may store evidence however it chooses but must emit or
+adapt the normalized reader contract before catalog generation.
+
+## 2026-07-16: Standalone Structure, Optional Hive Compatibility
+
+Context: requiring Hive for every author check would make registry validation
+less portable, while silently skipping Hive in CI would weaken compatibility.
+
+Decision: all registry structure/integrity checks use Ruby standard/default
+libraries. If installed, Hive's public descriptor parser is an additional check;
+local absence warns and explicit `--require-hive` fails.
+
+Consequence: normal author commands remain offline and dependency-light, while
+CI can prove the declared Hive minimum without duplicating Hive's full parser.

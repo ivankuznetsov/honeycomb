@@ -1,10 +1,7 @@
 # Command and API Surface
 
-This page tracks the public surfaces that are currently documented for
-`honeycomb`. As of the README change in commit `ab7861a`, the repository is
-still scaffolding: the command and catalog surfaces are described, but no local
-routes, handlers, executable entrypoints, package files, or catalog generator
-exist in this repository yet.
+This page tracks shipped registry commands plus documented future consumer
+surfaces. Full field and safety details live in `docs/PACKAGE_FORMAT.md`.
 
 ## Public Terms
 
@@ -14,32 +11,45 @@ exist in this repository yet.
 
 ## Documented Install Command
 
-The README documents the intended install form:
+The README documents the future Hive install form:
 
 ```sh
 hive workflow install honeycomb/<name>
 ```
 
-The README also says the install verbs land with Hive tasks 1852/1853, outside
-this repository. Treat this as a documented future Hive CLI integration rather
-than a command implemented by this repository.
+Install verbs remain outside this repository with Hive tasks 1852/1853.
+
+## Shipped Registry Commands
+
+| Command | Mutating mode | Read-only mode |
+|---|---|---|
+| `ruby script/honeycomb-manifest` | Explicit canonical manifest generation | `--check` |
+| `ruby script/honeycomb-validate` | None | One path or `--all`; `--json`; `--require-hive` |
+| `ruby script/honeycomb-catalog --evidence PATH` | Approval-gated root catalog generation | `--check` |
+
+All commands resolve a repository root independently of the caller's current
+directory. `--root` supports automation/fixtures. Catalog `--output` is accepted
+only when it still resolves to root `catalog.json`.
+
+Exit 0 means success/no error findings, exit 1 means validation or drift errors,
+and exit 2 means invocation/internal failure. Warnings and info do not fail.
+Validator `--json` always emits a stable array of exact `{path, code, message,
+severity}` objects, including exit-2 terminal findings.
+
+Local Hive absence is a warning; `--require-hive` makes absence an error. Strict
+mode is explicit and never inferred from environment variables.
 
 ## Package Shape
 
-The README defines a honeycomb as:
+The shipped version layout is:
 
-- a descriptor named `workflow.yml`;
-- stage instructions;
-- a manifest with version, author, permissions summary, and sha256 integrity.
-
-The Hive inbox task `registry-layout-package-manifest-schema-260709-1f1a`
-contains the fuller planned package layout: `packages/<name>/`, `README.md`,
-`manifest.yml`, generated top-level `catalog.json`, and a Ruby validator script.
-Those files are not present yet.
+- `packages/<name>/<semver>/workflow.yml`;
+- non-empty `instructions/` and `README.md`;
+- generated canonical `manifest.yml` using `honeycomb-manifest/v1`.
 
 ## Catalog and API Status
 
-`hive.sh/honeycombs` is documented as the catalog URL. The current repository
-does not contain a web app, route table, API handler, generated `catalog.json`,
-or executable entrypoint. Until implementation lands, consumers should treat the
-catalog and install command as README-level product direction.
+Root `catalog.json` is a shipped deterministic `honeycomb-catalog/v1` artifact.
+It is empty until task 1851 seeds real packages. `hive.sh/honeycombs` remains a
+documented future static rendering surface; no route, handler, or site code is
+implemented here.

@@ -11,6 +11,9 @@ change.
   implementation status.
 - [[decisions]] - durable design decisions and tradeoffs.
 - [[dependencies]] - runtime, development, and service dependencies.
+- [[package-catalog-contract]] - shipped package, manifest, evidence, and catalog
+  contracts.
+- [[security-review-contract]] - identity binding and boundary with listing CI.
 - [[gaps]] - missing, uncertain, or stale wiki coverage.
 
 ## Update Protocol

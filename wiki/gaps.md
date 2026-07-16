@@ -3,6 +3,7 @@
 | Area | Gap | Notes |
 |------|-----|-------|
 | Command surface | `hive workflow install honeycomb/<name>` is documented but not implemented here. | README says install verbs land with Hive tasks 1852/1853, which are outside this repository. |
-| Catalog surface | `hive.sh/honeycombs` is documented but no route, handler, static site, or generated catalog exists here. | Await registry/catalog implementation from inbox tasks 1848 and 1851. |
-| Package schema | README gives the high-level honeycomb shape, while manifest field details and validation rules are only in inbox task notes. | Confirm when task 1848 lands. |
-| Security review | The review gate is documented as core product behavior, but CI, lint output, and human review workflow are not implemented here. | Await tasks 1849 and 1850. |
+| Catalog surface | Root `catalog.json` is generated, but `hive.sh/honeycombs` has no route, handler, or static renderer here. | Static site work consumes `honeycomb-catalog/v1`; task 1851 seeds real entries. |
+| Production evidence adapter | `honeycomb-listing-evidence/v1` defines normalized reader semantics, but task 1849's persisted location/serialization is not frozen. | Task 1849 must emit the normalized set directly or adapt its private records before invoking the catalog tool. |
+| Security review workflow | Identity gating is implemented, but CI lint creation, approval invalidation, labels/comments, and human process are not. | Await tasks 1849 and 1850. |
+| Trust evolution | Catalog v1 has a tier string but no signing, attestation, advisory, yanked, revoked, or historic-tier fields. | Coordinate a later version with trust/site/installer work rather than extending v1 ad hoc. |
