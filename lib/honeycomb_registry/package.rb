@@ -130,6 +130,31 @@ module HoneycombRegistry
       self.class.relative(root, path)
     end
 
+    def validate_instruction_references(workflow, workflow_path: repository_path("workflow.yml"))
+      findings = Findings.new
+      return findings unless workflow.is_a?(Hash) && workflow["stages"].is_a?(Array)
+
+      workflow["stages"].each_with_index do |stage, index|
+        next unless stage.is_a?(Hash)
+
+        stage_path = "#{workflow_path}.stages[#{index}]"
+        validate_instruction(stage["instruction"], "#{stage_path}.instruction", findings) if stage.key?("instruction")
+        if stage["reviewers"].is_a?(Array)
+          stage["reviewers"].each_with_index do |reviewer, reviewer_index|
+            next unless reviewer.is_a?(Hash) && reviewer.key?("instruction")
+
+            validate_instruction(reviewer["instruction"],
+                                 "#{stage_path}.reviewers[#{reviewer_index}].instruction", findings)
+          end
+        end
+        revise = stage.dig("council", "revise") if stage["council"].is_a?(Hash)
+        if revise.is_a?(Hash) && revise.key?("instruction")
+          validate_instruction(revise["instruction"], "#{stage_path}.council.revise.instruction", findings)
+        end
+      end
+      findings
+    end
+
     private
 
     def validate_location(findings)
@@ -212,6 +237,28 @@ module HoneycombRegistry
       stat.file? && !stat.symlink?
     rescue Errno::ENOENT
       false
+    end
+
+    def validate_instruction(value, finding_path, findings)
+      unless value.is_a?(String) && !value.empty? && value == value.strip &&
+             !value.include?("\\") && !value.include?("\0") && !Pathname.new(value).absolute?
+        findings.add(finding_path, "package.invalid_instruction_path",
+                     "instruction must be a normalized relative path under instructions/")
+        return
+      end
+      segments = value.split("/")
+      clean = Pathname.new(value).cleanpath.to_s
+      unless segments.none? { |segment| segment.empty? || segment == "." || segment == ".." } &&
+             clean == value && value.start_with?("instructions/")
+        findings.add(finding_path, "package.invalid_instruction_path",
+                     "instruction must stay under the package instructions/ directory")
+        return
+      end
+      candidate = File.join(path, value)
+      unless regular_without_symlink?(candidate)
+        findings.add(finding_path, "package.invalid_instruction_path",
+                     "instruction must reference a regular package file")
+      end
     end
   end
 end

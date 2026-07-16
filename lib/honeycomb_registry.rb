@@ -9,6 +9,8 @@ require_relative "honeycomb_registry/atomic_write"
 require_relative "honeycomb_registry/canonical_yaml"
 require_relative "honeycomb_registry/package"
 require_relative "honeycomb_registry/manifest"
+require_relative "honeycomb_registry/hive_compatibility"
+require_relative "honeycomb_registry/validator"
 
 module HoneycombRegistry
   class InvocationError < StandardError; end

@@ -27,6 +27,7 @@ module HoneycombRegistry
       workflow_path = File.join(package.path, "workflow.yml")
       workflow = load_yaml(workflow_path, package.repository_path("workflow.yml"), findings)
       if workflow
+        findings.concat(package.validate_instruction_references(workflow))
         permission_result = Permissions.derive(workflow, path: package.repository_path("workflow.yml"))
         findings.concat(permission_result.findings)
       end

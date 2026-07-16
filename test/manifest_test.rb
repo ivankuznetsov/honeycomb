@@ -69,4 +69,20 @@ class ManifestTest < Minitest::Test
       assert_includes result.findings.codes, "manifest.identity"
     end
   end
+
+  def test_generation_rejects_instruction_paths_that_escape_the_package
+    in_tmpdir do |root|
+      package = HoneycombRegistry::Package.new(install_valid_fixture(root), root: root)
+      sentinel = File.join(root, "outside.md")
+      File.write(sentinel, "outside")
+      workflow = File.join(package.path, "workflow.yml")
+      File.write(workflow, File.read(workflow).sub("instructions/build.md", "../../../outside.md"))
+      before = File.binread(package.manifest_path)
+
+      result = HoneycombRegistry::Manifest.generate(package)
+      assert result.findings.errors?
+      assert_includes result.findings.codes, "package.invalid_instruction_path"
+      assert_equal before, File.binread(package.manifest_path)
+    end
+  end
 end
