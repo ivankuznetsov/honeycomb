@@ -30,6 +30,10 @@ module TestSupport
   def capture_command(*arguments, chdir: ROOT)
     Open3.capture3(RbConfig.ruby, *arguments, chdir: chdir)
   end
+
+  def capture_command_env(environment, *arguments, chdir: ROOT)
+    Open3.capture3(environment, RbConfig.ruby, *arguments, chdir: chdir)
+  end
 end
 
 class Minitest::Test
