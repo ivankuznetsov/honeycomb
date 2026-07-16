@@ -11,7 +11,7 @@ module HoneycombSecurityLint
     ].freeze
     SECURITY_KEYS = %w[network_host_reasons suppressions].freeze
     SUPPRESSION_KEYS = %w[fingerprint reason].freeze
-    HOST_PATTERN = /\A(?=.{1,253}\z)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}\z/
+    HOST_PATTERN = /\A(?=.{1,259}\z)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}(?::\d{1,5})?\z/
 
     attr_reader :baseline_network_hosts, :fixture_suppressions, :limits
 
@@ -63,7 +63,7 @@ module HoneycombSecurityLint
       permission_hosts = Array(manifest.dig("permissions", "network_hosts"))
       reasons.each do |host, reason|
         normalized = normalize_host(host)
-        errors << "manifest.x-security host #{host.inspect} is invalid" unless normalized == host
+        errors << "manifest.x-security host #{host.inspect} is invalid" unless normalized == host && valid_host?(host)
         errors << "manifest.x-security cannot grant undeclared host #{host.inspect}" unless permission_hosts.include?(host)
         errors << "manifest.x-security host #{host.inspect} requires a reason" unless reason.is_a?(String) && !reason.strip.empty?
       end
@@ -106,9 +106,16 @@ module HoneycombSecurityLint
         return []
       end
       normalized = value.map { |host| normalize_host(host) }
-      errors << "policy.#{path} must contain normalized concrete DNS hosts" unless value == normalized && value.all? { |host| HOST_PATTERN.match?(host) }
+      errors << "policy.#{path} must contain normalized concrete DNS hosts" unless value == normalized && value.all? { |host| valid_host?(host) }
       errors << "policy.#{path} must be sorted and unique" unless value == value.uniq.sort
       normalized
+    end
+
+    def valid_host?(host)
+      return false unless HOST_PATTERN.match?(host)
+
+      port = host[/:(\d+)\z/, 1]
+      port.nil? || port.to_i.between?(1, 65_535)
     end
 
     def validate_fingerprints(value, path, errors)

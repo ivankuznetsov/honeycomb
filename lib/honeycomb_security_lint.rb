@@ -8,6 +8,11 @@ require_relative "honeycomb_security_lint/change_set"
 require_relative "honeycomb_security_lint/text_files"
 require_relative "honeycomb_security_lint/redactor"
 require_relative "honeycomb_security_lint/secret_pii_scanner"
+require_relative "honeycomb_security_lint/instruction_scope"
+require_relative "honeycomb_security_lint/command_extractor"
+require_relative "honeycomb_security_lint/network_extractor"
+require_relative "honeycomb_security_lint/rule_engine"
+require_relative "honeycomb_security_lint/permission_checker"
 
 module HoneycombSecurityLint
   VERSION = "1.0.0"
