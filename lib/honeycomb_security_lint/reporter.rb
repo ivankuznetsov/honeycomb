@@ -1,19 +1,17 @@
 # frozen_string_literal: true
 
-require "digest"
-
 module HoneycombSecurityLint
   class Reporter
-    ARTIFACT_NAME = "security-lint-evidence"
+    ARTIFACT_NAME = EvidenceArtifact::ARTIFACT_NAME
     STATUS_CONTEXT = "honeycomb/security-lint"
     BOT_LOGIN = "github-actions[bot]"
     PROTECTED_PATH = %r{\A(?:
       \.github/workflows/|
       lib/honeycomb_security_lint(?:\.rb|/)|
       lib/honeycomb_registry(?:\.rb|/)|
-      script/honeycomb-(?:security-lint(?:-report)?|validate|manifest|catalog)\z|
+      script/honeycomb-(?:security-lint(?:-report)?|listing-approval|validate|manifest|catalog)\z|
       policy/security-lint\.yml\z|
-      schemas/(?:security-lint-evidence-v1|listing-approval-v1)\.json\z
+      schemas/[^/]+\.json\z
     )}x
     STATE_MAP = {
       "pass" => ["success", "Security lint passed"],
@@ -33,6 +31,7 @@ module HoneycombSecurityLint
       @repository = repository
       @policy = Policy.load(File.join(@root, "policy", "security-lint.yml"))
       @renderer = Renderer.new(max_items: @policy.limits.fetch("max_rendered_items"))
+      @artifact_loader = EvidenceArtifact.new(client: client, policy: @policy)
     end
 
     def report
@@ -43,7 +42,7 @@ module HoneycombSecurityLint
       begin
         evidence = load_evidence(run)
         validate_evidence_identity(evidence, run, pull_number, pull)
-      rescue ArtifactArchive::Invalid, Contracts::Invalid, Invalid
+      rescue EvidenceArtifact::Invalid, ArtifactArchive::Invalid, Contracts::Invalid, Invalid
         publish_fail_closed(pull_number, run)
         return :failed_closed
       end
@@ -82,28 +81,7 @@ module HoneycombSecurityLint
     end
 
     def load_evidence(run)
-      artifacts = @client.artifacts(run.fetch("id")).select do |artifact|
-        artifact["name"] == ARTIFACT_NAME && artifact["expired"] == false
-      end
-      raise Invalid, "expected exactly one evidence artifact" unless artifacts.length == 1
-      artifact = artifacts.first
-      size = artifact["size_in_bytes"]
-      max_archive = @policy.limits.fetch("max_artifact_bytes") + 262_144
-      unless size.is_a?(Integer) && size.positive? && size <= max_archive
-        raise Invalid, "evidence artifact size is invalid"
-      end
-      digest = artifact["digest"]
-      unless digest.is_a?(String) && digest.match?(/\Asha256:[0-9a-f]{64}\z/)
-        raise Invalid, "evidence artifact digest is missing"
-      end
-      archive = @client.download_artifact(artifact.fetch("archive_download_url"))
-      raise Invalid, "evidence artifact size changed" unless archive.bytesize == size
-      actual_digest = Digest::SHA256.hexdigest(archive)
-      raise Invalid, "evidence artifact digest changed" unless digest == "sha256:#{actual_digest}"
-      json = ArtifactArchive.evidence_json(archive, max_bytes: @policy.limits.fetch("max_artifact_bytes"))
-      evidence = Contracts.parse_evidence(json)
-      raise Invalid, "evidence content digest is invalid" unless Contracts.artifact_digest_valid?(evidence)
-      evidence
+      @artifact_loader.load(run.fetch("id"))
     end
 
     def validate_evidence_identity(evidence, run, pull_number, pull)

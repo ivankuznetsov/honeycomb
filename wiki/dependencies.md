@@ -15,9 +15,10 @@ The registry implementation is deliberately offline and dependency-light.
 - No Gemfile, Bundler runtime, application framework, database, network fetch,
   schema registry, or hidden cache is used.
 
-The unprivileged analyzer remains offline. The trusted `workflow_run` reporter
-has one isolated standard-library `Net::HTTP` adapter for GitHub's API and
-artifact endpoint; authorization is never forwarded across artifact redirects.
+The unprivileged analyzer and evidence snapshot exporter remain offline. The
+trusted `workflow_run` reporter and protected approval issuer share one isolated
+standard-library `Net::HTTP` adapter for GitHub metadata, artifact, Git ref, and
+Contents APIs; authorization is never forwarded across artifact redirects.
 
 ## Development and CI
 
@@ -29,6 +30,11 @@ states are tested without downloading runtimes. A CI job that invokes
 GitHub workflows use hosted ephemeral runners and pin `actions/checkout` and
 `actions/upload-artifact` to full commit SHAs. There is no dependency cache,
 self-hosted runner, artifact extraction action, or gem installation.
+
+The approval workflow additionally depends on a protected
+`honeycomb-listing-approval` environment and an append-only
+`honeycomb-evidence` branch. Those GitHub repository settings are rollout
+configuration, not runtime package dependencies.
 
 ## Services
 

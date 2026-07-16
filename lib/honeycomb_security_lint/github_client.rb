@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "json"
+require "base64"
 require "net/http"
 require "timeout"
 require "uri"
@@ -8,6 +9,8 @@ require "uri"
 module HoneycombSecurityLint
   class GitHubClient
     class Error < StandardError; end
+    class NotFound < Error; end
+    class Conflict < Error; end
 
     def initialize(repository:, token:, api_url: "https://api.github.com")
       @repository = repository
@@ -25,6 +28,19 @@ module HoneycombSecurityLint
 
     def pull_files(number)
       paginate(repo_path("pulls/#{number}/files"), key: nil).map { |entry| entry.fetch("filename") }
+    end
+
+    def pull_review(number, review_id)
+      get_json(repo_path("pulls/#{Integer(number)}/reviews/#{Integer(review_id)}"))
+    end
+
+    def collaborator_permission(login)
+      encoded = URI.encode_www_form_component(login.to_s)
+      get_json(repo_path("collaborators/#{encoded}/permission")).fetch("permission")
+    end
+
+    def commit_statuses(sha)
+      paginate(repo_path("commits/#{sha}/statuses"), key: nil)
     end
 
     def artifacts(run_id)
@@ -47,6 +63,47 @@ module HoneycombSecurityLint
       request_json(:post, repo_path("statuses/#{sha}"), attributes, expected: [201])
     end
 
+    def ensure_branch(branch, base_branch:)
+      encoded_branch = branch.split("/").map { |part| URI.encode_www_form_component(part) }.join("/")
+      get_json(repo_path("git/ref/heads/#{encoded_branch}"))
+      true
+    rescue NotFound
+      encoded_base = base_branch.split("/").map { |part| URI.encode_www_form_component(part) }.join("/")
+      base = get_json(repo_path("git/ref/heads/#{encoded_base}"))
+      sha = base.dig("object", "sha")
+      raise Error, "default branch ref is invalid" unless sha.is_a?(String) && sha.match?(/\A[0-9a-f]{40}\z/)
+
+      request_json(
+        :post, repo_path("git/refs"), {"ref" => "refs/heads/#{branch}", "sha" => sha},
+        expected: [201]
+      )
+      true
+    rescue Conflict
+      true
+    end
+
+    def create_content(path, bytes:, branch:, message:)
+      request_json(
+        :put, repo_path("contents/#{encode_path(path)}"),
+        {
+          "message" => message, "content" => Base64.strict_encode64(bytes),
+          "branch" => branch
+        },
+        expected: [201]
+      )
+    end
+
+    def content(path, ref:)
+      encoded_ref = URI.encode_www_form_component(ref)
+      document = get_json("#{repo_path("contents/#{encode_path(path)}")}?ref=#{encoded_ref}")
+      unless document["encoding"] == "base64" && document["content"].is_a?(String)
+        raise Error, "GitHub content response is invalid"
+      end
+      Base64.strict_decode64(document.fetch("content").gsub(/\s+/, ""))
+    rescue ArgumentError
+      raise Error, "GitHub content response is invalid"
+    end
+
     def remove_label(number, label)
       encoded = URI.encode_www_form_component(label)
       request_json(:delete, repo_path("issues/#{number}/labels/#{encoded}"), nil, expected: [200, 404])
@@ -66,6 +123,10 @@ module HoneycombSecurityLint
 
     def repo_path(suffix)
       "/repos/#{@repository}/#{suffix}"
+    end
+
+    def encode_path(path)
+      path.to_s.split("/").map { |part| URI.encode_www_form_component(part) }.join("/")
     end
 
     def paginate(path, key:)
@@ -91,7 +152,11 @@ module HoneycombSecurityLint
     def request_json(method, path, body, expected:)
       uri = @api_uri + path
       response = request(method, uri, body && JSON.generate(body), authorize: true)
-      raise Error, "GitHub API returned HTTP #{response.code}" unless expected.include?(response.code.to_i)
+      unless expected.include?(response.code.to_i)
+        raise NotFound, "GitHub API returned HTTP 404" if response.code.to_i == 404
+        raise Conflict, "GitHub API returned HTTP #{response.code}" if [409, 422].include?(response.code.to_i)
+        raise Error, "GitHub API returned HTTP #{response.code}"
+      end
       return {} if response.body.to_s.empty?
 
       JSON.parse(response.body)
@@ -117,7 +182,7 @@ module HoneycombSecurityLint
 
     def request(method, uri, body, authorize:)
       request_class = {
-        get: Net::HTTP::Get, post: Net::HTTP::Post, patch: Net::HTTP::Patch,
+        get: Net::HTTP::Get, post: Net::HTTP::Post, put: Net::HTTP::Put, patch: Net::HTTP::Patch,
         delete: Net::HTTP::Delete
       }.fetch(method)
       message = request_class.new(uri)

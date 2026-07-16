@@ -141,6 +141,7 @@ module HoneycombSecurityLint
       if identity.is_a?(Hash)
         errors << "#{path}.identity.name is invalid" unless identity["name"].is_a?(String) && NAME_PATTERN.match?(identity["name"])
         nonempty(identity["version"], "#{path}.identity.version", errors)
+        semver(identity["version"], "#{path}.identity.version", errors)
         expected_path = "packages/#{identity["name"]}/#{identity["version"]}"
         errors << "#{path}.identity.path must be #{expected_path.inspect}" unless identity["path"] == expected_path
         nullable_sha256(identity["release_sha256"], "#{path}.identity.release_sha256", errors)
@@ -252,6 +253,7 @@ module HoneycombSecurityLint
 
         errors << "#{path}.name is invalid" unless entry["name"].is_a?(String) && NAME_PATTERN.match?(entry["name"])
         nonempty(entry["version"], "#{path}.version", errors)
+        semver(entry["version"], "#{path}.version", errors)
         expected_path = "packages/#{entry["name"]}/#{entry["version"]}"
         errors << "#{path}.path must be #{expected_path.inspect}" unless entry["path"] == expected_path
         sha256(entry["release_sha256"], "#{path}.release_sha256", errors)
@@ -268,8 +270,8 @@ module HoneycombSecurityLint
         else
           errors << "#{path}.approved_suppressions contains duplicates" unless suppressions.uniq.length == suppressions.length
         end
-        key = [entry["name"], entry["version"], entry["release_sha256"], entry["head_sha"]]
-        errors << "#{path} duplicates an approval identity" if seen[key]
+        key = [entry["name"], entry["version"], entry["release_sha256"], entry["head_sha"], entry["reviewer"].to_s.downcase]
+        errors << "#{path} duplicates an approval reviewer identity" if seen[key]
         seen[key] = true
       end
       invalid!(errors)
@@ -365,10 +367,16 @@ module HoneycombSecurityLint
       errors << "#{path} must be a valid RFC 3339 timestamp"
     end
 
+    def semver(value, path, errors)
+      HoneycombRegistry::SemVer.parse(value)
+    rescue HoneycombRegistry::SemVer::Invalid, TypeError
+      errors << "#{path} must be a valid SemVer"
+    end
+
     def safe_url(value, path, errors)
       uri = URI.parse(value.to_s)
       valid = value.is_a?(String) && %w[http https].include?(uri.scheme) && uri.host &&
-              uri.userinfo.nil? && uri.fragment.nil?
+              uri.userinfo.nil?
       errors << "#{path} must be a safe absolute HTTP(S) URL" unless valid
     rescue URI::InvalidURIError
       errors << "#{path} must be a safe absolute HTTP(S) URL"

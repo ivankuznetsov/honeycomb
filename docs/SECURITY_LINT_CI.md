@@ -86,8 +86,45 @@ plus validated approval records into task 1848's strict
 `honeycomb-listing-evidence/v1` reader shape. It reconstructs and verifies the
 pre-approval digest for downgraded findings. Catalog eligibility still requires
 both a passing lint verdict and affirmative human approval for the same release
-and head. This repository does not yet implement the maintainer approval issuer
-or choose its durable storage channel.
+and head.
+
+The trusted `.github/workflows/listing-approval.yml` workflow issues those
+records from a protected `honeycomb-listing-approval` environment. It runs only
+default-branch code and verifies the dispatching maintainer's repository
+permission, current pull-request review, exact open head, authoritative lint
+status, protected-path split, artifact digest, and honeycomb release identity.
+Authors cannot approve their own submissions.
+
+The issuer appends the validated lint artifact and a singleton approval record
+to the dedicated `honeycomb-evidence` branch through the GitHub Contents API.
+Paths are derived only from validated identities:
+
+```text
+lint/<head_sha>/<evidence_digest>.json
+approvals/<name>/<version>/<head_sha>/<reviewer>.json
+```
+
+Existing bytes may be replayed idempotently, but a conflicting record is never
+overwritten. The branch is independent of the reviewed pull-request head, so
+recording an approval does not create a new SHA that invalidates itself. The
+honeycomb pull-request workflow never receives evidence-branch write authority.
+
+For an offline catalog build, check out the evidence branch and explicitly
+select the immutable lint records to export. Explicit selection prevents older
+append-only heads from becoming current implicitly:
+
+```sh
+ruby script/honeycomb-listing-approval export \
+  --snapshot /path/to/honeycomb-evidence \
+  --lint lint/<head_sha>/<evidence_digest>.json \
+  --checked-at 2026-07-17T09:00:00Z \
+  --tier community \
+  --output /path/to/listing-evidence.json
+```
+
+The exporter rejects records outside the snapshot, symlinks, oversized or
+non-canonical records, duplicate honeycomb versions, stale identities, and
+orphaned suppressions before emitting `honeycomb-listing-evidence/v1`.
 
 ## Repository setup and rollout
 
@@ -100,7 +137,11 @@ Repository administrators must:
 4. keep Actions permissions restricted so only the trusted reporter receives
    the permissions declared in its workflow;
 5. merge both workflows to the default branch before relying on
-   `workflow_run` reporting.
+   `workflow_run` reporting;
+6. create and protect the `honeycomb-listing-approval` environment with the
+   required maintainer reviewers;
+7. create/protect the `honeycomb-evidence` branch so ordinary pull requests
+   cannot update it and only the trusted approval workflow may append records.
 
 After default-branch installation, run a fork canary: confirm the analyzer sees
 no custom secret and cannot comment or set status; apply the gate and confirm the
@@ -114,6 +155,7 @@ the prior run cannot overwrite the new head.
 ruby test/run.rb
 ruby script/honeycomb-security-lint --help
 ruby script/honeycomb-security-lint-report --help
+ruby script/honeycomb-listing-approval --help
 ```
 
 Focused acceptance coverage lives under `test/security_lint/`, including the

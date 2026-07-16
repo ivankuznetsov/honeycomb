@@ -79,4 +79,17 @@ class SecurityLintContractsTest < Minitest::Test
     end
     assert_includes error.message, "exact SHA-256"
   end
+
+  def test_allows_distinct_maintainers_but_rejects_case_insensitive_reviewer_duplicates
+    records = approval
+    second = Marshal.load(Marshal.dump(records["approvals"].first))
+    second["reviewer"] = "second-maintainer"
+    records["approvals"] << second
+    assert_equal records, HoneycombSecurityLint::Contracts.validate_approvals(records)
+
+    records["approvals"][1]["reviewer"] = "MAINTAINER"
+    assert_raises(HoneycombSecurityLint::Contracts::Invalid) do
+      HoneycombSecurityLint::Contracts.validate_approvals(records)
+    end
+  end
 end

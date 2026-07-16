@@ -27,6 +27,8 @@ Install verbs remain outside this repository with Hive tasks 1852/1853.
 | `ruby script/honeycomb-validate` | None | One path or `--all`; `--json`; `--require-hive` |
 | `ruby script/honeycomb-catalog --evidence PATH` | Approval-gated root catalog generation | `--check` |
 | `ruby script/honeycomb-security-lint` | None | PR metadata, gate state, JSON/Markdown output paths |
+| `ruby script/honeycomb-listing-approval issue` | Append immutable trusted evidence | None; protected workflow plumbing |
+| `ruby script/honeycomb-listing-approval export` | Write normalized evidence output | Reads an explicit checked-out evidence snapshot |
 
 All commands resolve a repository root independently of the caller's current
 directory. `--root` supports automation/fixtures. Catalog `--output` is accepted
@@ -42,6 +44,11 @@ exit 1 means blocked/awaiting/expired, and exit 2 means invocation or incomplete
 analysis. `honeycomb-security-lint-report` is trusted workflow plumbing rather
 than an author command; it consumes `GITHUB_EVENT_PATH` and the automatic token
 from a default-branch checkout.
+
+`honeycomb-listing-approval issue` likewise consumes only a trusted
+`workflow_dispatch` event and the scoped automatic token. `export` performs no
+network access and requires one or more explicit immutable lint paths under a
+checked-out `honeycomb-evidence` snapshot.
 
 Local Hive absence is a warning; `--require-hive` makes absence an error. Strict
 mode is explicit and never inferred from environment variables.

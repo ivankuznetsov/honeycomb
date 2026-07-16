@@ -17,8 +17,12 @@ catalog renderer.
   hostile artifacts, and performs trusted GitHub metadata reporting.
 - `script/honeycomb-security-lint` is the unprivileged analyzer entrypoint;
   `script/honeycomb-security-lint-report` is default-branch reporter plumbing.
+- `script/honeycomb-listing-approval` is trusted approval workflow plumbing and
+  the offline exporter for checked-out evidence snapshots.
 - `.github/workflows/security-lint.yml` and `security-lint-report.yml` implement
   the read-only analyzer / metadata-write reporter split.
+- `.github/workflows/listing-approval.yml` verifies a maintainer's current
+  review and appends immutable lint/approval records to `honeycomb-evidence`.
 - `packages/<name>/<semver>/` is the immutable release store; it is empty except
   for `.gitkeep` until seeding work lands.
 - `catalog.json` is canonical generated output and currently contains the empty
@@ -50,6 +54,10 @@ The shared library has three main flows:
 5. The default-branch reporter verifies the workflow run, current PR head,
    protected paths, artifact ZIP/digests/schema/identity, then updates one owned
    comment and the `honeycomb/security-lint` commit status.
+6. The protected approval issuer re-verifies maintainer permission, review,
+   status, artifact, release, and head identities before appending records on a
+   separate evidence ref. Offline export explicitly selects current lint
+   snapshots and adapts matching approvals to the catalog reader.
 
 `source.revision`, generated `release_sha256`, and review `head_sha` are separate
 identities. Evidence binds both lint and human approval to the latter two.
@@ -58,6 +66,7 @@ identities. Evidence binds both lint and human approval to the latter two.
 
 Author tooling and security-lint CI are shipped. Analyzer code is deterministic
 and offline; only the trusted reporter uses GitHub HTTPS metadata APIs. The
-remaining consumer flow is future work: task 1850 issues maintainer approvals,
-task 1851 seeds real honeycombs, a static site exposes `hive.sh/honeycombs`, and
-Hive tasks 1852/1853 implement `hive workflow install honeycomb/<name>`.
+remaining consumer flow is future work: task 1851 seeds real honeycombs, a
+static site exposes `hive.sh/honeycombs`, and Hive tasks 1852/1853 implement
+`hive workflow install honeycomb/<name>`. Evidence branch/environment creation
+and protection remain post-merge repository rollout operations.

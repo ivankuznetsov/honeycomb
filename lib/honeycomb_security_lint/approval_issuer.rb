@@ -1,0 +1,187 @@
+# frozen_string_literal: true
+
+require "json"
+
+module HoneycombSecurityLint
+  class ApprovalIssuer
+    ELIGIBLE_PERMISSIONS = %w[admin maintain write].freeze
+    DECISIONS = {"approved" => "APPROVED", "denied" => "CHANGES_REQUESTED"}.freeze
+    INPUT_KEYS = %w[
+      pull_request head_sha lint_run_id name version release_sha256 evidence_digest
+      review_id decision notes approved_suppressions
+    ].freeze
+
+    class Invalid < StandardError; end
+
+    def initialize(event:, client:, store:, repository:, artifact_loader: nil, root: nil)
+      @event = event
+      @client = client
+      @store = store
+      @repository = repository
+      @artifact_loader = artifact_loader || begin
+        raise Invalid, "trusted repository root is required" unless root
+        policy = Policy.load(File.join(File.expand_path(root), "policy", "security-lint.yml"))
+        EvidenceArtifact.new(client: client, policy: policy).method(:load)
+      end
+    end
+
+    def issue
+      inputs, reviewer = validate_event
+      pull_number = positive_integer(inputs.fetch("pull_request"), "pull request")
+      run_id = positive_integer(inputs.fetch("lint_run_id"), "lint run ID")
+      review_id = positive_integer(inputs.fetch("review_id"), "review ID")
+      validate_sha!(inputs.fetch("head_sha"), "head SHA")
+      validate_sha256!(inputs.fetch("release_sha256"), "release fingerprint")
+      validate_sha256!(inputs.fetch("evidence_digest"), "evidence digest")
+
+      pull = @client.pull(pull_number)
+      validate_reviewer!(reviewer, pull)
+      validate_pull!(pull, inputs.fetch("head_sha"))
+      validate_protected_paths!(pull_number)
+      validate_status!(inputs.fetch("head_sha"), run_id)
+      review = validate_review!(pull_number, review_id, reviewer, inputs.fetch("decision"))
+
+      evidence = @artifact_loader.call(run_id)
+      package = validate_evidence!(evidence, inputs, pull_number, run_id)
+      suppressions = parse_suppressions(inputs.fetch("approved_suppressions"), package)
+      if inputs.fetch("decision") == "denied" && !suppressions.empty?
+        raise Invalid, "a denied review cannot approve suppressions"
+      end
+
+      approval = {
+        "name" => package.dig("identity", "name"),
+        "version" => package.dig("identity", "version"),
+        "path" => package.dig("identity", "path"),
+        "release_sha256" => package.dig("identity", "release_sha256"),
+        "head_sha" => evidence.fetch("head_sha"),
+        "reviewer" => reviewer,
+        "decision" => inputs.fetch("decision"),
+        "reviewed_at" => review.fetch("submitted_at"),
+        "evidence_digest" => evidence.fetch("artifact_digest"),
+        "review_url" => review.fetch("html_url"),
+        "notes" => inputs.fetch("notes"),
+        "approved_suppressions" => suppressions
+      }
+      Contracts.validate_approvals({"schema" => Contracts::APPROVAL_SCHEMA, "approvals" => [approval]})
+      @store.append_lint(evidence)
+      @store.append_approval(approval)
+      approval
+    rescue KeyError, JSON::ParserError, Contracts::Invalid, EvidenceArtifact::Invalid,
+           ArtifactArchive::Invalid, GitHubClient::Error => e
+      raise Invalid, Redactor.sanitize_text(e.message)
+    end
+
+    private
+
+    def validate_event
+      unless @event.dig("repository", "full_name") == @repository
+        raise Invalid, "workflow dispatch repository is invalid"
+      end
+      inputs = @event["inputs"]
+      unless inputs.is_a?(Hash) && (INPUT_KEYS - inputs.keys).empty?
+        raise Invalid, "workflow dispatch inputs are incomplete"
+      end
+      reviewer = @event.dig("sender", "login")
+      unless reviewer.is_a?(String) && EvidenceStore::LOGIN_PATTERN.match?(reviewer)
+        raise Invalid, "workflow dispatch sender is invalid"
+      end
+      [inputs, reviewer]
+    end
+
+    def validate_reviewer!(reviewer, pull)
+      permission = @client.collaborator_permission(reviewer)
+      raise Invalid, "reviewer is not an eligible maintainer" unless ELIGIBLE_PERMISSIONS.include?(permission)
+      if pull.dig("user", "login").to_s.casecmp?(reviewer)
+        raise Invalid, "a honeycomb author cannot approve their own submission"
+      end
+    end
+
+    def validate_pull!(pull, head_sha)
+      unless pull.is_a?(Hash) && pull["state"] == "open" && pull.dig("head", "sha") == head_sha
+        raise Invalid, "pull request is closed or its head SHA is stale"
+      end
+    end
+
+    def validate_protected_paths!(pull_number)
+      if @client.pull_files(pull_number).any? { |path| Reporter::PROTECTED_PATH.match?(path.to_s) }
+        raise Invalid, "trusted security tooling must be reviewed in a separate pull request"
+      end
+    end
+
+    def validate_status!(head_sha, run_id)
+      status = @client.commit_statuses(head_sha).find do |entry|
+        entry["context"] == Reporter::STATUS_CONTEXT
+      end
+      expected_url = "https://github.com/#{@repository}/actions/runs/#{run_id}"
+      unless status && status["state"] == "success" && status["target_url"] == expected_url
+        raise Invalid, "authoritative security lint status is not current and successful"
+      end
+    end
+
+    def validate_review!(pull_number, review_id, reviewer, decision)
+      expected_state = DECISIONS[decision]
+      raise Invalid, "listing decision is invalid" unless expected_state
+      review = @client.pull_review(pull_number, review_id)
+      unless review["id"] == review_id && review.dig("user", "login").to_s.casecmp?(reviewer) &&
+             review["state"] == expected_state
+        raise Invalid, "pull-request review is missing, dismissed, stale, or inconsistent"
+      end
+      review
+    end
+
+    def validate_evidence!(evidence, inputs, pull_number, run_id)
+      Contracts.validate_evidence(evidence)
+      raise Invalid, "security lint evidence digest is invalid" unless Contracts.artifact_digest_valid?(evidence)
+      expected = [pull_number, inputs.fetch("head_sha"), run_id, @repository, "pass"]
+      actual = [
+        evidence["pull_request"], evidence["head_sha"], evidence.dig("run", "id"),
+        evidence.dig("run", "repository"), evidence["state"]
+      ]
+      raise Invalid, "security lint evidence identity is stale or not passing" unless actual == expected
+      unless evidence.dig("event", "gate") == "applied" && evidence.dig("event", "label_sha") == evidence["head_sha"]
+        raise Invalid, "security lint evidence does not have a current maintainer gate"
+      end
+      unless evidence["artifact_digest"] == inputs.fetch("evidence_digest")
+        raise Invalid, "security lint evidence digest does not match the dispatch"
+      end
+
+      package = evidence.fetch("packages").find do |entry|
+        identity = entry.fetch("identity")
+        identity.values_at("name", "version", "release_sha256") ==
+          inputs.values_at("name", "version", "release_sha256")
+      end
+      raise Invalid, "honeycomb identity does not match security lint evidence" unless package
+      raise Invalid, "honeycomb lint result is not passing" unless package["verdict"] == "pass"
+      package
+    end
+
+    def parse_suppressions(source, package)
+      values = JSON.parse(source)
+      unless values.is_a?(Array) && values.uniq.length == values.length &&
+             values.all? { |value| value.is_a?(String) && Contracts::SHA256_PATTERN.match?(value) }
+        raise Invalid, "approved suppressions must be a JSON array of exact fingerprints"
+      end
+      requested = package.fetch("suppressions").map { |entry| entry.fetch("fingerprint") }
+      unless (values - requested).empty?
+        raise Invalid, "approved suppression is not requested by current evidence"
+      end
+      values.sort
+    end
+
+    def positive_integer(value, label)
+      integer = Integer(value, 10)
+      raise Invalid, "#{label} must be positive" unless integer.positive?
+      integer
+    rescue ArgumentError, TypeError
+      raise Invalid, "#{label} must be a positive integer"
+    end
+
+    def validate_sha!(value, label)
+      raise Invalid, "#{label} is invalid" unless value.is_a?(String) && Contracts::SHA_PATTERN.match?(value)
+    end
+
+    def validate_sha256!(value, label)
+      raise Invalid, "#{label} is invalid" unless value.is_a?(String) && Contracts::SHA256_PATTERN.match?(value)
+    end
+  end
+end

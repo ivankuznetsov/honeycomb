@@ -1,0 +1,97 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "optparse"
+$LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
+require "honeycomb_security_lint"
+
+module HoneycombSecurityLint
+  module ListingApprovalCLI
+    module_function
+
+    def run(argv, out: $stdout, err: $stderr, env: ENV, default_root: nil)
+      command = argv.shift
+      case command
+      when "issue"
+        issue(argv, out: out, env: env, default_root: default_root)
+      when "export"
+        export(argv, out: out, default_root: default_root)
+      when "-h", "--help", nil
+        out.puts "Usage: honeycomb-listing-approval <issue|export> [options]"
+        command ? 0 : 2
+      else
+        raise HoneycombRegistry::InvocationError, "unknown command #{command.inspect}"
+      end
+    rescue OptionParser::ParseError, HoneycombRegistry::InvocationError,
+           ApprovalIssuer::Invalid, EvidenceStore::Invalid, EvidenceStore::Conflict,
+           EvidenceSnapshot::Invalid, Contracts::Invalid, KeyError => e
+      err.puts "honeycomb-listing-approval: #{Redactor.sanitize_text(e.message)}"
+      2
+    rescue StandardError => e
+      err.puts "honeycomb-listing-approval: internal failure: #{e.class}"
+      1
+    end
+
+    def issue(argv, out:, env:, default_root:)
+      options = {root: default_root}
+      parser = OptionParser.new do |opts|
+        opts.banner = "Usage: honeycomb-listing-approval issue --event PATH [--root PATH]"
+        opts.on("--event PATH", "Trusted workflow_dispatch event JSON") { |value| options[:event] = value }
+        opts.on("--root PATH", "Trusted default-branch checkout") { |value| options[:root] = value }
+        opts.on("-h", "--help", "Show help") { out.puts opts; return 0 }
+      end
+      arguments = parser.parse(argv)
+      raise HoneycombRegistry::InvocationError, "unexpected positional arguments" unless arguments.empty?
+      raise HoneycombRegistry::InvocationError, "--event PATH is required" unless options[:event]
+      root = File.expand_path(options[:root] || Dir.pwd)
+      event = Contracts.parse_json(File.binread(options.fetch(:event)))
+      repository = env.fetch("GITHUB_REPOSITORY")
+      client = GitHubClient.new(
+        repository: repository, token: env.fetch("GITHUB_TOKEN"),
+        api_url: env.fetch("GITHUB_API_URL", "https://api.github.com")
+      )
+      store = EvidenceStore.new(
+        client: client, base_branch: event.dig("repository", "default_branch")
+      )
+      approval = ApprovalIssuer.new(
+        event: event, client: client, store: store, repository: repository, root: root
+      ).issue
+      out.write(Contracts.canonical_json({"schema" => Contracts::APPROVAL_SCHEMA, "approvals" => [approval]}))
+      0
+    end
+
+    def export(argv, out:, default_root:)
+      options = {root: default_root, lint: []}
+      parser = OptionParser.new do |opts|
+        opts.banner = "Usage: honeycomb-listing-approval export --snapshot PATH --lint PATH --checked-at TIME --tier TIER --output PATH"
+        opts.on("--snapshot PATH", "Checked-out honeycomb-evidence branch") { |value| options[:snapshot] = value }
+        opts.on("--lint PATH", "Selected immutable lint record (repeatable)") { |value| options[:lint] << value }
+        opts.on("--checked-at TIME", "RFC 3339 lint audit time") { |value| options[:checked_at] = value }
+        opts.on("--tier TIER", "Catalog trust tier") { |value| options[:tier] = value }
+        opts.on("--output PATH", "Normalized listing evidence output") { |value| options[:output] = value }
+        opts.on("-h", "--help", "Show help") { out.puts opts; return 0 }
+      end
+      arguments = parser.parse(argv)
+      raise HoneycombRegistry::InvocationError, "unexpected positional arguments" unless arguments.empty?
+      %i[snapshot checked_at tier output].each do |key|
+        raise HoneycombRegistry::InvocationError, "--#{key.to_s.tr('_', '-')} is required" unless options[key]
+      end
+      raise HoneycombRegistry::InvocationError, "at least one --lint PATH is required" if options[:lint].empty?
+
+      snapshot = File.expand_path(options.fetch(:snapshot), options[:root] || Dir.pwd)
+      lint_paths = options.fetch(:lint).map { |path| File.expand_path(path, snapshot) }
+      document = EvidenceSnapshot.export(
+        root: snapshot, lint_paths: lint_paths,
+        checked_at: options.fetch(:checked_at), tier: options.fetch(:tier)
+      )
+      output = File.expand_path(options.fetch(:output), options[:root] || Dir.pwd)
+      HoneycombRegistry::AtomicWrite.replace(output, Contracts.canonical_json(document))
+      out.puts "Wrote normalized listing evidence to #{output}"
+      0
+    end
+  end
+end
+
+exit HoneycombSecurityLint::ListingApprovalCLI.run(
+  ARGV, default_root: File.expand_path("..", __dir__)
+)

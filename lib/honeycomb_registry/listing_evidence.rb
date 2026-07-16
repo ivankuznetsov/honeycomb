@@ -228,7 +228,7 @@ module HoneycombRegistry
     def validate_url(value, path, findings)
       uri = URI.parse(value.to_s)
       valid = value.is_a?(String) && %w[http https].include?(uri.scheme) && uri.host &&
-              uri.userinfo.nil? && uri.fragment.nil?
+              uri.userinfo.nil?
       findings.add(path, "evidence.invalid_url", "review_url must be an absolute safe HTTP(S) URL") unless valid
     rescue URI::InvalidURIError
       findings.add(path, "evidence.invalid_url", "review_url must be an absolute safe HTTP(S) URL")

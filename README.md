@@ -22,6 +22,7 @@ ruby script/honeycomb-validate --all --json
 ruby script/honeycomb-catalog --check \
   --evidence test/fixtures/listing-evidence/empty.json
 ruby script/honeycomb-security-lint --help
+ruby script/honeycomb-listing-approval --help
 ruby test/run.rb
 ```
 

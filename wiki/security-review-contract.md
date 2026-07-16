@@ -43,9 +43,17 @@ lint execution, sticky PR evidence, invalidation, and
 approval records into the existing reader meaning without reimplementing
 catalog filtering.
 
-Task 1850 still owns the approval issuer/storage channel, reviewer/trust policy,
-signing/attestation decisions, promotion, demotion, advisories, yanking, and
-revocation. Those are not implicit v1 fields.
+The protected listing-approval workflow owns issuance and immutable storage. It
+requires an eligible non-author maintainer, a current non-dismissed GitHub
+review, the successful authoritative status, the exact redacted artifact, and
+matching release/head identities. It appends canonical records under
+`honeycomb-evidence`; a conflicting reviewer record cannot overwrite history.
+The offline exporter selects exact lint snapshots and never infers that the most
+recent historical record is current.
+
+Reviewer/trust policy prose remains owned by task 1850. Signing/attestation,
+promotion, demotion, advisories, yanking, and revocation are separate catalog
+contract fields rather than implicit lint or approval meanings.
 
 Exact approved suppressions remain visible and are verified by reconstructing
 the preliminary lint digest. Broad, orphaned, stale, or mismatched suppression
