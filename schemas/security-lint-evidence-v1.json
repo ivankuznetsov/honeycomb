@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hive.sh/schemas/security-lint-evidence-v1.json",
+  "title": "Honeycomb security lint evidence v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "event", "pull_request", "base_sha", "head_sha", "run",
+    "artifact_digest", "state", "packages", "totals", "verdict"
+  ],
+  "properties": {
+    "schema": {"const": "honeycomb.security-lint/v1"},
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["action", "gate", "label_sha"],
+      "properties": {
+        "action": {"type": "string", "minLength": 1},
+        "gate": {"enum": ["required", "applied", "expired", "unchanged"]},
+        "label_sha": {"oneOf": [{"$ref": "#/$defs/sha"}, {"type": "null"}]}
+      }
+    },
+    "pull_request": {"type": "integer", "minimum": 1},
+    "base_sha": {"$ref": "#/$defs/sha"},
+    "head_sha": {"$ref": "#/$defs/sha"},
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "attempt", "workflow", "repository"],
+      "properties": {
+        "id": {"type": "integer", "minimum": 1},
+        "attempt": {"type": "integer", "minimum": 1},
+        "workflow": {"const": "Security lint"},
+        "repository": {"type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"}
+      }
+    },
+    "artifact_digest": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+    "state": {"enum": ["pass", "fail", "awaiting_maintainer", "expired", "unchanged", "error"]},
+    "packages": {"type": "array", "items": {"$ref": "#/$defs/package"}},
+    "totals": {"$ref": "#/$defs/counts"},
+    "verdict": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "semver": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-((?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(?:\\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\\+([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?$"},
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hard", "advisory", "downgraded"],
+      "properties": {
+        "hard": {"type": "integer", "minimum": 0},
+        "advisory": {"type": "integer", "minimum": 0},
+        "downgraded": {"type": "integer", "minimum": 0}
+      }
+    },
+    "package": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "identity", "validator_findings", "requested_permissions", "scanned_files",
+        "commands", "hosts", "findings", "suppressions", "counts", "verdict"
+      ],
+      "properties": {
+        "identity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "version", "path", "release_sha256"],
+          "properties": {
+            "name": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$"},
+            "version": {"$ref": "#/$defs/semver"},
+            "path": {"type": "string", "pattern": "^packages/"},
+            "release_sha256": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]}
+          }
+        },
+        "validator_findings": {"type": "array", "items": {"$ref": "#/$defs/validatorFinding"}},
+        "requested_permissions": {"type": ["object", "null"]},
+        "scanned_files": {"type": "array", "items": {"$ref": "#/$defs/scannedFile"}},
+        "commands": {"type": "array", "items": {"$ref": "#/$defs/command"}},
+        "hosts": {"type": "array", "items": {"$ref": "#/$defs/host"}},
+        "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}},
+        "suppressions": {"type": "array", "items": {"$ref": "#/$defs/suppression"}},
+        "counts": {"$ref": "#/$defs/counts"},
+        "verdict": {"enum": ["pass", "fail", "error"]}
+      }
+    },
+    "validatorFinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "code", "message", "severity"],
+      "properties": {
+        "path": {"type": "string"},
+        "code": {"type": "string", "minLength": 1},
+        "message": {"type": "string"},
+        "severity": {"enum": ["error", "warning", "info"]}
+      }
+    },
+    "scannedFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "bytes", "sha256", "kind"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "bytes": {"type": "integer", "minimum": 0},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "kind": {"enum": ["text", "binary"]}
+      }
+    },
+    "command": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "line", "column", "kind", "redacted"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "line": {"type": "integer", "minimum": 1},
+        "column": {"type": "integer", "minimum": 1},
+        "kind": {"enum": ["fenced", "inline", "plain", "yaml-string"]},
+        "redacted": {"type": "string", "minLength": 1}
+      }
+    },
+    "host": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["host", "path", "line", "column", "declared", "reason", "disposition"],
+      "properties": {
+        "host": {"type": "string", "minLength": 1},
+        "path": {"type": "string", "minLength": 1},
+        "line": {"type": "integer", "minimum": 1},
+        "column": {"type": "integer", "minimum": 1},
+        "declared": {"type": "boolean"},
+        "reason": {"type": ["string", "null"]},
+        "disposition": {"enum": ["hard", "advisory"]}
+      }
+    },
+    "approvalReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reviewer", "reviewed_at", "review_url", "evidence_digest"],
+      "properties": {
+        "reviewer": {"type": "string", "minLength": 1},
+        "reviewed_at": {"type": "string", "format": "date-time"},
+        "review_url": {"type": "string", "format": "uri", "pattern": "^https?://"},
+        "evidence_digest": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rule_id", "category", "original_severity", "disposition", "path", "line",
+        "column", "fingerprint", "redacted_evidence", "message", "request", "approval"
+      ],
+      "properties": {
+        "rule_id": {"type": "string", "minLength": 1},
+        "category": {"type": "string", "minLength": 1},
+        "original_severity": {"enum": ["hard", "advisory"]},
+        "disposition": {"enum": ["hard", "advisory", "downgraded"]},
+        "path": {"type": "string", "minLength": 1},
+        "line": {"type": "integer", "minimum": 1},
+        "column": {"type": "integer", "minimum": 1},
+        "fingerprint": {"$ref": "#/$defs/sha256"},
+        "redacted_evidence": {"type": "string"},
+        "message": {"type": "string", "minLength": 1},
+        "request": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "object", "additionalProperties": false, "required": ["reason"],
+              "properties": {"reason": {"type": "string", "minLength": 1}}
+            }
+          ]
+        },
+        "approval": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/approvalReference"}]}
+      }
+    },
+    "suppression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fingerprint", "reason", "status", "approval"],
+      "properties": {
+        "fingerprint": {"$ref": "#/$defs/sha256"},
+        "reason": {"type": "string", "minLength": 1},
+        "status": {"enum": ["requested", "approved", "orphaned"]},
+        "approval": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/approvalReference"}]}
+      }
+    }
+  }
+}

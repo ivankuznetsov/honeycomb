@@ -1,12 +1,22 @@
 # frozen_string_literal: true
 
 require "optparse"
+require "time"
 
 module HoneycombRegistry
   module Catalog
     SCHEMA = "honeycomb-catalog/v1"
     REPOSITORY_URL = "https://github.com/ivankuznetsov/honeycomb"
     Result = Struct.new(:document, :bytes, :findings, keyword_init: true)
+
+    class Revoked < StandardError
+      attr_reader :advisories
+
+      def initialize(entry)
+        @advisories = entry.fetch("advisories")
+        super("honeycomb #{entry.fetch("name")}@#{entry.fetch("version")} is revoked")
+      end
+    end
 
     module_function
 
@@ -43,7 +53,7 @@ module HoneycombRegistry
 
       entries = eligible_records.map do |record|
         manifest = manifests.fetch([record.fetch("name"), record.fetch("version")])
-        project_entry(manifest, record, latest.fetch(record.fetch("name")))
+        project_entry(manifest, record, latest[record.fetch("name")])
       end
       entries.sort! do |left, right|
         name_comparison = left.fetch("name") <=> right.fetch("name")
@@ -78,7 +88,8 @@ module HoneycombRegistry
     end
 
     def latest_versions(records, findings)
-      records.group_by { |record| record.fetch("name") }.each_with_object({}) do |(name, grouped), result|
+      listed = records.select { |record| record["state"] == "listed" }
+      listed.group_by { |record| record.fetch("name") }.each_with_object({}) do |(name, grouped), result|
         versions = grouped.map { |record| record.fetch("version") }
         result[name] = SemVer.latest(versions).to_s
       rescue SemVer::AmbiguousPrecedence => e
@@ -88,32 +99,61 @@ module HoneycombRegistry
 
     def project_entry(manifest, record, latest_version)
       lint = record.fetch("lint")
-      approval = record.fetch("approval")
+      approvals = record.fetch("approvals").select { |approval| approval["status"] == "approved" }
       head_sha = lint.fetch("head_sha")
       name = manifest.fetch("name")
       version = manifest.fetch("version")
+      state = record.fetch("state")
       {
         "name" => name,
         "version" => version,
         "latest_version" => latest_version,
         "description" => manifest.fetch("description"),
-        "tier" => record.fetch("tier"),
+        "release_tier" => record.fetch("release_tier"),
+        "current_tier" => record.fetch("current_tier"),
+        "permission_risk" => record.fetch("permission_risk"),
+        "state" => state,
+        "discoverable" => state == "listed",
+        "exact_resolution" => state == "revoked" ? "blocked" : "allowed",
+        "verification" => record.fetch("verification"),
+        "history" => record.fetch("history"),
+        "advisories" => record.fetch("advisories"),
         "author" => manifest.fetch("author"),
         "license" => manifest.fetch("license"),
         "hive_min_version" => manifest.fetch("hive_min_version"),
         "permissions" => manifest.fetch("permissions"),
         "install_command" => "hive workflow install honeycomb/#{name}",
         "package_url" => "#{REPOSITORY_URL}/tree/#{head_sha}/packages/#{name}/#{version}",
-        "reviews_url" => approval.fetch("review_url"),
+        "reviews_url" => approvals.first.fetch("review_url"),
         "source_sha" => manifest.fetch("source").fetch("revision"),
         "listing_approval" => {
           "release_sha256" => manifest.fetch("release_sha256"),
           "head_sha" => head_sha,
           "lint_checked_at" => lint.fetch("checked_at"),
-          "approved_by" => approval.fetch("reviewer"),
-          "approved_at" => approval.fetch("reviewed_at")
+          "approved_by" => approvals.map { |approval| approval.fetch("reviewer") },
+          "approved_at" => approvals.max_by { |approval| Time.iso8601(approval.fetch("reviewed_at")) }.fetch("reviewed_at"),
+          "reviews" => approvals.map do |approval|
+            approval.slice("reviewer", "reviewed_at", "review_url", "evidence_digest")
+          end
         }
       }
+    end
+
+    def discovery(document)
+      Array(document.fetch("entries")).select { |entry| entry["discoverable"] == true }
+    end
+
+    def resolve(document, name:, version: nil)
+      entries = Array(document.fetch("entries")).select { |entry| entry["name"] == name }
+      selected = if version
+                   entries.find { |entry| entry["version"] == version }
+                 else
+                   latest = entries.map { |entry| entry["latest_version"] }.compact.first
+                   entries.find { |entry| entry["version"] == latest && entry["discoverable"] }
+                 end
+      raise Revoked, selected if selected && selected["state"] == "revoked"
+
+      selected
     end
   end
 

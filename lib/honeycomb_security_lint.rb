@@ -1,0 +1,30 @@
+# frozen_string_literal: true
+
+require_relative "honeycomb_registry"
+require_relative "honeycomb_security_lint/contracts"
+require_relative "honeycomb_security_lint/policy"
+require_relative "honeycomb_security_lint/validator_adapter"
+require_relative "honeycomb_security_lint/change_set"
+require_relative "honeycomb_security_lint/text_files"
+require_relative "honeycomb_security_lint/redactor"
+require_relative "honeycomb_security_lint/secret_pii_scanner"
+require_relative "honeycomb_security_lint/instruction_scope"
+require_relative "honeycomb_security_lint/command_extractor"
+require_relative "honeycomb_security_lint/network_extractor"
+require_relative "honeycomb_security_lint/rule_engine"
+require_relative "honeycomb_security_lint/permission_checker"
+require_relative "honeycomb_security_lint/evidence"
+require_relative "honeycomb_security_lint/renderer"
+require_relative "honeycomb_security_lint/runner"
+require_relative "honeycomb_security_lint/artifact_archive"
+require_relative "honeycomb_security_lint/github_client"
+require_relative "honeycomb_security_lint/evidence_artifact"
+require_relative "honeycomb_security_lint/reporter"
+require_relative "honeycomb_security_lint/listing_evidence_adapter"
+require_relative "honeycomb_security_lint/evidence_store"
+require_relative "honeycomb_security_lint/approval_issuer"
+require_relative "honeycomb_security_lint/evidence_snapshot"
+
+module HoneycombSecurityLint
+  VERSION = "1.0.0"
+end

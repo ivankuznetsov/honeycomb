@@ -7,9 +7,12 @@ class OfflineContractTest < Minitest::Test
   CATALOG = File.join(ROOT, "script", "honeycomb-catalog")
 
   def test_runtime_has_no_network_or_non_optional_dependency_surface
-    runtime = Dir[File.join(ROOT, "lib", "**", "*.rb")].sort.map { |path| File.read(path) }.join("\n")
+    runtime_paths = Dir[File.join(ROOT, "lib", "**", "*.rb")].sort
+    network_adapter = File.join(ROOT, "lib", "honeycomb_security_lint", "github_client.rb")
+    runtime = (runtime_paths - [network_adapter]).map { |path| File.read(path) }.join("\n")
     refute_match(/require ["'](?:net\/http|open-uri|socket|bundler)/, runtime)
     refute_match(/(?:Net::HTTP|URI\.open|TCPSocket|Socket\.tcp)/, runtime)
+    assert_match(/require "net\/http"/, File.read(network_adapter))
     refute File.exist?(File.join(ROOT, "Gemfile"))
   end
 

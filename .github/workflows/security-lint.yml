@@ -1,0 +1,124 @@
+name: Security lint
+run-name: Security lint / ${{ github.event.action }} / ${{ github.event.label.name || 'none' }}
+
+on:
+  pull_request:
+    types: [opened, labeled, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-lint-${{ github.event.pull_request.number }}-${{ github.event.action == 'labeled' && github.event.label.name != 'safe-to-validate' && 'unrelated' || 'authoritative' }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out trusted base for gate-only evidence
+        if: github.event.action != 'labeled' || github.event.label.name != 'safe-to-validate'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+
+      - name: Check out submitted honeycomb for analysis
+        if: github.event.action == 'labeled' && github.event.label.name == 'safe-to-validate'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Fetch exact trusted base for analysis
+        if: github.event.action == 'labeled' && github.event.label.name == 'safe-to-validate'
+        env:
+          BASE_REPOSITORY: ${{ github.repository }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          [[ "$BASE_REPOSITORY" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]
+          [[ "$BASE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          git fetch --no-tags "https://github.com/${BASE_REPOSITORY}.git" "$BASE_SHA"
+          git cat-file -e "${BASE_SHA}^{commit}"
+
+      - name: Emit awaiting-maintainer evidence
+        if: github.event.action == 'opened'
+        continue-on-error: true
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          ORIGIN_REPOSITORY: ${{ github.repository }}
+        run: >-
+          ruby script/honeycomb-security-lint
+          --base "$BASE_SHA" --head "$HEAD_SHA" --pr "$PR_NUMBER"
+          --event-action opened --gate required
+          --run-id "$RUN_ID" --run-attempt "$RUN_ATTEMPT" --repository "$ORIGIN_REPOSITORY"
+          --output "$RUNNER_TEMP/evidence.json" --summary-output "$GITHUB_STEP_SUMMARY"
+
+      - name: Emit expired evidence
+        if: github.event.action == 'synchronize' || github.event.action == 'reopened'
+        continue-on-error: true
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          EVENT_ACTION: ${{ github.event.action }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          ORIGIN_REPOSITORY: ${{ github.repository }}
+        run: >-
+          ruby script/honeycomb-security-lint
+          --base "$BASE_SHA" --head "$HEAD_SHA" --pr "$PR_NUMBER"
+          --event-action "$EVENT_ACTION" --gate expired
+          --run-id "$RUN_ID" --run-attempt "$RUN_ATTEMPT" --repository "$ORIGIN_REPOSITORY"
+          --output "$RUNNER_TEMP/evidence.json" --summary-output "$GITHUB_STEP_SUMMARY"
+
+      - name: Analyze the submitted honeycomb
+        if: github.event.action == 'labeled' && github.event.label.name == 'safe-to-validate'
+        continue-on-error: true
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          ORIGIN_REPOSITORY: ${{ github.repository }}
+        run: >-
+          ruby script/honeycomb-security-lint
+          --base "$BASE_SHA" --head "$HEAD_SHA" --pr "$PR_NUMBER"
+          --event-action labeled --gate applied --label-sha "$HEAD_SHA"
+          --run-id "$RUN_ID" --run-attempt "$RUN_ATTEMPT" --repository "$ORIGIN_REPOSITORY"
+          --output "$RUNNER_TEMP/evidence.json" --summary-output "$GITHUB_STEP_SUMMARY"
+
+      - name: Preserve status for unrelated labels
+        if: github.event.action == 'labeled' && github.event.label.name != 'safe-to-validate'
+        continue-on-error: true
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          ORIGIN_REPOSITORY: ${{ github.repository }}
+        run: >-
+          ruby script/honeycomb-security-lint
+          --base "$BASE_SHA" --head "$HEAD_SHA" --pr "$PR_NUMBER"
+          --event-action labeled --gate unchanged --label-sha "$HEAD_SHA"
+          --run-id "$RUN_ID" --run-attempt "$RUN_ATTEMPT" --repository "$ORIGIN_REPOSITORY"
+          --output "$RUNNER_TEMP/evidence.json" --summary-output "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload redacted evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: security-lint-evidence
+          path: ${{ runner.temp }}/evidence.json
+          if-no-files-found: error
+          retention-days: 7

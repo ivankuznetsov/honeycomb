@@ -1,0 +1,40 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "optparse"
+$LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
+require "honeycomb_security_lint"
+
+options = {root: File.expand_path("..", __dir__)}
+parser = OptionParser.new do |opts|
+  opts.banner = "Usage: honeycomb-security-lint-report --event PATH [--root PATH]"
+  opts.on("--event PATH", "workflow_run event JSON") { |value| options[:event] = value }
+  opts.on("--root PATH", "Trusted default-branch checkout") { |value| options[:root] = value }
+  opts.on("-h", "--help", "Show help") do
+    puts opts
+    exit 0
+  end
+end
+
+begin
+  arguments = parser.parse(ARGV)
+  raise ArgumentError, "unexpected positional arguments" unless arguments.empty?
+  raise ArgumentError, "--event PATH is required" unless options[:event]
+  repository = ENV.fetch("GITHUB_REPOSITORY")
+  event = HoneycombSecurityLint::Contracts.parse_json(File.binread(options.fetch(:event)))
+  client = HoneycombSecurityLint::GitHubClient.new(
+    repository: repository, token: ENV.fetch("GITHUB_TOKEN"),
+    api_url: ENV.fetch("GITHUB_API_URL", "https://api.github.com")
+  )
+  result = HoneycombSecurityLint::Reporter.new(
+    root: options.fetch(:root), event: event, client: client, repository: repository
+  ).report
+  puts "honeycomb-security-lint-report: #{result}"
+  exit 0
+rescue OptionParser::ParseError, ArgumentError, KeyError, HoneycombSecurityLint::Contracts::Invalid => e
+  warn "honeycomb-security-lint-report: #{HoneycombSecurityLint::Redactor.sanitize_text(e.message)}"
+  exit 2
+rescue StandardError => e
+  warn "honeycomb-security-lint-report: internal failure: #{e.class}"
+  exit 1
+end

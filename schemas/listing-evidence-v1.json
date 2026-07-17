@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hive.sh/schemas/listing-evidence-v1.json",
+  "title": "Honeycomb normalized listing evidence v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "records"],
+  "properties": {
+    "schema": {"const": "honeycomb-listing-evidence/v1"},
+    "records": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/record"}
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "headSha": {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
+    "semver": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-((?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(?:\\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\\+([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?$"},
+    "uri": {"type": "string", "format": "uri", "pattern": "^https?://"},
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name", "version", "release_tier", "current_tier", "permission_risk",
+        "state", "lint", "approvals", "verification", "history", "advisories"
+      ],
+      "properties": {
+        "name": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$"},
+        "version": {"$ref": "#/$defs/semver"},
+        "release_tier": {"enum": ["community", "verified"]},
+        "current_tier": {"enum": ["community", "verified"]},
+        "permission_risk": {"enum": ["low", "moderate", "high"]},
+        "state": {"enum": ["listed", "soft_hidden", "yanked", "revoked"]},
+        "lint": {"$ref": "#/$defs/lint"},
+        "approvals": {"type": "array", "items": {"$ref": "#/$defs/approval"}},
+        "verification": {
+          "oneOf": [{"type": "null"}, {"$ref": "#/$defs/verification"}]
+        },
+        "history": {"type": "array", "items": {"$ref": "#/$defs/history"}},
+        "advisories": {"type": "array", "items": {"$ref": "#/$defs/advisory"}}
+      }
+    },
+    "lint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {"enum": ["pass", "pending", "fail"]},
+        "release_sha256": {"$ref": "#/$defs/sha256"},
+        "head_sha": {"$ref": "#/$defs/headSha"},
+        "checked_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status", "release_sha256", "head_sha", "reviewer", "reviewed_at",
+        "review_url", "evidence_digest"
+      ],
+      "properties": {
+        "status": {"enum": ["approved", "denied"]},
+        "release_sha256": {"$ref": "#/$defs/sha256"},
+        "head_sha": {"$ref": "#/$defs/headSha"},
+        "reviewer": {"type": "string", "minLength": 1},
+        "reviewed_at": {"type": "string", "format": "date-time"},
+        "review_url": {"$ref": "#/$defs/uri"},
+        "evidence_digest": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["archive_sha256", "signature", "attestation", "verified_at"],
+      "properties": {
+        "archive_sha256": {"$ref": "#/$defs/sha256"},
+        "signature": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["identity", "issuer", "url"],
+          "properties": {
+            "identity": {"$ref": "#/$defs/uri"},
+            "issuer": {"const": "https://token.actions.githubusercontent.com"},
+            "url": {"$ref": "#/$defs/uri"}
+          }
+        },
+        "attestation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["repository", "workflow", "url"],
+          "properties": {
+            "repository": {"type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"},
+            "workflow": {"type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/\\.github/workflows/[A-Za-z0-9_.-]+@refs/(?:heads|tags)/[A-Za-z0-9._/-]+$"},
+            "url": {"$ref": "#/$defs/uri"}
+          }
+        },
+        "verified_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "history": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "from", "to", "changed_at", "actor", "reason", "url"],
+      "properties": {
+        "kind": {"enum": ["tier", "state"]},
+        "from": {"type": "string"},
+        "to": {"type": "string"},
+        "changed_at": {"type": "string", "format": "date-time"},
+        "actor": {"type": "string", "minLength": 1},
+        "reason": {"type": "string", "minLength": 1},
+        "url": {"$ref": "#/$defs/uri"}
+      }
+    },
+    "advisory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "severity", "url", "published_at"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{1,127}$"},
+        "title": {"type": "string", "minLength": 1},
+        "severity": {"enum": ["low", "moderate", "high", "critical"]},
+        "url": {"$ref": "#/$defs/uri"},
+        "published_at": {"type": "string", "format": "date-time"}
+      }
+    }
+  }
+}
