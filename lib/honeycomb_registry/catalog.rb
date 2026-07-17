@@ -7,6 +7,7 @@ module HoneycombRegistry
   module Catalog
     SCHEMA = "honeycomb-catalog/v1"
     REPOSITORY_URL = "https://github.com/ivankuznetsov/honeycomb"
+    COMMUNITY_REVIEWS_REF = "main"
     Result = Struct.new(:document, :bytes, :findings, keyword_init: true)
 
     class Revoked < StandardError
@@ -124,7 +125,7 @@ module HoneycombRegistry
         "permissions" => manifest.fetch("permissions"),
         "install_command" => "hive workflow install honeycomb/#{name}",
         "package_url" => "#{REPOSITORY_URL}/tree/#{head_sha}/packages/#{name}/#{version}",
-        "reviews_url" => approvals.first.fetch("review_url"),
+        "reviews_url" => "#{REPOSITORY_URL}/tree/#{COMMUNITY_REVIEWS_REF}/reviews/#{name}/#{version}",
         "source_sha" => manifest.fetch("source").fetch("revision"),
         "listing_approval" => {
           "release_sha256" => manifest.fetch("release_sha256"),

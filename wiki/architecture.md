@@ -25,13 +25,18 @@ catalog renderer.
   review and appends immutable lint/approval records to `honeycomb-evidence`.
 - `packages/<name>/<semver>/` is the immutable release store; it is empty except
   for `.gitkeep` until seeding work lands.
+- `reviews/<name>/<version>/<github-user>.md` is the mutable, external
+  community-review namespace; checked documentation fixtures demonstrate its
+  strict record shape without creating production reviews.
 - `catalog.json` is canonical generated output and currently contains the empty
   `honeycomb-catalog/v1` document.
 - `policy/spdx-license-ids.txt` is the offline license identifier snapshot.
 - `test/fixtures/` and `test/run.rb` prove the format without a network or gem
   install.
 - `docs/PACKAGE_FORMAT.md` is the authoritative public format/command contract;
-  `wiki/` records agent-facing architecture and cross-task boundaries.
+  root `CONTRIBUTING.md`/`SECURITY.md` and `docs/TRUST.md`/`REVIEWS.md` are the
+  canonical public policy; `wiki/` records agent-facing architecture and
+  cross-task boundaries.
 
 ## Intended Product Shape
 
@@ -69,6 +74,8 @@ identities. Evidence binds both lint and human approval to the latter two.
 Release/current trust tier, permission risk, lifecycle state, verification,
 history, and advisories remain independent catalog axes. Revoked entries remain
 auditable but exact resolution fails closed with their public advisories.
+Catalog community-review links resolve to the mutable external namespace, while
+designated maintainer review evidence remains an immutable approval audit.
 
 ## Runtime Flow Status
 

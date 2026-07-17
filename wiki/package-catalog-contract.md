@@ -9,8 +9,9 @@ cross-task contract for agents implementing CI, seeding, site, or installers.
 - `honeycomb-manifest/v1` is strict and independent from Hive/hive-bench schemas.
 - Authors own metadata and safe top-level `x-*`; generation owns normalized
   permissions, exact payload file SHA-256s, and `release_sha256`.
-- Only root `manifest.yml` is excluded from payload hashing. An evolving review
-  file placed inside a version would be immutable hashed package content.
+- Only root `manifest.yml` is excluded from payload hashing. Mutable community
+  reviews live separately at `reviews/<name>/<version>/<github-user>.md` and
+  never enter the package file map or archive identity.
 - `source.revision` is upstream provenance, not registry release or reviewed-head
   identity.
 
@@ -26,6 +27,11 @@ The catalog projects manifest description/author/license/Hive minimum/permission
 data, independent trust/lifecycle/review metadata, deterministic package and
 review URLs, source SHA, and a compact listing-approval identity. It does not
 embed full manifests or timestamps generated at runtime.
+
+Catalog `reviews_url` is the default-branch external community-review directory.
+The immutable designated maintainer review URLs remain separately recorded in
+`listing_approval.reviews`; neither community content nor verdict counts affect
+eligibility.
 
 The contract carries immutable `release_tier`, mutable `current_tier`,
 authoritative `permission_risk`, lifecycle `state`, Verified signature and
@@ -48,8 +54,8 @@ unlisted package aborts output rather than hiding behind missing evidence.
 
 - Task 1849: produce/adapt normalized evidence and invoke validator/catalog
   checks in CI.
-- Task 1850: publish reviewer/trust policy prose using the shipped independent
-  tier/risk/state/verification/advisory fields.
+- Task 1850: shipped the canonical public contribution, security, trust, and
+  community-review policies plus their documentation contract tests.
 - Task 1851: add real packages, generated manifests, evidence integration, and a
   populated catalog.
 - Static site: consume catalog entries as generated; do not reinterpret package

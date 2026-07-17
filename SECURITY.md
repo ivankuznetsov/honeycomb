@@ -72,6 +72,7 @@ actions retain the version in canonical catalog history:
 
 | Action | Catalog `state` | Discovery and default/new install | Exact pinned resolution |
 |---|---|---|---|
+| Normal listing | `listed` | Included | Allowed |
 | Investigation hold | `soft_hidden` | Excluded immediately | Continues unless separately revoked |
 | Ordinary delisting | `yanked` | Excluded | Continues |
 | Material-harm response | `revoked` | Excluded | Fails closed with public advisory metadata |

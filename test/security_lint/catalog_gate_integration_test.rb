@@ -76,6 +76,10 @@ class SecurityLintCatalogGateIntegrationTest < Minitest::Test
       package = canonical_honeycomb(root)
       lint = lint_evidence(package)
 
+      review_path = File.join(root, "reviews", package.name, package.version, "community-reviewer.md")
+      FileUtils.mkdir_p(File.dirname(review_path))
+      File.write(review_path, "---\nreviewer: community-reviewer\nverdict: approve\n---\n")
+
       evidence_path = write_listing_evidence(root, lint, [])
       _stdout, stderr, status = run_catalog(root, evidence_path)
       assert_equal 0, status.exitstatus, stderr
@@ -87,6 +91,8 @@ class SecurityLintCatalogGateIntegrationTest < Minitest::Test
       entries = JSON.parse(File.read(File.join(root, "catalog.json"))).fetch("entries")
       assert_equal ["example"], entries.map { |entry| entry.fetch("name") }
       assert_equal SHA, entries.first.dig("listing_approval", "head_sha")
+      assert_equal "https://github.com/ivankuznetsov/honeycomb/tree/main/reviews/example/1.0.0",
+                   entries.first.fetch("reviews_url")
 
       failed = lint_evidence(package, state: "fail")
       evidence_path = write_listing_evidence(root, failed, [approval(failed)])

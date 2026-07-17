@@ -30,6 +30,13 @@ Merged version directories are immutable. Fixes publish a new SemVer version;
 checkout validation does not inspect Git history, so listing CI owns enforcement
 against the merge base.
 
+Mutable community reviews are deliberately outside this directory at
+`reviews/<name>/<version>/<github-user>.md`. They are not manifest payload,
+signed archive content, security-lint evidence, or designated listing approval.
+Adding or moderating a review cannot change the immutable release fingerprint.
+The canonical public review format and moderation policy are in [community
+reviews](REVIEWS.md).
+
 Names match `\A[a-z0-9][a-z0-9-]{1,62}[a-z0-9]\z` (3–64 characters).
 Versions are strict SemVer 2.0 strings and directory spelling must equal the
 manifest value. Build metadata does not affect precedence; two eligible versions
@@ -204,11 +211,13 @@ public shape:
 Root, record, lint, approval, verification, history, and advisory keys are
 strict; JSON duplicate keys and non-canonical record/reviewer/history/advisory
 ordering are rejected. Lint statuses are `pass`, `pending`, and `fail`.
-Approvals are current reviewer decisions (`approved` or `denied`); an empty
-array represents no approval. Every decision binds the exact release, head,
-reviewed evidence digest, reviewer, timestamp, and review URL. A low or moderate
-risk honeycomb needs one distinct current approval. `risk: high` needs two; any
-current denial leaves it ineligible.
+Approvals are current designated-maintainer decisions (`approved` or `denied`);
+an empty array represents no approval. Every decision binds the exact release,
+head, reviewed evidence digest, reviewer, timestamp, and pull-request
+`review_url`. That audit URL is distinct from catalog `reviews_url`, which is
+the external community-review namespace. A low or moderate risk honeycomb needs
+one distinct current approval. `risk: high` needs two; any current denial leaves
+it ineligible.
 
 Trust and lifecycle are independent:
 
@@ -262,7 +271,7 @@ output. Entries carry these projections:
 | `verification`, `history`, `advisories` | Strict listing evidence copied without reinterpretation. |
 | `install_command` | Fixed `hive workflow install honeycomb/<name>`. |
 | `package_url` | Fixed registry repository URL at the evidence head SHA and exact version path. |
-| `reviews_url` | Approved evidence review URL. |
+| `reviews_url` | External `reviews/<name>/<version>/` community-review namespace on the default branch. |
 | `source_sha` | Manifest `source.revision`. |
 | `listing_approval` | Release/head/lint identity plus every qualifying reviewer audit record. |
 
@@ -271,6 +280,11 @@ only `listed` entries. Exact resolution remains allowed for `soft_hidden` and
 `yanked`; a `revoked` exact version raises a fail-closed result carrying its
 public advisories. The catalog contains no full manifest, package file map,
 generation timestamp, or caller-supplied shell projection.
+
+`listing_approval.reviews[*].review_url` retains each immutable designated
+maintainer pull-request review. Catalog `reviews_url` instead points to the
+mutable external community-review directory. Community review content and
+verdict counts never participate in catalog eligibility.
 
 ```sh
 ruby script/honeycomb-catalog --evidence path/to/evidence.json
