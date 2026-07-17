@@ -23,14 +23,21 @@ module HoneycombSecurityLint
                message: "Encoded or compressed data is sent to a network client")
     ].freeze
 
+    class LimitExceeded < StandardError; end
+
+    def initialize(max_findings: nil)
+      @max_findings = max_findings
+    end
+
     def analyze(commands)
-      findings = commands.flat_map do |command|
+      findings = []
+      commands.each do |command|
         RULES.filter_map do |rule|
           match = rule.regex.match(command.raw)
           finding(rule.rule_id, rule.message, command, match.begin(0) + 1, match[0]) if match
-        end
+        end.each { |entry| append(findings, entry) }
       end
-      findings.concat(download_then_execute(commands))
+      download_then_execute(commands).each { |entry| append(findings, entry) }
       findings.uniq { |entry| entry["fingerprint"] }
               .sort_by { |entry| [entry["path"], entry["line"], entry["column"], entry["rule_id"]] }
     end
@@ -39,11 +46,16 @@ module HoneycombSecurityLint
 
     def download_then_execute(commands)
       downloads = {}
-      commands.each_with_object([]) do |command, findings|
+      commands.each do |command|
         if (match = command.raw.match(/\b(?:curl|wget)\b.*?(?:-o|--output|-O)\s+([A-Za-z0-9_.\/-]+)/i))
           downloads[File.basename(match[1])] = command
         end
-        downloads.each do |basename, download|
+      end
+      commands.each_with_object([]) do |command, findings|
+        candidates = command.raw.scan(/[A-Za-z0-9_.\/-]+/).map { |token| File.basename(token) }.uniq
+        candidates.each do |basename|
+          download = downloads[basename]
+          next unless download
           next unless command.raw.match?(%r{(?:\b(?:bash|sh|zsh|chmod)\b[^\n]*|\./)\b?#{Regexp.escape(basename)}\b})
           next if command.equal?(download)
 
@@ -51,6 +63,13 @@ module HoneycombSecurityLint
                               command, 1, basename)
         end
       end
+    end
+
+    def append(findings, finding)
+      if @max_findings && findings.length >= @max_findings
+        raise LimitExceeded, "rule finding count exceeds policy"
+      end
+      findings << finding
     end
 
     def finding(rule_id, message, command, offset, matched)

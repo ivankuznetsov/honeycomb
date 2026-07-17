@@ -88,4 +88,94 @@ class SecurityLintEvidenceSnapshotTest < Minitest::Test
       File.unlink(outside) if outside && File.exist?(outside)
     end
   end
+
+
+  def test_selects_latest_append_only_decision_per_reviewer
+    in_tmpdir do |root|
+      record = lint
+      lint_path = File.join(root, "lint", SHA, "#{record.fetch("artifact_digest")}.json")
+      directory = File.join(root, "approvals", "example", "1.0.0", SHA)
+      FileUtils.mkdir_p(File.dirname(lint_path))
+      FileUtils.mkdir_p(directory)
+      File.write(lint_path, HoneycombSecurityLint::Contracts.canonical_json(record))
+      first = approval(record)
+      latest = approval(record)
+      latest["approvals"][0].merge!(
+        "decision" => "denied", "reviewed_at" => "2026-07-17T11:00:00Z",
+        "review_url" => "https://example.test/reviews/maintainer-2"
+      )
+      File.write(File.join(directory, "maintainer-a.json"), HoneycombSecurityLint::Contracts.canonical_json(first))
+      File.write(File.join(directory, "maintainer-b.json"), HoneycombSecurityLint::Contracts.canonical_json(latest))
+
+      document = HoneycombSecurityLint::EvidenceSnapshot.export(
+        root: root, lint_paths: [lint_path], checked_at: "2026-07-17T12:00:00Z", release_tier: "community"
+      )
+
+      assert_equal ["denied"], document.dig("records", 0, "approvals").map { |entry| entry["status"] }
+    end
+  end
+
+
+  def test_latest_decision_selection_is_scoped_per_honeycomb
+    in_tmpdir do |root|
+      record = lint
+      second_package = Marshal.load(Marshal.dump(record.fetch("packages").first))
+      second_package["identity"] = {
+        "name" => "another", "version" => "1.0.0", "path" => "packages/another/1.0.0",
+        "release_sha256" => "b" * 64
+      }
+      record["packages"] << second_package
+      record["packages"].sort_by! { |package| package.dig("identity", "name") }
+      record = HoneycombSecurityLint::Evidence.finalize(record)
+      lint_path = File.join(root, "lint", SHA, "#{record.fetch("artifact_digest")}.json")
+      FileUtils.mkdir_p(File.dirname(lint_path))
+      File.write(lint_path, HoneycombSecurityLint::Contracts.canonical_json(record))
+
+      %w[another example].each do |name|
+        document = approval(record)
+        item = document.fetch("approvals").first
+        item["name"] = name
+        item["path"] = "packages/#{name}/1.0.0"
+        item["release_sha256"] = name == "another" ? "b" * 64 : RELEASE
+        path = File.join(root, "approvals", name, "1.0.0", SHA, "maintainer-a.json")
+        FileUtils.mkdir_p(File.dirname(path))
+        File.write(path, HoneycombSecurityLint::Contracts.canonical_json(document))
+      end
+
+      document = HoneycombSecurityLint::EvidenceSnapshot.export(
+        root: root, lint_paths: [lint_path], checked_at: "2026-07-17T12:00:00Z", release_tier: "community"
+      )
+
+      reviewers = document.fetch("records").map do |item|
+        item.dig("approvals", 0, "reviewer")
+      end
+      assert_equal %w[maintainer maintainer], reviewers
+    end
+  end
+
+
+  def test_rejects_same_timestamp_decision_ties_instead_of_guessing
+    in_tmpdir do |root|
+      record = lint
+      lint_path = File.join(root, "lint", SHA, "#{record.fetch("artifact_digest")}.json")
+      directory = File.join(root, "approvals", "example", "1.0.0", SHA)
+      FileUtils.mkdir_p(File.dirname(lint_path))
+      FileUtils.mkdir_p(directory)
+      File.write(lint_path, HoneycombSecurityLint::Contracts.canonical_json(record))
+      first = approval(record)
+      second = approval(record)
+      second["approvals"][0].merge!(
+        "decision" => "denied", "review_url" => "https://example.test/reviews/maintainer-2"
+      )
+      File.write(File.join(directory, "maintainer-a.json"), HoneycombSecurityLint::Contracts.canonical_json(first))
+      File.write(File.join(directory, "maintainer-b.json"), HoneycombSecurityLint::Contracts.canonical_json(second))
+
+      error = assert_raises(HoneycombSecurityLint::EvidenceSnapshot::Invalid) do
+        HoneycombSecurityLint::EvidenceSnapshot.export(
+          root: root, lint_paths: [lint_path], checked_at: "2026-07-17T12:00:00Z", release_tier: "community"
+        )
+      end
+      assert_includes error.message, "ambiguous audit timestamp"
+    end
+  end
 end

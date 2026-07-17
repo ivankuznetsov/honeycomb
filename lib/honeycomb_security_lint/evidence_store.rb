@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "digest"
+
 module HoneycombSecurityLint
   class EvidenceStore
     BRANCH = "honeycomb-evidence"
@@ -43,7 +45,8 @@ module HoneycombSecurityLint
 
       path = [
         "approvals", record.fetch("name"), record.fetch("version"),
-        record.fetch("head_sha"), "#{reviewer.downcase}.json"
+        record.fetch("head_sha"),
+        "#{reviewer.downcase}-#{Digest::SHA256.hexdigest(record.fetch("review_url"))}.json"
       ].join("/")
       append(path, Contracts.canonical_json(document), "Record honeycomb listing approval")
     rescue Contracts::Invalid => e

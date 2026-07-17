@@ -76,8 +76,6 @@ module HoneycombSecurityLint
         unless (approved - downgraded_fingerprints).empty?
           errors << "approvals[#{index}] suppression set is not present in downgraded evidence"
         end
-        selected = downgraded.select { |finding| approved.include?(finding.fetch("fingerprint")) }
-        validate_suppression_references!(package, approval, selected, errors, index)
         expected_digest = approved.empty? ? evidence.fetch("artifact_digest") : preliminary_digest
         unless approval["evidence_digest"] == expected_digest
           errors << "approvals[#{index}] reviewed evidence digest is stale"
@@ -91,6 +89,7 @@ module HoneycombSecurityLint
         approved = Array(by_path[path]).flat_map { |approval| approval.fetch("approved_suppressions") }.uniq.sort
         expected = downgraded.map { |finding| finding.fetch("fingerprint") }.uniq.sort
         errors << "#{path} has downgraded evidence without exact current approvals" unless approved == expected
+        validate_suppression_references!(package, Array(by_path[path]), downgraded, errors)
       end
       raise Contracts::Invalid, errors unless errors.empty?
 
@@ -98,20 +97,24 @@ module HoneycombSecurityLint
       by_path
     end
 
-    def validate_suppression_references!(package, approval, downgraded, errors, approval_index)
-      expected_reference = {
-        "reviewer" => approval.fetch("reviewer"), "reviewed_at" => approval.fetch("reviewed_at"),
-        "review_url" => approval.fetch("review_url"), "evidence_digest" => approval.fetch("evidence_digest")
-      }
+    def validate_suppression_references!(package, approvals, downgraded, errors)
       downgraded.each do |finding|
         fingerprint = finding.fetch("fingerprint")
+        references = approvals.select do |approval|
+          approval["decision"] == "approved" && approval.fetch("approved_suppressions").include?(fingerprint)
+        end.map do |approval|
+          {
+            "reviewer" => approval.fetch("reviewer"), "reviewed_at" => approval.fetch("reviewed_at"),
+            "review_url" => approval.fetch("review_url"), "evidence_digest" => approval.fetch("evidence_digest")
+          }
+        end
         unless finding["original_severity"] == "hard" && finding["request"].is_a?(Hash) &&
-               finding["approval"] == expected_reference
-          errors << "approvals[#{approval_index}] does not match the preliminary finding #{fingerprint}"
+               references.include?(finding["approval"])
+          errors << "current approvals do not match the preliminary finding #{fingerprint}"
         end
         suppression = package.fetch("suppressions").find { |entry| entry["fingerprint"] == fingerprint }
-        unless suppression && suppression["status"] == "approved" && suppression["approval"] == expected_reference
-          errors << "approvals[#{approval_index}] does not match the suppression request #{fingerprint}"
+        unless suppression && suppression["status"] == "approved" && references.include?(suppression["approval"])
+          errors << "current approvals do not match the suppression request #{fingerprint}"
         end
       end
     end

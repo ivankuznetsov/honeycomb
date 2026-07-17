@@ -56,4 +56,26 @@ class SecurityLintValidatorAdapterTest < Minitest::Test
       assert_equal 2, result.exit_status
     end
   end
+
+  def test_timeout_kills_and_reaps_the_validator_process_group
+    in_tmpdir do |root|
+      executable = File.join(root, "sleeping-validator.rb")
+      pid_file = File.join(root, "validator.pid")
+      File.write(executable, <<~RUBY)
+        File.write(ARGV.last, Process.pid.to_s)
+        sleep 30
+      RUBY
+      started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      result = HoneycombSecurityLint::ValidatorAdapter.new(
+        root: root, executable: executable, timeout_seconds: 0.1
+      ).validate(pid_file)
+      elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - started
+
+      assert result.error?
+      assert_equal "validator timed out", result.operational_error
+      assert_operator elapsed, :<, 2
+      pid = Integer(File.read(pid_file))
+      assert_raises(Errno::ESRCH) { Process.kill(0, pid) }
+    end
+  end
 end

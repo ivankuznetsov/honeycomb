@@ -16,7 +16,10 @@ write permissions. It verifies the current head and hostile artifact before
 writing the authoritative `honeycomb/security-lint` status or one bot-owned
 sticky comment. Synchronize/reopen evidence is pending/expired and removes the
 gate label. Protected analyzer/validator/policy/schema/workflow changes refuse a
-pass and must land separately.
+pass and must land separately. The reporter requires a complete GitHub changed
+file list, serializes by pull request, rejects older same-head source runs, and
+publishes `success` for complete diffs with no honeycomb changes so the required
+context never deadlocks unrelated pull requests.
 
 ## Normalized reader boundary
 
@@ -52,12 +55,14 @@ approval records into the existing reader meaning without reimplementing
 catalog filtering.
 
 The protected listing-approval workflow owns issuance and immutable storage. It
-requires an eligible non-author maintainer, a current non-dismissed GitHub
-review, the successful authoritative status, the exact redacted artifact, and
-matching release/head identities. It appends canonical records under
-`honeycomb-evidence`; a conflicting reviewer record cannot overwrite history.
-The offline exporter selects exact lint snapshots and never infers that the most
-recent historical record is current.
+requires an eligible non-author maintainer, that maintainer's latest decisive
+GitHub review bound to the exact head, the exact authoritative status/run, the
+redacted artifact, and matching release/head identities. Ordinary approval
+requires a pass. Exact requested suppressions may begin from failure only when
+trusted code applies them and proves the final evidence passes before publishing
+success. It appends canonical records under `honeycomb-evidence`; renewed
+reviewer decisions use distinct immutable records, and export selects the latest
+decision per reviewer. The offline exporter still selects exact lint snapshots.
 
 Reviewer/trust policy prose remains owned by task 1850. Signing/attestation,
 promotion, demotion, advisories, yanking, and revocation use separate catalog
@@ -66,6 +71,11 @@ contract fields rather than implicit lint or approval meanings.
 Exact approved suppressions remain visible and are verified by reconstructing
 the preliminary lint digest. Broad, orphaned, stale, or mismatched suppression
 approvals fail closed before catalog invocation.
+
+Instruction analysis covers README/workflow surfaces plus every UTF-8 file under
+`instructions/`, including unfenced command-like lines and non-Markdown
+extensions. Commands, network observations, and findings have policy budgets;
+budget exhaustion is an operational error rather than truncated evidence.
 
 ## Compatibility gate
 

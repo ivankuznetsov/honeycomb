@@ -23,6 +23,12 @@ class SecurityLintWorkflowContractTest < Minitest::Test
     assert_includes @analyzer, "github.event.pull_request.head.sha"
     assert_includes @analyzer, "safe-to-validate"
     assert_includes @analyzer, "cancel-in-progress: true"
+    assert_includes @analyzer, "run-name: Security lint /"
+    assert_includes @analyzer, "'unrelated' || 'authoritative'"
+    refute_includes @analyzer, "paths:"
+    assert_includes @analyzer, "fetch-depth: 0"
+    assert_includes @analyzer, "git fetch --no-tags"
+    assert_includes @analyzer, "github.event.pull_request.base.sha"
   end
 
   def test_reporter_checks_out_only_default_branch_with_metadata_permissions
@@ -34,6 +40,7 @@ class SecurityLintWorkflowContractTest < Minitest::Test
     refute_includes @reporter, "workflow_run.head_sha }}\n          persist-credentials"
     assert_includes @reporter, "github.event.repository.default_branch"
     assert_includes @reporter, "persist-credentials: false"
+    assert_includes @reporter, "workflow_run.pull_requests[0].number"
     refute_includes @reporter, "secrets."
   end
 

@@ -10,6 +10,7 @@
     "entries": {"type": "array", "items": {"$ref": "#/$defs/entry"}}
   },
   "$defs": {
+    "semver": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-((?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(?:\\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\\+([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?$"},
     "entry": {
       "type": "object",
       "additionalProperties": false,
@@ -22,8 +23,8 @@
       ],
       "properties": {
         "name": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$"},
-        "version": {"type": "string"},
-        "latest_version": {"oneOf": [{"type": "null"}, {"type": "string"}]},
+        "version": {"$ref": "#/$defs/semver"},
+        "latest_version": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/semver"}]},
         "description": {"type": "string"},
         "release_tier": {"enum": ["community", "verified"]},
         "current_tier": {"enum": ["community", "verified"]},
@@ -55,7 +56,7 @@
           }
         },
         "license": {"type": "string"},
-        "hive_min_version": {"type": "string"},
+        "hive_min_version": {"$ref": "#/$defs/semver"},
         "permissions": {
           "type": "object",
           "additionalProperties": false,

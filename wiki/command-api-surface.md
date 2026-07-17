@@ -48,7 +48,10 @@ from a default-branch checkout.
 `honeycomb-listing-approval issue` likewise consumes only a trusted
 `workflow_dispatch` event and the scoped automatic token. `export` performs no
 network access and requires one or more explicit immutable lint paths under a
-checked-out `honeycomb-evidence` snapshot.
+checked-out `honeycomb-evidence` snapshot. `issue` accepts an exact requested
+suppression against failing preliminary evidence only when trusted finalization
+produces a complete passing result; ordinary affirmative approvals require an
+already-passing result.
 
 Local Hive absence is a warning; `--require-hive` makes absence an error. Strict
 mode is explicit and never inferred from environment variables.

@@ -60,4 +60,13 @@ class SecurityLintSecretPiiScannerTest < Minitest::Test
     refute_equal first["fingerprint"], changed_content["fingerprint"]
     refute_equal first["fingerprint"], changed_path["fingerprint"]
   end
+
+  def test_finding_budget_stops_dense_input
+    scanner = HoneycombSecurityLint::SecretPiiScanner.new(max_findings: 2)
+    text = "person@example.test\n" * 3
+
+    assert_raises(HoneycombSecurityLint::SecretPiiScanner::LimitExceeded) do
+      scanner.scan([source(text)])
+    end
+  end
 end

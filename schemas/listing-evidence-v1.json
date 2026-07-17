@@ -15,6 +15,7 @@
   "$defs": {
     "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "headSha": {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
+    "semver": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-((?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(?:\\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\\+([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?$"},
     "uri": {"type": "string", "format": "uri", "pattern": "^https?://"},
     "record": {
       "type": "object",
@@ -25,7 +26,7 @@
       ],
       "properties": {
         "name": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$"},
-        "version": {"type": "string"},
+        "version": {"$ref": "#/$defs/semver"},
         "release_tier": {"enum": ["community", "verified"]},
         "current_tier": {"enum": ["community", "verified"]},
         "permission_risk": {"enum": ["low", "moderate", "high"]},
@@ -89,7 +90,7 @@
           "required": ["repository", "workflow", "url"],
           "properties": {
             "repository": {"type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"},
-            "workflow": {"type": "string"},
+            "workflow": {"type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/\\.github/workflows/[A-Za-z0-9_.-]+@refs/(?:heads|tags)/[A-Za-z0-9._/-]+$"},
             "url": {"$ref": "#/$defs/uri"}
           }
         },

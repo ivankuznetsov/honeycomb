@@ -121,4 +121,28 @@ class SecurityLintListingEvidenceAdapterTest < Minitest::Test
     assert_equal %w[maintainer second-maintainer], record.fetch("approvals").map { |entry| entry["reviewer"] }
     assert HoneycombRegistry::ListingEvidence.eligible?(record)
   end
+
+  def test_multiple_reviewers_can_approve_the_same_exact_suppression
+    fingerprint = "f" * 64
+    finding = {
+      "rule_id" => "secret.fixture", "category" => "secret", "original_severity" => "hard",
+      "disposition" => "hard", "path" => "packages/example/1.0.0/README.md", "line" => 1,
+      "column" => 1, "fingerprint" => fingerprint, "redacted_evidence" => "[redacted]",
+      "message" => "Fixture secret", "request" => {"reason" => "Inert fixture"}, "approval" => nil
+    }
+    suppression = {"fingerprint" => fingerprint, "reason" => "Inert fixture", "status" => "requested", "approval" => nil}
+    preliminary = lint(finding: finding, suppression: suppression)
+    first = approval(digest: preliminary.fetch("artifact_digest"), suppressions: [fingerprint])
+    second = first.merge(
+      "reviewer" => "second-maintainer", "review_url" => "https://example.test/reviews/43"
+    )
+    final = HoneycombSecurityLint::Evidence.apply_approvals(preliminary, [first])
+
+    document = HoneycombSecurityLint::ListingEvidenceAdapter.build(
+      lint_evidence: final, approvals: [first, second],
+      checked_at: "2026-07-16T10:00:00Z", release_tier: "community"
+    )
+
+    assert_equal %w[maintainer second-maintainer], document.dig("records", 0, "approvals").map { |entry| entry["reviewer"] }
+  end
 end

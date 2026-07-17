@@ -92,4 +92,23 @@ class SecurityLintContractsTest < Minitest::Test
       HoneycombSecurityLint::Contracts.validate_approvals(records)
     end
   end
+
+  def test_public_schemas_share_runtime_identity_constraints
+    security = JSON.parse(File.read(File.join(ROOT, "schemas", "security-lint-evidence-v1.json")))
+    approval_schema = JSON.parse(File.read(File.join(ROOT, "schemas", "listing-approval-v1.json")))
+    listing = JSON.parse(File.read(File.join(ROOT, "schemas", "listing-evidence-v1.json")))
+    catalog = JSON.parse(File.read(File.join(ROOT, "schemas", "catalog-v1.json")))
+
+    [security, approval_schema, listing, catalog].each do |schema|
+      pattern = Regexp.new(schema.dig("$defs", "semver", "pattern"))
+      assert_match pattern, "1.2.3-rc.1+build.5"
+      refute_match pattern, "01.2.3"
+      refute_match pattern, "not-semver"
+    end
+    assert_equal({"$ref" => "#/$defs/semver"}, security.dig("$defs", "package", "properties", "identity", "properties", "version"))
+    assert_equal({"$ref" => "#/$defs/sha"}, security.dig("properties", "event", "properties", "label_sha", "oneOf", 0))
+    workflow = Regexp.new(listing.dig("$defs", "verification", "properties", "attestation", "properties", "workflow", "pattern"))
+    assert_match workflow, "hive-sh/honeycomb/.github/workflows/release.yml@refs/heads/main"
+    refute_match workflow, "arbitrary-workflow"
+  end
 end

@@ -17,12 +17,18 @@ module HoneycombSecurityLint
     end
 
     class Invalid < StandardError; end
+    class LimitExceeded < Invalid; end
 
     COMMAND_START = /\A\s*(?:\$\s*)?(?:(?:bash|sh|zsh|pwsh|powershell|curl|wget|iwr|invoke-webrequest|git|gh|ruby|python\d*|node|npm|npx|bundle|rake|cat|grep|rg|find|ls|head|tail|sed|awk|tar|zip|gzip|base64|openssl|env|printenv|export|set|cp|mv|rm|mkdir|chmod|chown|tee|echo|printf|source)\b|\.\/[^\s]+)(?:\s|[|;&<>()]|\z)/i
     SHELL_FENCE = /\A\s*```\s*(bash|sh|shell|zsh|powershell|pwsh)?\s*\z/i
     YAML_EXTENSION = /\.ya?ml\z/i
 
+    def initialize(max_commands: nil)
+      @max_commands = max_commands
+    end
+
     def extract(files, version_root:)
+      @command_count = 0
       scoped = files.select { |file| file.text && InstructionScope.include?(file.path, version_root) }
       scoped.flat_map do |file|
         if YAML_EXTENSION.match?(file.path)
@@ -54,15 +60,18 @@ module HoneycombSecurityLint
         end
         if fence
           if !stripped.strip.empty? && (fence[:shell] || command_like?(stripped))
-            commands << build(file.path, line_number, first_column(line), "fenced", stripped)
+            append(commands, build(file.path, line_number, first_column(line), "fenced", stripped))
           end
           next
+        end
+        if !stripped.strip.empty? && command_like?(stripped)
+          append(commands, build(file.path, line_number, first_column(line), "plain", stripped))
         end
         line.to_enum(:scan, /`([^`\r\n]+)`/).each do
           match = Regexp.last_match
           next unless command_like?(match[1])
 
-          commands << build(file.path, line_number, match.begin(1) + 1, "inline", match[1])
+          append(commands, build(file.path, line_number, match.begin(1) + 1, "inline", match[1]))
         end
       end
       commands
@@ -98,10 +107,10 @@ module HoneycombSecurityLint
             value = line.chomp
             next if value.strip.empty?
 
-            commands << build(path, node.start_line + index + 1, 1, "yaml-string", value)
+            append(commands, build(path, node.start_line + index + 1, 1, "yaml-string", value))
           end
         else
-          commands << build(path, node.start_line + 1, node.start_column + 1, "yaml-string", node.value)
+          append(commands, build(path, node.start_line + 1, node.start_column + 1, "yaml-string", node.value))
         end
       end
     end
@@ -116,6 +125,14 @@ module HoneycombSecurityLint
 
     def build(path, line, column, kind, raw)
       Command.new(path: path, line: line, column: column, kind: kind, raw: raw)
+    end
+
+    def append(commands, command)
+      if @max_commands && @command_count >= @max_commands
+        raise LimitExceeded, "extracted command count exceeds policy"
+      end
+      @command_count += 1
+      commands << command
     end
 
     def first_column(line)

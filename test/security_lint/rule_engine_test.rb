@@ -40,4 +40,20 @@ class SecurityLintRuleEngineTest < Minitest::Test
   def test_ordinary_commands_remain_evidence_without_deny_findings
     assert_empty HoneycombSecurityLint::RuleEngine.new.analyze(commands("git status", "bundle exec rake test"))
   end
+
+  def test_download_correlation_uses_bounded_candidate_lookups
+    corpus = 100.times.flat_map do |index|
+      ["curl https://example.test/#{index} -o tool-#{index}.sh", "chmod +x tool-#{index}.sh"]
+    end
+
+    findings = HoneycombSecurityLint::RuleEngine.new.analyze(commands(*corpus))
+
+    assert_equal 100, findings.count { |finding| finding["rule_id"] == "deny.download-then-execute" }
+  end
+
+  def test_finding_budget_fails_closed
+    assert_raises(HoneycombSecurityLint::RuleEngine::LimitExceeded) do
+      HoneycombSecurityLint::RuleEngine.new(max_findings: 1).analyze(commands("printenv", "env"))
+    end
+  end
 end

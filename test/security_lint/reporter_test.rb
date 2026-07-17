@@ -10,24 +10,35 @@ class SecurityLintReporterTest < Minitest::Test
   BASE = "c" * 40
 
   class FakeClient
-    attr_accessor :pull_data, :files, :comment_data, :artifact_data, :archive
+    attr_accessor :pull_data, :files, :comment_data, :artifact_data, :archive, :run_data, :comment_error
     attr_reader :created_comments, :updated_comments, :statuses, :removed_labels
 
     def initialize
-      @pull_data = {"head" => {"sha" => SHA}, "base" => {"sha" => BASE}}
+      @pull_data = {"head" => {"sha" => SHA}, "base" => {"sha" => BASE}, "changed_files" => 1}
       @files = ["packages/example/1.0.0/README.md"]
       @comment_data = []
       @created_comments = []
       @updated_comments = []
       @statuses = []
       @removed_labels = []
+      @run_data = [{
+        "run_number" => 3, "run_attempt" => 1, "display_title" => "Security lint / labeled / safe-to-validate",
+        "pull_requests" => [{"number" => 42}]
+      }]
     end
 
     def pull(_number) = pull_data
-    def pull_files(_number) = files
+    def pull_files(_number, expected_count:)
+      raise HoneycombSecurityLint::GitHubClient::Error, "incomplete" unless expected_count == files.length
+      files
+    end
+    def workflow_runs(_workflow, head_sha:) = run_data
     def artifacts(_run_id) = artifact_data
     def download_artifact(_url) = archive
-    def comments(_number) = comment_data
+    def comments(_number)
+      raise HoneycombSecurityLint::GitHubClient::Error, "comments unavailable" if comment_error
+      comment_data
+    end
     def create_comment(number, body) = created_comments << [number, body]
     def update_comment(id, body) = updated_comments << [id, body]
     def create_status(sha, attributes) = statuses << [sha, attributes]
@@ -38,7 +49,7 @@ class SecurityLintReporterTest < Minitest::Test
     {
       "action" => "completed", "repository" => {"full_name" => "hive-sh/honeycomb"},
       "workflow_run" => {
-        "id" => 7, "run_attempt" => 1, "name" => "Security lint",
+        "id" => 7, "run_attempt" => 1, "run_number" => 3, "name" => "Security lint",
         "event" => "pull_request", "path" => ".github/workflows/security-lint.yml",
         "head_sha" => SHA, "html_url" => "https://github.com/hive-sh/honeycomb/actions/runs/7",
         "pull_requests" => [{"number" => 42}]
@@ -122,7 +133,7 @@ class SecurityLintReporterTest < Minitest::Test
 
   def test_stale_run_is_a_no_op_before_artifact_or_writes
     client = client_for
-    client.pull_data = {"head" => {"sha" => "e" * 40}, "base" => {"sha" => BASE}}
+    client.pull_data = {"head" => {"sha" => "e" * 40}, "base" => {"sha" => BASE}, "changed_files" => 1}
 
     assert_equal :stale, reporter(client).report
     assert_empty client.created_comments
@@ -165,10 +176,81 @@ class SecurityLintReporterTest < Minitest::Test
   def test_protected_tooling_change_refuses_artifact_pass_with_split_guidance
     client = client_for
     client.files << "lib/honeycomb_security_lint/rule_engine.rb"
+    client.pull_data["changed_files"] = 2
 
     assert_equal :reported, reporter(client).report
     assert_equal "failure", client.statuses.first.last.fetch("state")
     assert_includes client.created_comments.first.last, "separate pull request"
+  end
+
+
+  def test_incomplete_file_list_fails_closed
+    client = client_for
+    client.pull_data["changed_files"] = 2
+
+    assert_equal :failed_closed, reporter(client).report
+    assert_equal "error", client.statuses.first.last.fetch("state")
+  end
+
+  def test_non_package_pull_publishes_unchanged_required_status
+    client = client_for
+    client.files = ["docs/PACKAGE_FORMAT.md"]
+
+    assert_equal :unchanged, reporter(client).report
+    assert_equal "success", client.statuses.first.last.fetch("state")
+    assert_includes client.created_comments.first.last, "No changed honeycomb"
+  end
+
+  def test_newer_same_head_run_supersedes_older_report
+    client = client_for
+    client.run_data << {
+      "run_number" => 4, "run_attempt" => 1, "display_title" => "Security lint / synchronize / none",
+      "pull_requests" => [{"number" => 42}]
+    }
+
+    assert_equal :superseded, reporter(client).report
+    assert_empty client.statuses
+    assert_empty client.created_comments
+  end
+
+
+  def test_unrelated_label_run_does_not_supersede_authoritative_result
+    client = client_for
+    client.run_data << {
+      "run_number" => 4, "run_attempt" => 1, "display_title" => "Security lint / labeled / documentation",
+      "pull_requests" => [{"number" => 42}]
+    }
+
+    assert_equal :reported, reporter(client).report
+    assert_equal "success", client.statuses.first.last.fetch("state")
+  end
+
+  def test_newer_attempt_of_same_run_supersedes_older_report
+    client = client_for
+    client.run_data << {
+      "run_number" => 3, "run_attempt" => 2, "display_title" => "Security lint / labeled / safe-to-validate",
+      "pull_requests" => [{"number" => 42}]
+    }
+
+    assert_equal :superseded, reporter(client).report
+    assert_empty client.statuses
+  end
+
+  def test_comment_failure_does_not_suppress_authoritative_status
+    client = client_for
+    client.comment_error = true
+
+    assert_equal :reported, reporter(client).report
+    assert_equal "success", client.statuses.first.last.fetch("state")
+  end
+
+  def test_spdx_policy_change_is_protected
+    client = client_for
+    client.files << "policy/spdx-license-ids.txt"
+    client.pull_data["changed_files"] = 2
+
+    assert_equal :reported, reporter(client).report
+    assert_equal "failure", client.statuses.first.last.fetch("state")
   end
 
   def test_synchronize_pending_state_removes_gate_only_for_current_head

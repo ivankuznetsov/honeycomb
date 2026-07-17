@@ -42,4 +42,14 @@ class SecurityLintArtifactArchiveTest < Minitest::Test
       )
     end
   end
+
+
+  def test_streaming_limit_rejects_deflate_output_larger_than_declared_size
+    archive = zip("a" * 1_000, declared_size: 100)
+
+    error = assert_raises(HoneycombSecurityLint::ArtifactArchive::Invalid) do
+      HoneycombSecurityLint::ArtifactArchive.evidence_json(archive, max_bytes: 100)
+    end
+    assert_equal "artifact evidence exceeds the uncompressed size limit", error.message
+  end
 end

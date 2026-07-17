@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "time"
+
 module HoneycombSecurityLint
   module EvidenceSnapshot
     MAX_RECORD_BYTES = 2 * 1024 * 1024
@@ -46,7 +48,7 @@ module HoneycombSecurityLint
     end
 
     def approvals_for(snapshot, lint)
-      lint.fetch("packages").flat_map do |package|
+      records = lint.fetch("packages").flat_map do |package|
         identity = package.fetch("identity")
         HoneycombRegistry::SemVer.parse(identity.fetch("version"))
         directory = File.join(
@@ -64,6 +66,16 @@ module HoneycombSecurityLint
           end
           document.fetch("approvals").first
         end
+      end
+      records.group_by do |approval|
+        approval.values_at("name", "version", "path") + [approval.fetch("reviewer").downcase]
+      end.values.map do |decisions|
+        ranked = decisions.map { |approval| [approval, Time.iso8601(approval.fetch("reviewed_at"))] }
+        newest_at = ranked.map(&:last).max
+        newest = ranked.select { |_approval, reviewed_at| reviewed_at == newest_at }
+        raise Invalid, "reviewer decisions have an ambiguous audit timestamp" unless newest.length == 1
+
+        newest.first.first
       end
     end
 

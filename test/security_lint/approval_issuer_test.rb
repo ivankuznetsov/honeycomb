@@ -8,13 +8,14 @@ class SecurityLintApprovalIssuerTest < Minitest::Test
   RELEASE = "a" * 64
 
   class FakeClient
-    attr_accessor :permission, :pull_data, :files, :statuses, :review
+    attr_accessor :permission, :pull_data, :files, :statuses, :review, :reviews, :comment_data
+    attr_reader :created_statuses, :created_comments, :updated_comments
 
     def initialize
       @permission = "maintain"
       @pull_data = {
         "state" => "open", "user" => {"login" => "author"},
-        "head" => {"sha" => SHA}
+        "head" => {"sha" => SHA}, "changed_files" => 1
       }
       @files = ["packages/example/1.0.0/README.md"]
       @statuses = [{
@@ -24,16 +25,30 @@ class SecurityLintApprovalIssuerTest < Minitest::Test
       }]
       @review = {
         "id" => 99, "state" => "APPROVED", "user" => {"login" => "maintainer"},
+        "commit_id" => SHA,
         "submitted_at" => "2026-07-17T10:00:00Z",
         "html_url" => "https://github.com/hive-sh/honeycomb/pull/42#pullrequestreview-99"
       }
+      @reviews = [@review]
+      @comment_data = []
+      @created_statuses = []
+      @created_comments = []
+      @updated_comments = []
     end
 
     def collaborator_permission(_login) = permission
     def pull(_number) = pull_data
-    def pull_files(_number) = files
+    def pull_files(_number, expected_count:)
+      raise HoneycombSecurityLint::GitHubClient::Error, "incomplete" unless expected_count == files.length
+      files
+    end
     def commit_statuses(_sha) = statuses
     def pull_review(_number, _review_id) = review
+    def pull_reviews(_number) = reviews
+    def create_status(sha, attributes) = created_statuses << [sha, attributes]
+    def comments(_number) = comment_data
+    def create_comment(number, body) = created_comments << [number, body]
+    def update_comment(id, body) = updated_comments << [id, body]
   end
 
   class FakeStore
@@ -114,6 +129,7 @@ class SecurityLintApprovalIssuerTest < Minitest::Test
       ->(client, _event) { client.pull_data["user"]["login"] = "maintainer" },
       ->(client, _event) { client.pull_data["head"]["sha"] = "e" * 40 },
       ->(client, _event) { client.statuses[0]["state"] = "failure" },
+      ->(client, _event) { client.review["commit_id"] = "e" * 40 },
       ->(client, _event) { client.review["state"] = "DISMISSED" },
       ->(client, input) { input["inputs"]["evidence_digest"] = "f" * 64 }
     ]
@@ -128,9 +144,56 @@ class SecurityLintApprovalIssuerTest < Minitest::Test
     end
   end
 
+
+  def test_rejects_superseded_review_and_inexact_status_identity
+    client = FakeClient.new
+    client.reviews << client.review.merge(
+      "id" => 100, "state" => "CHANGES_REQUESTED", "submitted_at" => "2026-07-17T11:00:00Z"
+    )
+    assert_raises(HoneycombSecurityLint::ApprovalIssuer::Invalid) { issuer(client: client).issue }
+
+    [
+      ->(entry) { entry["target_url"] = "https://github.com/hive-sh/honeycomb/actions/runs/8" },
+      ->(entry) { entry["context"] = "other/status" }
+    ].each do |mutation|
+      client = FakeClient.new
+      mutation.call(client.statuses.first)
+      assert_raises(HoneycombSecurityLint::ApprovalIssuer::Invalid) { issuer(client: client).issue }
+    end
+  end
+
+  def test_exact_suppression_finalizes_evidence_and_publishes_success
+    fingerprint = "f" * 64
+    record = evidence
+    package = record.fetch("packages").first
+    package["findings"] = [{
+      "rule_id" => "secret.fixture", "category" => "secret", "original_severity" => "hard",
+      "disposition" => "hard", "path" => "packages/example/1.0.0/README.md", "line" => 1,
+      "column" => 1, "fingerprint" => fingerprint, "redacted_evidence" => "[redacted]",
+      "message" => "Fixture secret", "request" => {"reason" => "Inert fixture"}, "approval" => nil
+    }]
+    package["suppressions"] = [{
+      "fingerprint" => fingerprint, "reason" => "Inert fixture", "status" => "requested", "approval" => nil
+    }]
+    record = HoneycombSecurityLint::Evidence.finalize(record)
+    input = event(record)
+    input["inputs"]["approved_suppressions"] = JSON.generate([fingerprint])
+    client = FakeClient.new
+    client.statuses.first["state"] = "failure"
+    store = FakeStore.new
+
+    approval = issuer(client: client, store: store, record: record, event_data: input).issue
+
+    assert_equal [fingerprint], approval.fetch("approved_suppressions")
+    assert_equal "pass", store.lint_records.first.fetch("state")
+    assert_equal "success", client.created_statuses.first.last.fetch("state")
+    assert_equal 1, client.created_comments.length
+  end
+
   def test_rejects_protected_tooling_and_suppression_not_present_in_evidence
     client = FakeClient.new
     client.files << "script/honeycomb-listing-approval"
+    client.pull_data["changed_files"] = 2
     assert_raises(HoneycombSecurityLint::ApprovalIssuer::Invalid) { issuer(client: client).issue }
 
     input = event

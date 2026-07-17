@@ -9,9 +9,10 @@ runs with a write token or repository secrets.
 `contents: read`. Opened, synchronized, and reopened pull requests check out the
 trusted base and emit gate-only evidence without reading submitted content. A
 `labeled` event checks out the exact fork head only when a maintainer has just
-applied `safe-to-validate`. The analyzer invokes the production validator and
-the deterministic Ruby scanners; it never executes submitted commands,
-instructions, hooks, or network requests.
+applied `safe-to-validate`, then fetches the exact trusted base SHA so the
+three-dot package diff has both identities and their merge base. The analyzer
+invokes the production validator and deterministic Ruby scanners; it never
+executes submitted commands, instructions, hooks, or network requests.
 
 `.github/workflows/security-lint-report.yml` runs later on `workflow_run`. It
 checks out only the default branch and has the narrow metadata permissions
@@ -19,7 +20,10 @@ needed to read the artifact, update the pull request, remove the expired label,
 and create a commit status. The reporter downloads the artifact itself, verifies
 its GitHub SHA-256, parses a bounded single-file ZIP without extracting it,
 strict-loads the evidence schema, verifies the evidence content digest, and
-binds the result to the current pull-request head before every write.
+binds the result to a complete changed-file count, the newest source run for
+the pull/head, and the current pull-request head before every write. The status
+is published before the best-effort sticky comment so comment availability
+cannot suppress the required context.
 
 The authoritative required context is `honeycomb/security-lint`. The analyzer
 workflow conclusion is diagnostic because a pull request can propose changes to
@@ -34,10 +38,12 @@ its own unprivileged analyzer.
 | Fresh label, blocking evidence | `failure` | Resolve the evidence or obtain an exact approved suppression. |
 | Synchronize or reopen | `pending` | Prior evidence expires, the label is removed, and a maintainer must reapply it. |
 | Missing, malformed, stale, oversized, or mismatched artifact | `error` | Inspect/re-run CI; the reporter does not render attacker-controlled fields. |
+| No changed honeycomb versions | `success` | No security review action is required. |
 
 Unrelated labels produce an `unchanged` artifact and do not overwrite the
-current status or sticky comment. Concurrency cancellation plus current-head API
-checks prevent an older run from winning after a new push.
+current status or sticky comment. Analyzer cancellation, per-pull reporter
+serialization, current-head checks, and source-run ordering prevent older runs
+from winning after a push or a same-head rerun.
 
 ## Evidence contract
 
@@ -49,8 +55,13 @@ checks prevent an older run from winning after a new push.
 - each changed honeycomb's name, version path, generated `release_sha256`,
   validator findings, authoritative requested permissions, and scanned-file
   accounting;
-- redacted extracted commands, observed network hosts, static deny findings,
+- redacted extracted commands from every UTF-8 file under `instructions/`,
+  observed network hosts, static deny findings,
   secret/PII findings, suppression dispositions, counts, and terminal verdict.
+
+Policy limits bound files, bytes, extracted commands, network observations, and
+findings before evidence arrays are materialized. Exceeding a limit produces
+one compact operational failure rather than a partial pass.
 
 The sticky comment and job summary render the same already-redacted model. Human
 sections are capped with explicit omission counts; the bounded JSON artifact is
@@ -66,7 +77,7 @@ honeycomb and any trusted assessment surface:
 - `lib/honeycomb_security_lint.rb` or `lib/honeycomb_security_lint/`;
 - `lib/honeycomb_registry.rb` or `lib/honeycomb_registry/`;
 - the `honeycomb-*` validator, manifest, catalog, analyzer, or reporter scripts;
-- `policy/security-lint.yml` or any checked-in security/catalog schema.
+- any checked-in file under `policy/` or any security/catalog schema.
 
 Land those changes in a separate pull request before using them to assess a
 honeycomb submission.
@@ -93,7 +104,15 @@ records from a protected `honeycomb-listing-approval` environment. It runs only
 default-branch code and verifies the dispatching maintainer's repository
 permission, current pull-request review, exact open head, authoritative lint
 status, protected-path split, artifact digest, and honeycomb release identity.
-Authors cannot approve their own submissions.
+The selected review must bind the exact head and be that reviewer's latest
+decisive review. Authors cannot approve their own submissions.
+
+Ordinary approvals still require a passing authoritative result. An exact
+suppression approval may start from the corresponding failing result: trusted
+default-branch code applies only the named requested fingerprints, requires the
+resulting evidence to pass, appends the final evidence, and then updates the
+authoritative status/comment. A partial suppression set that leaves any hard or
+operational finding cannot finalize.
 
 The issuer appends the validated lint artifact and a singleton approval record
 to the dedicated `honeycomb-evidence` branch through the GitHub Contents API.
@@ -101,11 +120,13 @@ Paths are derived only from validated identities:
 
 ```text
 lint/<head_sha>/<evidence_digest>.json
-approvals/<name>/<version>/<head_sha>/<reviewer>.json
+approvals/<name>/<version>/<head_sha>/<reviewer>-<review-url-digest>.json
 ```
 
 Existing bytes may be replayed idempotently, but a conflicting record is never
-overwritten. The branch is independent of the reviewed pull-request head, so
+overwritten. Renewed decisions receive distinct immutable paths; offline export
+selects the unique latest audit timestamp per reviewer as the current decision
+and fails closed on timestamp ties. The branch is independent of the reviewed pull-request head, so
 recording an approval does not create a new SHA that invalidates itself. The
 honeycomb pull-request workflow never receives evidence-branch write authority.
 

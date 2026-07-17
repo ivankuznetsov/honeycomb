@@ -13,7 +13,7 @@ module HoneycombSecurityLint
       @approvals = approvals
       @change_set = change_set || ChangeSet.new(root: @root)
       @validator = validator || ValidatorAdapter.new(root: @root)
-      @scanner = SecretPiiScanner.new
+      @scanner = SecretPiiScanner.new(max_findings: @policy.limits.fetch("max_findings"))
     end
 
     def run
@@ -75,21 +75,45 @@ module HoneycombSecurityLint
       manifest = load_manifest(files, version_root, findings)
       permissions = manifest["permissions"] if manifest.is_a?(Hash) && manifest["permissions"].is_a?(Hash)
       extension = security_extension(manifest, version_root, findings)
-      findings.concat(@scanner.scan(files))
+      begin
+        findings.concat(@scanner.scan(files))
+      rescue SecretPiiScanner::LimitExceeded
+        operational = true
+        findings << generic_finding("operational.finding-limit", "operational", version_root,
+                                    "Honeycomb content produced too many security findings")
+      end
 
       commands = []
       begin
-        commands = CommandExtractor.new.extract(files, version_root: version_root)
+        commands = CommandExtractor.new(max_commands: @policy.limits.fetch("max_commands"))
+                                   .extract(files, version_root: version_root)
+      rescue CommandExtractor::LimitExceeded
+        operational = true
+        findings << generic_finding("operational.command-limit", "operational", version_root,
+                                    "Honeycomb instructions produced too many commands")
       rescue CommandExtractor::Invalid
         findings << generic_finding("instruction.malformed-yaml", "instruction", version_root,
                                     "Instruction YAML could not be parsed safely")
       end
-      observations = NetworkExtractor.new.extract(commands)
+      observations = begin
+        NetworkExtractor.new(max_observations: @policy.limits.fetch("max_observations")).extract(commands)
+      rescue NetworkExtractor::LimitExceeded
+        operational = true
+        findings << generic_finding("operational.observation-limit", "operational", version_root,
+                                    "Honeycomb instructions produced too many network destinations")
+        []
+      end
       permission_findings, hosts = PermissionChecker.new(policy: @policy).check(
         commands: commands, observations: observations, permissions: permissions,
         security_extension: extension
       )
-      findings.concat(RuleEngine.new.analyze(commands))
+      begin
+        findings.concat(RuleEngine.new(max_findings: @policy.limits.fetch("max_findings")).analyze(commands))
+      rescue RuleEngine::LimitExceeded
+        operational = true
+        findings << generic_finding("operational.rule-limit", "operational", version_root,
+                                    "Honeycomb instructions produced too many deny findings")
+      end
       findings.concat(permission_findings)
       suppressions = attach_requests(findings, extension.fetch("suppressions"), version_root)
       findings.sort_by! { |finding| [finding["path"], finding["line"], finding["column"], finding["rule_id"]] }

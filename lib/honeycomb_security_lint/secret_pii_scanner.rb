@@ -50,6 +50,12 @@ module HoneycombSecurityLint
                   message: "Phone-like personal data observed")
     ].freeze
 
+    class LimitExceeded < StandardError; end
+
+    def initialize(max_findings: nil)
+      @max_findings = max_findings
+    end
+
     class << self
       def entropy(value)
         return 0.0 if value.empty?
@@ -79,18 +85,21 @@ module HoneycombSecurityLint
     end
 
     def scan(files)
-      files.select(&:text).flat_map { |file| scan_source(file) }
-           .sort_by { |finding| [finding["path"], finding["line"], finding["column"], finding["rule_id"]] }
+      findings = []
+      files.select(&:text).each { |file| scan_source(file, findings) }
+      findings.sort_by { |finding| [finding["path"], finding["line"], finding["column"], finding["rule_id"]] }
     end
 
-    def scan_source(file)
-      findings = []
+    def scan_source(file, findings = [])
       file.text.each_line.with_index(1) do |line, line_number|
         PATTERNS.each do |pattern|
           line.to_enum(:scan, pattern.regex).each do
             match = Regexp.last_match
             next if pattern.predicate && !pattern.predicate.call(match)
 
+            if @max_findings && findings.length >= @max_findings
+              raise LimitExceeded, "secret and PII finding count exceeds policy"
+            end
             findings << finding(pattern, file.path, line_number, match.begin(0) + 1, match[0])
           end
         end

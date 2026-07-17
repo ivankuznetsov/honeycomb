@@ -26,12 +26,32 @@ module HoneycombSecurityLint
       get_json(repo_path("pulls/#{number}"))
     end
 
-    def pull_files(number)
-      paginate(repo_path("pulls/#{number}/files"), key: nil).map { |entry| entry.fetch("filename") }
+    def pull_files(number, expected_count:)
+      count = Integer(expected_count)
+      raise Error, "pull changed-files count is invalid" if count.negative?
+
+      files = paginate(repo_path("pulls/#{number}/files"), key: nil).map { |entry| entry.fetch("filename") }
+      unless files.length == count
+        raise Error, "GitHub pull file list is incomplete"
+      end
+      files
+    rescue ArgumentError, TypeError
+      raise Error, "pull changed-files count is invalid"
     end
 
     def pull_review(number, review_id)
       get_json(repo_path("pulls/#{Integer(number)}/reviews/#{Integer(review_id)}"))
+    end
+
+    def pull_reviews(number)
+      paginate(repo_path("pulls/#{Integer(number)}/reviews"), key: nil)
+    end
+
+    def workflow_runs(workflow, head_sha:)
+      encoded_workflow = URI.encode_www_form_component(workflow.to_s)
+      encoded_sha = URI.encode_www_form_component(head_sha.to_s)
+      paginate(repo_path("actions/workflows/#{encoded_workflow}/runs?event=pull_request&head_sha=#{encoded_sha}"),
+               key: "workflow_runs")
     end
 
     def collaborator_permission(login)

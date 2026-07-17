@@ -1,16 +1,15 @@
 name: Security lint
+run-name: Security lint / ${{ github.event.action }} / ${{ github.event.label.name || 'none' }}
 
 on:
   pull_request:
     types: [opened, labeled, synchronize, reopened]
-    paths:
-      - "packages/**"
 
 permissions:
   contents: read
 
 concurrency:
-  group: security-lint-${{ github.event.pull_request.number }}
+  group: security-lint-${{ github.event.pull_request.number }}-${{ github.event.action == 'labeled' && github.event.label.name != 'safe-to-validate' && 'unrelated' || 'authoritative' }}
   cancel-in-progress: true
 
 jobs:
@@ -32,7 +31,19 @@ jobs:
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
           persist-credentials: false
+
+      - name: Fetch exact trusted base for analysis
+        if: github.event.action == 'labeled' && github.event.label.name == 'safe-to-validate'
+        env:
+          BASE_REPOSITORY: ${{ github.repository }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          [[ "$BASE_REPOSITORY" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]
+          [[ "$BASE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          git fetch --no-tags "https://github.com/${BASE_REPOSITORY}.git" "$BASE_SHA"
+          git cat-file -e "${BASE_SHA}^{commit}"
 
       - name: Emit awaiting-maintainer evidence
         if: github.event.action == 'opened'

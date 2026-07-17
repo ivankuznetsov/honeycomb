@@ -184,6 +184,7 @@ module HoneycombSecurityLint
         object(entry, entry_path, COMMAND_KEYS, COMMAND_KEYS, errors)
         next unless entry.is_a?(Hash)
         %w[path kind redacted].each { |key| nonempty(entry[key], "#{entry_path}.#{key}", errors) }
+        enum(entry["kind"], "#{entry_path}.kind", %w[fenced inline plain yaml-string], errors)
         positive_integer(entry["line"], "#{entry_path}.line", errors)
         positive_integer(entry["column"], "#{entry_path}.column", errors)
       end

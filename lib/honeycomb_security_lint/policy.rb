@@ -8,6 +8,7 @@ module HoneycombSecurityLint
     ROOT_KEYS = %w[schema baseline_network_hosts fixture_suppressions limits].freeze
     LIMIT_KEYS = %w[
       max_file_bytes max_total_bytes max_files max_artifact_bytes max_rendered_items
+      max_commands max_observations max_findings
     ].freeze
     SECURITY_KEYS = %w[network_host_reasons suppressions].freeze
     SUPPRESSION_KEYS = %w[fingerprint reason].freeze

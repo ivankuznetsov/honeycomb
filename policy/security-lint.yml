@@ -10,3 +10,6 @@ limits:
   max_files: 1000
   max_artifact_bytes: 2097152
   max_rendered_items: 50
+  max_commands: 1000
+  max_observations: 1000
+  max_findings: 1000

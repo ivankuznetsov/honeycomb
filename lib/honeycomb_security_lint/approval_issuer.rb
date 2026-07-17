@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "json"
+require "time"
 
 module HoneycombSecurityLint
   class ApprovalIssuer
@@ -18,6 +19,7 @@ module HoneycombSecurityLint
       @client = client
       @store = store
       @repository = repository
+      @renderer = Renderer.new(max_items: root ? policy_limits(root).fetch("max_rendered_items") : 50)
       @artifact_loader = artifact_loader || begin
         raise Invalid, "trusted repository root is required" unless root
         policy = Policy.load(File.join(File.expand_path(root), "policy", "security-lint.yml"))
@@ -37,9 +39,9 @@ module HoneycombSecurityLint
       pull = @client.pull(pull_number)
       validate_reviewer!(reviewer, pull)
       validate_pull!(pull, inputs.fetch("head_sha"))
-      validate_protected_paths!(pull_number)
-      validate_status!(inputs.fetch("head_sha"), run_id)
-      review = validate_review!(pull_number, review_id, reviewer, inputs.fetch("decision"))
+      validate_protected_paths!(pull_number, pull)
+      status = validate_status!(inputs.fetch("head_sha"), run_id)
+      review = validate_review!(pull_number, review_id, reviewer, inputs.fetch("decision"), inputs.fetch("head_sha"))
 
       evidence = @artifact_loader.call(run_id)
       package = validate_evidence!(evidence, inputs, pull_number, run_id)
@@ -63,8 +65,10 @@ module HoneycombSecurityLint
         "approved_suppressions" => suppressions
       }
       Contracts.validate_approvals({"schema" => Contracts::APPROVAL_SCHEMA, "approvals" => [approval]})
-      @store.append_lint(evidence)
+      final_evidence = finalize_evidence!(evidence, package, approval, status)
       @store.append_approval(approval)
+      @store.append_lint(final_evidence)
+      publish_finalized!(pull_number, run_id, final_evidence) if final_evidence["artifact_digest"] != evidence["artifact_digest"]
       approval
     rescue KeyError, JSON::ParserError, Contracts::Invalid, EvidenceArtifact::Invalid,
            ArtifactArchive::Invalid, GitHubClient::Error => e
@@ -102,8 +106,10 @@ module HoneycombSecurityLint
       end
     end
 
-    def validate_protected_paths!(pull_number)
-      if @client.pull_files(pull_number).any? { |path| Reporter::PROTECTED_PATH.match?(path.to_s) }
+    def validate_protected_paths!(pull_number, pull)
+      if @client.pull_files(pull_number, expected_count: pull.fetch("changed_files")).any? do |path|
+           Reporter::PROTECTED_PATH.match?(path.to_s)
+         end
         raise Invalid, "trusted security tooling must be reviewed in a separate pull request"
       end
     end
@@ -113,31 +119,48 @@ module HoneycombSecurityLint
         entry["context"] == Reporter::STATUS_CONTEXT
       end
       expected_url = "https://github.com/#{@repository}/actions/runs/#{run_id}"
-      unless status && status["state"] == "success" && status["target_url"] == expected_url
-        raise Invalid, "authoritative security lint status is not current and successful"
+      unless status && %w[success failure].include?(status["state"]) && status["target_url"] == expected_url
+        raise Invalid, "authoritative security lint status is not current or terminal"
       end
+      status
     end
 
-    def validate_review!(pull_number, review_id, reviewer, decision)
+    def validate_review!(pull_number, review_id, reviewer, decision, head_sha)
       expected_state = DECISIONS[decision]
       raise Invalid, "listing decision is invalid" unless expected_state
       review = @client.pull_review(pull_number, review_id)
       unless review["id"] == review_id && review.dig("user", "login").to_s.casecmp?(reviewer) &&
-             review["state"] == expected_state
+             review["state"] == expected_state && review["commit_id"] == head_sha
         raise Invalid, "pull-request review is missing, dismissed, stale, or inconsistent"
       end
+      decisive = @client.pull_reviews(pull_number).select do |entry|
+        entry.dig("user", "login").to_s.casecmp?(reviewer) &&
+          %w[APPROVED CHANGES_REQUESTED DISMISSED].include?(entry["state"]) &&
+          entry["submitted_at"].is_a?(String)
+      end
+      ranked = decisive.map do |entry|
+        [entry, Time.iso8601(entry.fetch("submitted_at")), Integer(entry.fetch("id"))]
+      end
+      latest = ranked.max_by { |_entry, submitted_at, id| [submitted_at, id] }&.first
+      unless latest && latest["id"] == review_id
+        raise Invalid, "pull-request review is not the reviewer's latest decisive review"
+      end
       review
+    rescue ArgumentError, TypeError
+      raise Invalid, "pull-request review history is malformed"
     end
 
     def validate_evidence!(evidence, inputs, pull_number, run_id)
       Contracts.validate_evidence(evidence)
       raise Invalid, "security lint evidence digest is invalid" unless Contracts.artifact_digest_valid?(evidence)
-      expected = [pull_number, inputs.fetch("head_sha"), run_id, @repository, "pass"]
+      expected = [pull_number, inputs.fetch("head_sha"), run_id, @repository]
       actual = [
         evidence["pull_request"], evidence["head_sha"], evidence.dig("run", "id"),
-        evidence.dig("run", "repository"), evidence["state"]
+        evidence.dig("run", "repository")
       ]
-      raise Invalid, "security lint evidence identity is stale or not passing" unless actual == expected
+      unless actual == expected && %w[pass fail].include?(evidence["state"])
+        raise Invalid, "security lint evidence identity is stale or not terminal"
+      end
       unless evidence.dig("event", "gate") == "applied" && evidence.dig("event", "label_sha") == evidence["head_sha"]
         raise Invalid, "security lint evidence does not have a current maintainer gate"
       end
@@ -151,8 +174,59 @@ module HoneycombSecurityLint
           inputs.values_at("name", "version", "release_sha256")
       end
       raise Invalid, "honeycomb identity does not match security lint evidence" unless package
-      raise Invalid, "honeycomb lint result is not passing" unless package["verdict"] == "pass"
       package
+    end
+
+    def finalize_evidence!(evidence, package, approval, status)
+      if approval["decision"] == "denied"
+        return evidence
+      end
+      if approval["approved_suppressions"].empty?
+        unless status["state"] == "success" && evidence["state"] == "pass" && package["verdict"] == "pass"
+          raise Invalid, "honeycomb lint result is not passing"
+        end
+        return evidence
+      end
+
+      final = Evidence.apply_approvals(evidence, [approval])
+      final_package = final.fetch("packages").find do |entry|
+        entry.dig("identity", "path") == approval["path"]
+      end
+      unless final["state"] == "pass" && final_package && final_package["verdict"] == "pass"
+        raise Invalid, "approved suppressions do not produce passing security lint evidence"
+      end
+      final
+    end
+
+    def publish_finalized!(pull_number, run_id, evidence)
+      head_sha = evidence.fetch("head_sha")
+      return unless @client.pull(pull_number).dig("head", "sha") == head_sha
+
+      target_url = "https://github.com/#{@repository}/actions/runs/#{run_id}"
+      @client.create_status(
+        head_sha,
+        {
+          "state" => "success", "context" => Reporter::STATUS_CONTEXT,
+          "description" => "Security lint passed after exact maintainer suppressions",
+          "target_url" => target_url
+        }
+      )
+      return unless @client.pull(pull_number).dig("head", "sha") == head_sha
+
+      body = @renderer.comment(evidence)
+      owned = @client.comments(pull_number).find do |comment|
+        comment.dig("user", "login") == Reporter::BOT_LOGIN &&
+          comment["body"].to_s.include?(Renderer::COMMENT_MARKER)
+      end
+      if owned
+        @client.update_comment(owned.fetch("id"), body)
+      else
+        @client.create_comment(pull_number, body)
+      end
+    end
+
+    def policy_limits(root)
+      Policy.load(File.join(File.expand_path(root), "policy", "security-lint.yml")).limits
     end
 
     def parse_suppressions(source, package)

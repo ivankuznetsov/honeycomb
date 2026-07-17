@@ -17,7 +17,7 @@
       "properties": {
         "action": {"type": "string", "minLength": 1},
         "gate": {"enum": ["required", "applied", "expired", "unchanged"]},
-        "label_sha": {"type": ["string", "null"]}
+        "label_sha": {"oneOf": [{"$ref": "#/$defs/sha"}, {"type": "null"}]}
       }
     },
     "pull_request": {"type": "integer", "minimum": 1},
@@ -43,6 +43,7 @@
   "$defs": {
     "sha": {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
     "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "semver": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-((?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(?:\\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\\+([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?$"},
     "counts": {
       "type": "object",
       "additionalProperties": false,
@@ -67,7 +68,7 @@
           "required": ["name", "version", "path", "release_sha256"],
           "properties": {
             "name": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$"},
-            "version": {"type": "string", "minLength": 1},
+            "version": {"$ref": "#/$defs/semver"},
             "path": {"type": "string", "pattern": "^packages/"},
             "release_sha256": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]}
           }
@@ -113,7 +114,7 @@
         "path": {"type": "string", "minLength": 1},
         "line": {"type": "integer", "minimum": 1},
         "column": {"type": "integer", "minimum": 1},
-        "kind": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["fenced", "inline", "plain", "yaml-string"]},
         "redacted": {"type": "string", "minLength": 1}
       }
     },
@@ -137,8 +138,8 @@
       "required": ["reviewer", "reviewed_at", "review_url", "evidence_digest"],
       "properties": {
         "reviewer": {"type": "string", "minLength": 1},
-        "reviewed_at": {"type": "string", "minLength": 1},
-        "review_url": {"type": "string", "minLength": 1},
+        "reviewed_at": {"type": "string", "format": "date-time"},
+        "review_url": {"type": "string", "format": "uri", "pattern": "^https?://"},
         "evidence_digest": {"$ref": "#/$defs/sha256"}
       }
     },

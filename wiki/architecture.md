@@ -51,14 +51,18 @@ The shared library has three main flows:
    `catalog.json`.
 4. Security lint discovers changed version roots from the exact base/head diff,
    invokes the production validator, scans all bounded text content, statically
-   analyzes only instruction surfaces, and emits canonical redacted evidence.
+   analyzes every UTF-8 instruction surface with item budgets, and emits
+   canonical redacted evidence.
 5. The default-branch reporter verifies the workflow run, current PR head,
-   protected paths, artifact ZIP/digests/schema/identity, then updates one owned
-   comment and the `honeycomb/security-lint` commit status.
+   complete changed-file set, newest same-head source run, protected paths,
+   artifact ZIP/digests/schema/identity, then updates the
+   `honeycomb/security-lint` commit status and one best-effort owned comment.
 6. The protected approval issuer re-verifies maintainer permission, review,
    status, artifact, release, and head identities before appending records on a
-   separate evidence ref. Offline export explicitly selects current lint
-   snapshots and adapts matching approvals to the catalog reader.
+   separate evidence ref. It can finalize exact requested suppressions from
+   preliminary failure to a proven pass. Offline export explicitly selects lint
+   snapshots, projects the latest decision per reviewer, and adapts matching
+   approvals to the catalog reader.
 
 `source.revision`, generated `release_sha256`, and review `head_sha` are separate
 identities. Evidence binds both lint and human approval to the latter two.

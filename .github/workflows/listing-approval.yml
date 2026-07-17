@@ -12,7 +12,7 @@ on:
         required: true
         type: string
       lint_run_id:
-        description: Passing Security lint workflow run ID
+        description: Exact reviewed Security lint workflow run ID
         required: true
         type: string
       name:
@@ -54,7 +54,8 @@ permissions:
   actions: read
   contents: write
   pull-requests: read
-  statuses: read
+  issues: write
+  statuses: write
 
 concurrency:
   group: honeycomb-listing-approval

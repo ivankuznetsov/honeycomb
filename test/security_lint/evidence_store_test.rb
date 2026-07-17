@@ -51,7 +51,22 @@ class SecurityLintEvidenceStoreTest < Minitest::Test
     assert_equal :unchanged, replay
     assert_equal [[HoneycombSecurityLint::EvidenceStore::BRANCH, "main"]], client.branches.uniq
     assert_equal 1, client.writes.length
-    assert_match(%r{\Aapprovals/example/1\.0\.0/#{"d" * 40}/maintainer\.json\z}, client.writes.first.first)
+    assert_match(%r{\Aapprovals/example/1\.0\.0/#{"d" * 40}/maintainer-[0-9a-f]{64}\.json\z}, client.writes.first.first)
+  end
+
+
+  def test_renewed_review_uses_a_distinct_immutable_record
+    client = FakeClient.new
+    store = HoneycombSecurityLint::EvidenceStore.new(client: client, base_branch: "main")
+    store.append_approval(approval)
+    renewed = approval.merge(
+      "decision" => "denied", "reviewed_at" => "2026-07-17T11:00:00Z",
+      "review_url" => "https://github.com/hive-sh/honeycomb/pull/42#pullrequestreview-100"
+    )
+
+    assert_equal :created, store.append_approval(renewed)
+    assert_equal 2, client.writes.length
+    refute_equal client.writes[0].first, client.writes[1].first
   end
 
   def test_conflicting_reviewer_record_fails_closed

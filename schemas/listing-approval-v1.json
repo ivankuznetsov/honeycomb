@@ -18,16 +18,16 @@
           "approved_suppressions"
         ],
         "properties": {
-          "name": {"type": "string"},
-          "version": {"type": "string"},
-          "path": {"type": "string", "pattern": "^packages/"},
+          "name": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$"},
+          "version": {"$ref": "#/$defs/semver"},
+          "path": {"type": "string", "pattern": "^packages/[a-z0-9][a-z0-9-]{1,62}[a-z0-9]/"},
           "release_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
           "head_sha": {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
           "reviewer": {"type": "string", "minLength": 1},
           "decision": {"enum": ["approved", "denied"]},
           "reviewed_at": {"type": "string", "format": "date-time"},
           "evidence_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-          "review_url": {"type": "string", "format": "uri"},
+          "review_url": {"type": "string", "format": "uri", "pattern": "^https?://"},
           "notes": {"type": "string"},
           "approved_suppressions": {
             "type": "array",
@@ -37,5 +37,8 @@
         }
       }
     }
+  },
+  "$defs": {
+    "semver": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-((?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(?:\\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\\+([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?$"}
   }
 }

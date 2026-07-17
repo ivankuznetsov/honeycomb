@@ -58,12 +58,30 @@ module HoneycombSecurityLint
     private
 
     def execute(argv)
-      stdout = stderr = nil
-      status = nil
-      Timeout.timeout(@timeout_seconds) do
-        stdout, stderr, status = Open3.capture3(*argv, chdir: @root)
+      input = output = error = wait_thread = nil
+      output_reader = error_reader = nil
+      input, output, error, wait_thread = Open3.popen3(*argv, chdir: @root, pgroup: true)
+      input.close
+      output_reader = Thread.new { output.read }
+      error_reader = Thread.new { error.read }
+      unless wait_thread.join(@timeout_seconds)
+        terminate_group(wait_thread)
+        raise Timeout::Error, "validator deadline exceeded"
       end
-      [stdout, stderr, status]
+      [output_reader.value, error_reader.value, wait_thread.value]
+    ensure
+      [input, output, error].compact.each { |stream| stream.close unless stream.closed? }
+      [output_reader, error_reader].compact.each { |reader| reader.join(1) }
+    end
+
+    def terminate_group(wait_thread)
+      Process.kill("TERM", -wait_thread.pid)
+      return if wait_thread.join(1)
+
+      Process.kill("KILL", -wait_thread.pid)
+      wait_thread.join
+    rescue Errno::ESRCH
+      nil
     end
 
     def parse_findings(source)

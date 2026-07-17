@@ -13,7 +13,8 @@ class SecurityLintListingApprovalWorkflowTest < Minitest::Test
     assert_match(/contents: write/, workflow)
     assert_match(/actions: read/, workflow)
     assert_match(/pull-requests: read/, workflow)
-    assert_match(/statuses: read/, workflow)
+    assert_match(/statuses: write/, workflow)
+    assert_match(/issues: write/, workflow)
     refute_match(/^\s{2}pull_request:/, workflow)
     refute_includes workflow, "pull_request_target"
     refute_includes workflow, "secrets."
