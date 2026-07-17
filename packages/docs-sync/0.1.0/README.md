@@ -2,12 +2,13 @@
 
 Turn a bounded set of source changes into a focused documentation update. The
 `inspect` stage records relevant source paths, `docs/**` targets, and a concise
-rationale; `update-docs` consumes that handoff and changes only task-workspace
-documentation.
+rationale; `update-docs` consumes that handoff and changes only project
+documentation below `docs/**`.
 
 ## Install
 
-Requires Hive 0.4.2 or newer:
+Requires Hive 0.4.3 or newer (the first release expected to contain portable
+qualified file rules):
 
 ```sh
 hive workflow install honeycomb/docs-sync
@@ -15,10 +16,10 @@ hive workflow install honeycomb/docs-sync
 
 ## Permissions
 
-This Community tutorial requests repository/task read access and bounded
-write tooling for its state files and `docs/**` task-workspace output. It has
-no shell, network, or secret access. The generated `manifest.yml` is the
-authoritative permission projection.
+This Community tutorial requests repository/task read access and writes only
+its two task state files plus repository `docs/**`. It has no broad task or
+repository write grant, shell, network, or secret access. The generated
+`manifest.yml` is the authoritative permission projection.
 
 ## Flow
 

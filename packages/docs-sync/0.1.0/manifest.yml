@@ -33,7 +33,6 @@ files:
 release_sha256: "a8b87a68eb5fe1b8013cbeb70add62f3485a050c52f22af3f7c38923ba0219f0"
 x-provenance:
   kind: "registry-original"
-  revision_algorithm: "sha256-source-payload-v1"
   source_paths:
     - "workflow.yml"
     - "instructions/inspect.md"

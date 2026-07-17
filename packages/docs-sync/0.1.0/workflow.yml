@@ -12,8 +12,9 @@ stages:
         - LS
         - Grep
         - Glob
-        - Write
-        - Edit
+        - Edit(./inspect.md)
+      dirs:
+        - ../../../..
   - name: update-docs
     kind: agent
     state_file: update-docs.md
@@ -26,7 +27,7 @@ stages:
         - LS
         - Grep
         - Glob
-        - Write
-        - Edit
+        - Edit(./update-docs.md)
+        - Edit(../../../../docs/**)
       dirs:
-        - docs
+        - ../../../..

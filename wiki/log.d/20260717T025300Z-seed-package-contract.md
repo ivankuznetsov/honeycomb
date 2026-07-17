@@ -4,5 +4,5 @@
   generated manifests and tamper/provenance coverage.
 - Fixed the protected normalized evidence location at
   `honeycomb-evidence:normalized/listing-evidence-v1.json`.
-- Defined `sha256-source-payload-v1` for behavior source authored directly in
-  the registry, avoiding a self-referential Git commit identity.
+- Preserved registry-original behavior in a real source commit for the final
+  manifest to cite without a self-referential Git identity.

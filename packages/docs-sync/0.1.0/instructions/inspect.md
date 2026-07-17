@@ -1,8 +1,8 @@
 # Inspect documentation impact
 
-Inspect only the source and documentation files supplied in this task
-workspace. Do not use shell commands, network access, secrets, or files outside
-the workspace.
+Inspect only the source and documentation files supplied by the task from the
+project repository. Do not use shell commands, network access, secrets, or
+files outside the project.
 
 Write `inspect.md` with:
 
