@@ -9,7 +9,7 @@ module HoneycombSecurityLint
     READ_COMMAND = /\A\s*(?:cat|grep|rg|find|ls|head|tail|sed|awk)\b/i
     SHELL_COMMAND = CommandExtractor::COMMAND_START
     NETWORK_COMMAND = NetworkExtractor::NETWORK_COMMAND
-    ABSOLUTE_PATH = %r{(?:\A|\s)(/(?!/)[^\s"']+)}
+    ABSOLUTE_PATH = %r{(?:\A|\s)(/(?![/\\])[^\s"']+)}
     SECRET_VARIABLE = /\$(?:\{)?([A-Z][A-Z0-9_]*(?:TOKEN|KEY|SECRET|PASSWORD)[A-Z0-9_]*)(?:\})?/i
 
     def initialize(policy:)
@@ -19,6 +19,7 @@ module HoneycombSecurityLint
     def check(commands:, observations:, permissions:, security_extension:)
       permissions ||= {}
       capabilities = Array(permissions["capabilities"])
+      declared_secrets = Array(permissions["secrets"])
       findings = []
       commands.each do |command|
         findings << finding("permission.shell", "Observed shell command is not declared", command, command.raw) if command.raw.match?(SHELL_COMMAND) && !capabilities.include?("shell")
@@ -31,7 +32,7 @@ module HoneycombSecurityLint
           findings << finding("permission.absolute-path", "Absolute filesystem path is outside declared scopes", command, path)
         end
         command.raw.scan(SECRET_VARIABLE).flatten.each do |name|
-          next if Array(permissions["secrets"]).include?(name)
+          next if declared_secrets.include?("*") || declared_secrets.include?(name)
 
           findings << finding("permission.secret", "Observed secret variable is not declared", command, name)
         end

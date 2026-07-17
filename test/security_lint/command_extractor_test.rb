@@ -64,6 +64,37 @@ class SecurityLintCommandExtractorTest < Minitest::Test
     assert_includes findings.map { |finding| finding["rule_id"] }, "deny.pipe-to-shell"
   end
 
+  def test_yaml_permission_descriptors_are_not_shell_commands
+    workflow = <<~YAML
+      stages:
+        - name: inspect
+          permissions:
+            tools:
+              - LS
+              - Grep
+              - Edit(../../../../docs/**)
+            dirs:
+              - ../../../..
+          command: "git status"
+    YAML
+
+    commands = HoneycombSecurityLint::CommandExtractor.new.extract(
+      [source("workflow.yml", workflow)], version_root: ROOT_PATH
+    )
+
+    assert_equal ["git status"], commands.map(&:raw)
+  end
+
+  def test_permission_shaped_yaml_outside_the_descriptor_remains_scannable
+    yaml = "stages:\n  - permissions:\n      tools:\n        - LS\n"
+
+    commands = HoneycombSecurityLint::CommandExtractor.new.extract(
+      [source("instructions/workflow.yml", yaml)], version_root: ROOT_PATH
+    )
+
+    assert_equal ["LS"], commands.map(&:raw)
+  end
+
   def test_command_budget_fails_before_materializing_unbounded_evidence
     text = Array.new(4, "curl https://example.test").join("\n")
 

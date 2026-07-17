@@ -38,7 +38,15 @@ class SecurityLintRuleEngineTest < Minitest::Test
   end
 
   def test_ordinary_commands_remain_evidence_without_deny_findings
-    assert_empty HoneycombSecurityLint::RuleEngine.new.analyze(commands("git status", "bundle exec rake test"))
+    assert_empty HoneycombSecurityLint::RuleEngine.new.analyze(
+      commands("git status", "bundle exec rake test", "set -euo pipefail", 'env  = ["env"]', 'env  << "KEY=value"')
+    )
+  end
+
+  def test_bare_set_remains_an_environment_dump
+    findings = HoneycombSecurityLint::RuleEngine.new.analyze(commands("set"))
+
+    assert_equal ["deny.environment-dump"], findings.map { |finding| finding["rule_id"] }
   end
 
   def test_download_correlation_uses_bounded_candidate_lookups

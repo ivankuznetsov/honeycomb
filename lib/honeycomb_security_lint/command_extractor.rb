@@ -32,7 +32,7 @@ module HoneycombSecurityLint
       scoped = files.select { |file| file.text && InstructionScope.include?(file.path, version_root) }
       scoped.flat_map do |file|
         if YAML_EXTENSION.match?(file.path)
-          extract_yaml(file)
+          extract_yaml(file, version_root: version_root)
         else
           extract_markdown(file)
         end
@@ -77,11 +77,11 @@ module HoneycombSecurityLint
       commands
     end
 
-    def extract_yaml(file)
+    def extract_yaml(file, version_root:)
       HoneycombRegistry::SafeYAML.load(file.bytes, path: file.path)
       stream = Psych.parse_stream(file.text, filename: file.path)
       commands = []
-      walk_yaml(stream, file.path, commands, mapping_key: false)
+      walk_yaml(stream, file.path, commands, mapping_key: false, yaml_path: [], version_root: version_root)
       commands
     rescue HoneycombRegistry::SafeYAML::Invalid => e
       raise Invalid, "#{file.path}: #{e.code}: #{e.message}"
@@ -89,27 +89,32 @@ module HoneycombSecurityLint
       raise Invalid, "#{file.path}: malformed YAML: #{e.message.lines.first.to_s.strip}"
     end
 
-    def walk_yaml(node, path, commands, mapping_key:)
+    def walk_yaml(node, path, commands, mapping_key:, yaml_path:, version_root:)
       case node
       when Psych::Nodes::Mapping
         node.children.each_slice(2) do |key, value|
-          walk_yaml(key, path, commands, mapping_key: true)
-          walk_yaml(value, path, commands, mapping_key: false)
+          walk_yaml(key, path, commands, mapping_key: true, yaml_path: yaml_path, version_root: version_root)
+          child_path = key.is_a?(Psych::Nodes::Scalar) ? yaml_path + [key.value] : yaml_path
+          walk_yaml(value, path, commands, mapping_key: false, yaml_path: child_path, version_root: version_root)
         end
       when Psych::Nodes::Sequence, Psych::Nodes::Stream, Psych::Nodes::Document
-        node.children.each { |child| walk_yaml(child, path, commands, mapping_key: false) }
+        node.children.each do |child|
+          walk_yaml(child, path, commands, mapping_key: false, yaml_path: yaml_path, version_root: version_root)
+        end
       when Psych::Nodes::Scalar
-        return if mapping_key || !yaml_string?(node)
+        return if mapping_key || !yaml_string?(node) || workflow_permission_field?(path, version_root, yaml_path)
 
         lines = node.value.lines
         if lines.length > 1
           lines.each_with_index do |line, index|
             value = line.chomp
-            next if value.strip.empty?
+            next unless command_like?(value)
 
             append(commands, build(path, node.start_line + index + 1, 1, "yaml-string", value))
           end
         else
+          return unless command_like?(node.value)
+
           append(commands, build(path, node.start_line + 1, node.start_column + 1, "yaml-string", node.value))
         end
       end
@@ -121,6 +126,14 @@ module HoneycombSecurityLint
 
       value = node.value
       !value.match?(/\A(?:null|~|true|false|yes|no|on|off|[-+]?\d+(?:\.\d+)?)\z/i)
+    end
+
+    def workflow_permission_field?(path, version_root, yaml_path)
+      return false unless path == "#{version_root}/workflow.yml" && yaml_path.first == "stages"
+
+      yaml_path.each_cons(2).any? do |parent, field|
+        parent == "permissions" && %w[tools dirs].include?(field)
+      end
     end
 
     def build(path, line, column, kind, raw)

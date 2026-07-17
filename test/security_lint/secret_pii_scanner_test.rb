@@ -51,6 +51,13 @@ class SecurityLintSecretPiiScannerTest < Minitest::Test
     refute findings.any? { |finding| finding["disposition"] == "hard" }
   end
 
+  def test_sha256_digests_are_not_phone_numbers
+    text = "sha256: bd5923118ec824beee8ff96fb6e29e9a49f00665d6b40b93e5538211072edaa6\n"
+    findings = HoneycombSecurityLint::SecretPiiScanner.new.scan([source(text)])
+
+    refute_includes findings.map { |finding| finding["rule_id"] }, "pii.phone"
+  end
+
   def test_fingerprint_changes_with_content_or_location
     scanner = HoneycombSecurityLint::SecretPiiScanner.new
     first = scanner.scan([source("SSN: 123-45-6789\n")]).first

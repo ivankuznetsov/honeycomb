@@ -14,7 +14,7 @@ module HoneycombSecurityLint
                regex: %r{(?:~|\$\{?HOME\}?)/(?:\.ssh|\.aws|\.config/gh|\.kube/config|\.npmrc|\.netrc|\.git-credentials|\.docker/config\.json)|/\.aws/credentials}i,
                message: "Command reads a credential-bearing path"),
       Rule.new(rule_id: "deny.environment-dump",
-               regex: /\A\s*(?:env|printenv|set)(?:\s|\z)/i,
+               regex: /\A\s*(?:(?:env|printenv)(?:\z|(?!\s*(?:=|<<))\s+)|set\s*\z)/i,
                message: "Command dumps environment values"),
       Rule.new(rule_id: "deny.path-traversal", regex: %r{(?:\A|[\s"'])\.\./},
                message: "Command contains parent traversal"),
