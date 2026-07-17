@@ -59,6 +59,11 @@ unlisted package aborts output rather than hiding behind missing evidence.
 Offline approval export requires prior normalized evidence and preserves
 unselected versions plus tier/state/verification/history/advisory projections,
 so refreshing lint cannot silently relist or demote a version.
+The canonical mutable projection is
+`normalized/listing-evidence-v1.json` on the protected
+`honeycomb-evidence` branch. Registry-original packages use the documented
+`sha256-source-payload-v1` source identity to avoid a manifest/commit hash
+cycle while retaining exact behavior-source provenance.
 
 ## Handoffs
 

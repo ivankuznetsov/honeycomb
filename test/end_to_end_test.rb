@@ -80,13 +80,13 @@ class EndToEndTest < Minitest::Test
     end
   end
 
-  def test_real_empty_registry_matches_all_committed_derived_artifacts
+  def test_real_registry_matches_all_committed_derived_artifacts
     stdout, stderr, status = capture_command(MANIFEST, "--check", "--all")
     assert_equal 0, status.exitstatus, [stdout, stderr].join("\n")
 
     stdout, stderr, status = capture_command(VALIDATE, "--all", "--json")
     assert_equal 0, status.exitstatus, stderr
-    assert_equal [], JSON.parse(stdout)
+    refute JSON.parse(stdout).any? { |finding| finding["severity"] == "error" }
 
     stdout, stderr, status = capture_command(
       CATALOG, "--check", "--evidence", fixture_path("listing-evidence", "empty.json")

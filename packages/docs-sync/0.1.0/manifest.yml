@@ -1,0 +1,40 @@
+schema: "honeycomb-manifest/v1"
+name: "docs-sync"
+version: "0.1.0"
+description: "Turn bounded source changes into focused documentation updates"
+author:
+  name: "Honeycomb Maintainers"
+  url: "https://github.com/ivankuznetsov/honeycomb"
+license: "MIT"
+hive_min_version: "0.4.2"
+source:
+  url: "https://github.com/ivankuznetsov/honeycomb/tree/main/packages/docs-sync/0.1.0"
+  revision: "3e9b04ce85bf1568251567814617658f76f3ed2be59db7fa06a0923c4822ab8e"
+permissions:
+  risk: "moderate"
+  capabilities:
+    - "filesystem-read"
+    - "filesystem-write"
+  network_hosts: []
+  filesystem_read:
+    - "repository"
+    - "task"
+    - "task/docs"
+  filesystem_write:
+    - "repository"
+    - "task"
+    - "task/docs"
+  secrets: []
+files:
+  "packages/docs-sync/0.1.0/README.md": "f2877edc8e6b79aa74163c549d54e6a7af8dde9d4c4e5710742f19d9653889ca"
+  "packages/docs-sync/0.1.0/instructions/inspect.md": "95cfde6495c518e54795c04e19a67973308a0d65e5b6144b6068cb4b29bad2c0"
+  "packages/docs-sync/0.1.0/instructions/update-docs.md": "4d26ed077c5426d07f1f06ea118d6b6ab0bb01ac5b945e1e4831bc400afa05b6"
+  "packages/docs-sync/0.1.0/workflow.yml": "1bbf2c5c2c9850a476d8d095d97b53bd78fc5e1a84e33cf847f665e20b1876fd"
+release_sha256: "a8b87a68eb5fe1b8013cbeb70add62f3485a050c52f22af3f7c38923ba0219f0"
+x-provenance:
+  kind: "registry-original"
+  revision_algorithm: "sha256-source-payload-v1"
+  source_paths:
+    - "workflow.yml"
+    - "instructions/inspect.md"
+    - "instructions/update-docs.md"

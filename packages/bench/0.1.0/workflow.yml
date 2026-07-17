@@ -1,0 +1,28 @@
+id: bench
+stages:
+  - name: inbox
+    kind: terminal
+    state_file: task.md
+  - name: extract
+    kind: agent
+    state_file: extract.md
+    instruction: instructions/extract.md
+    advance_verb: extract
+  - name: generate
+    kind: agent
+    state_file: generate.md
+    instruction: instructions/generate.md
+    advance_verb: generate
+  - name: judge
+    kind: agent
+    state_file: judge.md
+    instruction: instructions/judge.md
+    advance_verb: judge
+  - name: publish
+    kind: agent
+    state_file: publish.md
+    instruction: instructions/publish.md
+    advance_verb: publish
+  - name: done
+    kind: terminal
+    state_file: task.md

@@ -102,6 +102,29 @@ and deterministic collection indentation. It does not use Psych's emitter.
 These values are deliberately not interchangeable. Catalog inclusion requires
 current evidence for the release fingerprint and agreement on the review head.
 
+### Registry-original source identity
+
+An original honeycomb authored directly in this registry has no earlier Git
+commit to cite without creating a self-referential manifest/commit cycle. Its
+`source.revision` is therefore a 64-character SHA-256 source-payload identity,
+and `source.url` is the permanent package location. The manifest records:
+
+```yaml
+x-provenance:
+  kind: registry-original
+  revision_algorithm: sha256-source-payload-v1
+  source_paths:
+    - workflow.yml
+    - instructions/example.md
+```
+
+For `sha256-source-payload-v1`, sort `source_paths` bytewise and hash the
+concatenation `path + NUL + file-bytes + NUL` for each path. The listed files
+must contain all original behavior-bearing source. Generated `manifest.yml`
+and explanatory `README.md` are excluded. A changed source file therefore
+requires a new source identity and package version without pretending a
+nonexistent upstream commit authored the release.
+
 ## Permission projection
 
 The generator visits active stages, council reviewers, and council revise

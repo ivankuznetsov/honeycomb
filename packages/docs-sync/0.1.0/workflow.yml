@@ -1,0 +1,32 @@
+id: docs-sync
+stages:
+  - name: inspect
+    kind: agent
+    state_file: inspect.md
+    instruction: instructions/inspect.md
+    agent: claude
+    permissions:
+      preset: scoped
+      tools:
+        - Read
+        - LS
+        - Grep
+        - Glob
+        - Write
+        - Edit
+  - name: update-docs
+    kind: agent
+    state_file: update-docs.md
+    instruction: instructions/update-docs.md
+    agent: claude
+    permissions:
+      preset: scoped
+      tools:
+        - Read
+        - LS
+        - Grep
+        - Glob
+        - Write
+        - Edit
+      dirs:
+        - docs
