@@ -45,7 +45,7 @@ module HoneycombSecurityLint
                   regex: /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i,
                   message: "Email address observed"),
       Pattern.new(rule_id: "pii.phone", category: "pii", severity: "advisory",
-                  regex: /(?<!\d)(?:\+?\d[\s().-]*){10,15}(?!\d)/,
+                  regex: /(?<![A-Z0-9])(?:\+?\d[\s().-]*){10,15}(?![A-Z0-9])/i,
                   predicate: ->(match) { match[0].scan(/\d/).length.between?(10, 15) },
                   message: "Phone-like personal data observed")
     ].freeze
