@@ -6,6 +6,7 @@ require "digest"
 class SeedCatalogTest < Minitest::Test
   BENCH = File.join(ROOT, "packages", "bench", "0.1.0")
   DOCS_SYNC = File.join(ROOT, "packages", "docs-sync", "0.1.0")
+  DOCS_SYNC_SOURCE_REVISION = "057af38a6f5f3cdd03d18a3283f5b541668285bc"
   UPSTREAM_BENCH_INSTRUCTION_DIGESTS = {
     "extract.md" => "f143fd4c4e7ce4e6679a903a800e35f8c0556b260d81a034930adb0d45fb45fa",
     "generate.md" => "bd5923118ec824beee8ff96fb6e29e9a49f00665d6b40b93e5538211072edaa6",
@@ -51,15 +52,34 @@ class SeedCatalogTest < Minitest::Test
     stages.each do |stage|
       tools = stage.dig("permissions", "tools")
       assert_empty(tools & %w[Bash WebFetch WebSearch])
+      assert_empty(tools & %w[Write MultiEdit NotebookEdit])
+      assert_equal ["../../../.."], stage.dig("permissions", "dirs")
     end
-    assert_equal ["docs"], stages.last.dig("permissions", "dirs")
+    assert_equal "Edit(./inspect.md)", stages.first.dig("permissions", "tools").last
+    assert_equal(
+      ["Edit(./update-docs.md)", "Edit(../../../../docs/**)"],
+      stages.last.dig("permissions", "tools").last(2)
+    )
+    assert_equal "0.4.3", document.fetch("hive_min_version")
     assert_equal "moderate", document.dig("permissions", "risk")
     assert_equal [], document.dig("permissions", "network_hosts")
+    assert_equal %w[repository task], document.dig("permissions", "filesystem_read")
+    assert_equal(
+      %w[repository/docs/** task/inspect.md task/update-docs.md],
+      document.dig("permissions", "filesystem_write")
+    )
     assert_equal [], document.dig("permissions", "secrets")
 
     paths = document.dig("x-provenance", "source_paths").sort
-    bytes = paths.map { |path| "#{path}\0#{File.binread(File.join(DOCS_SYNC, path))}\0" }.join
-    assert_equal Digest::SHA256.hexdigest(bytes), document.dig("source", "revision")
+    assert_equal DOCS_SYNC_SOURCE_REVISION, document.dig("source", "revision")
+    assert_includes document.dig("source", "url"), DOCS_SYNC_SOURCE_REVISION
+    paths.each do |path|
+      source, stderr, status = Open3.capture3(
+        "git", "show", "#{DOCS_SYNC_SOURCE_REVISION}:packages/docs-sync/0.1.0/#{path}", chdir: ROOT
+      )
+      assert status.success?, stderr
+      assert_equal File.binread(File.join(DOCS_SYNC, path)), source.b, path
+    end
   end
 
   def test_seed_readmes_publish_exact_install_commands_and_no_embedded_reviews
