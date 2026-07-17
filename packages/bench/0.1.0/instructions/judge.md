@@ -39,15 +39,23 @@ write_complete() {
   } >>"$STATE_FILE"
 }
 
-# Guarded: this substitution runs under `set -e`, and a cd failure before the
-# marker helpers existed used to die marker-less.
-REPO_ROOT="$(cd ../../../.. && pwd)" || {
-  write_waiting "ERROR: could not resolve ../../../.. from $PWD (repo-root anchor failed)."
+# Guarded: resolve the nested hive-state checkout through Git, verify its
+# identity, then use its containing project directory. A failed substitution
+# under `set -e` must still write a terminal marker.
+STATE_ROOT="$(git rev-parse --show-toplevel)" || {
+  write_waiting "ERROR: could not resolve the hive-state checkout from $PWD."
   exit 0
 }
 
+if [ "$(basename "$STATE_ROOT")" != ".hive-state" ]; then
+  write_waiting "ERROR: Git root is not a .hive-state checkout: $STATE_ROOT."
+  exit 0
+fi
+
+REPO_ROOT="$(dirname "$STATE_ROOT")"
+
 if [ ! -f "$REPO_ROOT/harness/hive_run.rb" ]; then
-  write_waiting "ERROR: ../../../.. did not resolve to the hive-bench repo root; missing harness/hive_run.rb at $REPO_ROOT."
+  write_waiting "ERROR: hive-state checkout did not resolve to the hive-bench repo root; missing harness/hive_run.rb at $REPO_ROOT."
   exit 0
 fi
 

@@ -31,7 +31,12 @@ commit `b4f462848d439d07e97e1e37943d738e8ca8d28a`:
 - `workflows/bench/judge.md`
 - `workflows/bench/publish.md`
 
-The four instruction files are byte-for-byte copies. The only descriptor
-translation changes each `./bench/<stage>.md` instruction reference to its
-package-relative `instructions/<stage>.md` destination. Behavior is otherwise
-unchanged.
+The package keeps the upstream stage behavior with two registry adaptations:
+
+- descriptor references use package-relative `instructions/<stage>.md` paths;
+- each stage asks Git for the nested `.hive-state` checkout root, verifies it,
+  and uses its containing source worktree instead of a fixed number of
+  parent-directory traversals.
+
+The second adaptation preserves the same `harness/hive_run.rb` lookup while
+remaining correct if Hive's task-directory depth changes.

@@ -7,11 +7,11 @@ class SeedCatalogTest < Minitest::Test
   BENCH = File.join(ROOT, "packages", "bench", "0.1.0")
   DOCS_SYNC = File.join(ROOT, "packages", "docs-sync", "0.1.0")
   DOCS_SYNC_SOURCE_REVISION = "057af38a6f5f3cdd03d18a3283f5b541668285bc"
-  UPSTREAM_BENCH_INSTRUCTION_DIGESTS = {
-    "extract.md" => "f143fd4c4e7ce4e6679a903a800e35f8c0556b260d81a034930adb0d45fb45fa",
-    "generate.md" => "bd5923118ec824beee8ff96fb6e29e9a49f00665d6b40b93e5538211072edaa6",
-    "judge.md" => "d2441d36d776dbe970e88816410b9c9c4c0d22598d3ff4a6f955a8927cf89ccd",
-    "publish.md" => "81ae24aa477a2041ecc84a6d47b7a1ab177d5ea9759293cd50333e6193bbd786"
+  BENCH_INSTRUCTION_DIGESTS = {
+    "extract.md" => "903393564e84837734521ee28ebd4a284c5782404fc29e48a6a79a54b2e083f5",
+    "generate.md" => "2c4cae7d63677647e02e4574c47d05fd19508e47d24f140450990e213cf3e566",
+    "judge.md" => "cd04fe61f7db5eed278c0091e50a66ff479911fc1bf3c2cc168644bdaeb1e79c",
+    "publish.md" => "18e2767e83225f571220f172d29e61cd7a94d1383bb1fce7e0c14e93f9367339"
   }.freeze
 
   def manifest(path)
@@ -22,7 +22,7 @@ class SeedCatalogTest < Minitest::Test
     HoneycombRegistry::SafeYAML.load_file(File.join(path, "workflow.yml"))
   end
 
-  def test_bench_is_the_pinned_upstream_snapshot_with_only_descriptor_path_translation
+  def test_bench_is_the_pinned_upstream_snapshot_with_documented_registry_translations
     document = manifest(BENCH)
     descriptor = workflow(BENCH)
 
@@ -32,7 +32,7 @@ class SeedCatalogTest < Minitest::Test
       %w[instructions/extract.md instructions/generate.md instructions/judge.md instructions/publish.md],
       descriptor.fetch("stages").filter_map { |stage| stage["instruction"] }
     )
-    UPSTREAM_BENCH_INSTRUCTION_DIGESTS.each do |basename, expected|
+    BENCH_INSTRUCTION_DIGESTS.each do |basename, expected|
       actual = Digest::SHA256.file(File.join(BENCH, "instructions", basename)).hexdigest
       assert_equal expected, actual, basename
     end
@@ -42,11 +42,14 @@ class SeedCatalogTest < Minitest::Test
     assert_equal ["*"], document.dig("permissions", "secrets")
     security = document.fetch("x-security")
     assert_equal({}, security.fetch("network_host_reasons"))
-    suppressions = security.fetch("suppressions")
-    assert_equal 12, suppressions.length
-    assert_equal suppressions.length, suppressions.map { |entry| entry.fetch("fingerprint") }.uniq.length
-    assert suppressions.all? { |entry| entry.fetch("fingerprint").match?(/\A[0-9a-f]{64}\z/) }
-    assert suppressions.all? { |entry| entry.fetch("reason").include?("documented Hive package anchor") }
+    assert_empty security.fetch("suppressions")
+
+    descriptor.fetch("stages").filter_map { |stage| stage["instruction"] }.each do |instruction|
+      source = File.read(File.join(BENCH, instruction))
+      assert_includes source, 'STATE_ROOT="$(git rev-parse --show-toplevel)"'
+      assert_includes source, 'REPO_ROOT="$(dirname "$STATE_ROOT")"'
+      refute_includes source, "../../../.."
+    end
   end
 
   def test_docs_sync_is_a_bounded_two_stage_honeycomb_with_content_provenance

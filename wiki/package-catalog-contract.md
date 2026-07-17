@@ -68,11 +68,11 @@ meaning of `source.revision`. Scoped descriptor directories and file rules use
 Hive's exact `../../../..` project anchor so manifests can distinguish
 `repository/docs/**` from repository-wide write access.
 
-Bench retains the canonical Hive package-to-repository anchor used by its
-guarded stage scripts. Security lint reports each executable or diagnostic
-occurrence as a hard parent-traversal finding. The package requests suppression
-only for those exact finding fingerprints; requests remain visible and do not
-pass lint until eligible maintainers explicitly approve the complete set.
+Bench stage scripts ask Git for the nested `.hive-state` checkout root, verify
+that identity, use its containing HiveBench source worktree, then verify
+`harness/hive_run.rb` exists before continuing. This avoids fixed
+parent-directory traversal, remains independent of Hive's task-directory
+depth, and requires no security-lint suppression requests.
 
 ## Handoffs
 
