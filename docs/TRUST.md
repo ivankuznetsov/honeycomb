@@ -174,4 +174,5 @@ undisclosed trust tier, secret reviewer rule, or closed distribution process.
 
 The operational lint/approval boundary is documented in [Security Lint
 CI](SECURITY_LINT_CI.md). Contributor review steps and appeals are defined in
-the root contribution policy once published.
+[the root contribution policy](../CONTRIBUTING.md), and public review policy is
+defined separately in [community reviews](REVIEWS.md).
