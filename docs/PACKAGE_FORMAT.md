@@ -102,28 +102,31 @@ and deterministic collection indentation. It does not use Psych's emitter.
 These values are deliberately not interchangeable. Catalog inclusion requires
 current evidence for the release fingerprint and agreement on the review head.
 
-### Registry-original source identity
+### Registry-original source commits
 
-An original honeycomb authored directly in this registry has no earlier Git
-commit to cite without creating a self-referential manifest/commit cycle. Its
-`source.revision` is therefore a 64-character SHA-256 source-payload identity,
-and `source.url` is the permanent package location. The manifest records:
+An original honeycomb authored directly in this registry still uses a Git
+commit for `source.revision`; the 64-character form does not authorize a
+payload digest. Avoid a self-referential manifest/commit cycle with a
+two-commit release: first commit the behavior-bearing source, then generate the
+final manifest in a later commit that cites the first commit. The source commit
+must remain reachable from the default branch, so merge the release pull
+request with a merge commit rather than squash or rebase. Point `source.url` at
+the exact source commit and record the behavior-bearing paths:
 
 ```yaml
 x-provenance:
   kind: registry-original
-  revision_algorithm: sha256-source-payload-v1
   source_paths:
     - workflow.yml
     - instructions/example.md
 ```
 
-For `sha256-source-payload-v1`, sort `source_paths` bytewise and hash the
-concatenation `path + NUL + file-bytes + NUL` for each path. The listed files
-must contain all original behavior-bearing source. Generated `manifest.yml`
-and explanatory `README.md` are excluded. A changed source file therefore
-requires a new source identity and package version without pretending a
-nonexistent upstream commit authored the release.
+The source commit may contain an incomplete or stale generated manifest; the
+later release commit is the authority for generated fields and must pass full
+validation. Every listed `source_path` in the final package must be byte-equal
+to that path at `source.revision`. A changed behavior source therefore requires
+a new source commit and package version. This preserves the existing commit-ID
+schema while making provenance independently inspectable.
 
 ## Permission projection
 
@@ -150,16 +153,29 @@ unbounded access and, when present, is the only array value.
 | Hive descriptor request | Projection |
 |---|---|
 | `read-only` | Repository/task read, `filesystem-read`, low risk. |
-| `scoped` + `Read`, `LS`, `Grep`, `Glob` | Bounded read scopes, low risk. |
-| `scoped` + `Write`, `Edit`, `MultiEdit`, `NotebookEdit` | Bounded write scopes, moderate risk. |
+| `scoped` + bare `Read`, `LS`, `Grep`, `Glob` | Task plus declared read scopes, low risk. |
+| `scoped` + bare `Write`, `Edit`, `MultiEdit`, `NotebookEdit` | Task plus declared write scopes, moderate risk. |
+| `Read(path)` / `Edit(path)` | Only the normalized task/project path for that capability. |
 | `scoped` + `WebFetch`, `WebSearch` | Unbounded host `*`, network capability, high risk. |
 | Missing permissions, `yolo`, or Bash (including the Bash tool) | All four capabilities and `*` hosts/read/write/secrets, high risk. |
 
-Safe `dirs` entries are projected as `task/<relative-path>` and supplement the
-repository/task scopes for the requested file capabilities. Absolute,
-backslash, empty, null-containing, or traversing directories fail. Unknown
-presets, keys, tools, blank blocks, or future permission-bearing constructs fail
-closed rather than publishing a narrower summary.
+Safe ordinary `dirs` entries are projected as `task/<relative-path>`. Hive
+workflow tasks have a stable four-level anchor from the task folder to the
+project root, so exact `../../../..` projects as `repository` and
+`../../../../<normalized-path>` projects as `repository/<normalized-path>`.
+No other `..` traversal is accepted. A bare file tool uses `task` plus its
+declared `dirs`; a qualified `Read(path)` or `Edit(path)` contributes only that
+normalized path. `Write(path)`, `MultiEdit(path)`, `NotebookEdit(path)`,
+`LS(path)`, `Grep(path)`, and `Glob(path)` fail because Hive does not enforce
+those forms; use `Edit(path)` or `Read(path)`. Absolute, home-relative, Windows
+drive, backslash, empty, null-containing, ambiguous, or escaping paths fail.
+Unknown presets, keys, tools, blank blocks, or future permission-bearing
+constructs fail closed rather than publishing a narrower summary.
+
+A honeycomb using qualified file rules must set `hive_min_version` to the
+first released Hive version that contains the portable path-rule contract.
+Hive v0.4.2 predates that contract; do not use it as the minimum merely because
+its parser accepts the rule-shaped string.
 
 ## Read-only validation and Hive compatibility
 

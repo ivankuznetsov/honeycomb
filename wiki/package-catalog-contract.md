@@ -61,9 +61,12 @@ unselected versions plus tier/state/verification/history/advisory projections,
 so refreshing lint cannot silently relist or demote a version.
 The canonical mutable projection is
 `normalized/listing-evidence-v1.json` on the protected
-`honeycomb-evidence` branch. Registry-original packages use the documented
-`sha256-source-payload-v1` source identity to avoid a manifest/commit hash
-cycle while retaining exact behavior-source provenance.
+`honeycomb-evidence` branch. Registry-original packages use a documented
+two-commit release: a preserved Git source commit followed by the generated
+manifest commit. This avoids a manifest/commit hash cycle without changing the
+meaning of `source.revision`. Scoped descriptor directories and file rules use
+Hive's exact `../../../..` project anchor so manifests can distinguish
+`repository/docs/**` from repository-wide write access.
 
 ## Handoffs
 
