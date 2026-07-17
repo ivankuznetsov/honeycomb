@@ -12,8 +12,14 @@ module HoneycombRegistry
     NETWORK_TOOLS = %w[WebFetch WebSearch].freeze
     SHELL_TOOLS = %w[Bash].freeze
     KNOWN_TOOLS = (READ_TOOLS + WRITE_TOOLS + NETWORK_TOOLS + SHELL_TOOLS).freeze
+    TOOL_RULE_PATTERN = /\A(?<tool>[A-Za-z][A-Za-z0-9_.:*-]*)(?:\((?<specifier>[^(),\s\x00]+)\))?\z/
+    UNSUPPORTED_FILE_RULES = {
+      "Write" => "Edit", "MultiEdit" => "Edit", "NotebookEdit" => "Edit",
+      "LS" => "Read", "Grep" => "Read", "Glob" => "Read"
+    }.freeze
     ALLOWED_SCOPE_KEYS = %w[preset tools dirs bash].freeze
     RISK_ORDER = {"low" => 0, "moderate" => 1, "high" => 2}.freeze
+    PROJECT_ROOT_DIR = "../../../.."
 
     module_function
 
@@ -168,13 +174,9 @@ module HoneycombRegistry
         findings.add("#{path}.tools", "permissions.invalid", "tools must be a non-empty string array")
         return
       end
-      unknown = tools.uniq - KNOWN_TOOLS
-      unless unknown.empty?
-        findings.add("#{path}.tools", "permissions.unknown_tool",
-                     "unsupported permission-bearing tools: #{unknown.sort.join(", ")}")
-        return
-      end
-      return unbounded("scoped Bash tool") if tools.include?("Bash")
+      rules = normalize_tool_rules(tools, "#{path}.tools", findings)
+      return unless rules
+      return unbounded("scoped Bash tool") if rules.any? { |rule| rule.fetch(:tool) == "Bash" }
 
       contribution = {
         label: "scoped tools",
@@ -186,22 +188,70 @@ module HoneycombRegistry
         secrets: Set.new,
         unbounded: false
       }
-      unless (tools & READ_TOOLS).empty?
-        contribution[:capabilities] << "filesystem-read"
-        contribution[:filesystem_read].merge(%w[repository task] + dirs)
-      end
-      unless (tools & WRITE_TOOLS).empty?
-        contribution[:risk] = "moderate"
-        contribution[:capabilities] << "filesystem-write"
-        contribution[:filesystem_write].merge(%w[repository task] + dirs)
-      end
-      unless (tools & NETWORK_TOOLS).empty?
-        contribution[:risk] = "high"
-        contribution[:capabilities] << "network"
-        contribution[:network_hosts] << "*"
-        contribution[:unbounded] = true
+      rules.each do |rule|
+        tool = rule.fetch(:tool)
+        specifier = rule[:specifier]
+        if specifier && tool == "Read"
+          contribution[:capabilities] << "filesystem-read"
+          contribution[:filesystem_read] << specifier
+        elsif specifier && tool == "Edit"
+          contribution[:risk] = "moderate"
+          contribution[:capabilities] << "filesystem-write"
+          contribution[:filesystem_write] << specifier
+        elsif READ_TOOLS.include?(tool)
+          contribution[:capabilities] << "filesystem-read"
+          contribution[:filesystem_read].merge(["task"] + dirs)
+        elsif WRITE_TOOLS.include?(tool)
+          contribution[:risk] = "moderate"
+          contribution[:capabilities] << "filesystem-write"
+          contribution[:filesystem_write].merge(["task"] + dirs)
+        elsif NETWORK_TOOLS.include?(tool)
+          contribution[:risk] = "high"
+          contribution[:capabilities] << "network"
+          contribution[:network_hosts] << "*"
+          contribution[:unbounded] = true
+        end
       end
       contribution
+    end
+
+    def normalize_tool_rules(tools, path, findings)
+      rules = tools.each_with_index.filter_map do |rule, index|
+        match = TOOL_RULE_PATTERN.match(rule)
+        unless match
+          findings.add("#{path}[#{index}]", "permissions.invalid_tool_rule",
+                       "tool must be Tool or Tool(non-empty-specifier)")
+          next
+        end
+
+        tool = match[:tool]
+        unless KNOWN_TOOLS.include?(tool)
+          findings.add("#{path}[#{index}]", "permissions.unknown_tool",
+                       "unsupported permission-bearing tool: #{tool}")
+          next
+        end
+
+        specifier = match[:specifier]
+        if specifier && UNSUPPORTED_FILE_RULES.key?(tool)
+          replacement = UNSUPPORTED_FILE_RULES.fetch(tool)
+          findings.add("#{path}[#{index}]", "permissions.unsupported_file_rule",
+                       "#{tool}(path) is not enforced by Hive; use #{replacement}(path)")
+          next
+        end
+
+        if specifier && %w[Read Edit].include?(tool)
+          specifier = normalize_scope_path(specifier)
+          unless specifier
+            findings.add("#{path}[#{index}]", "permissions.invalid_tool_path",
+                         "file rule must be task-relative or use the exact ../../../../ project anchor")
+            next
+          end
+        end
+        {tool: tool, specifier: specifier}
+      end
+      return if findings.errors?
+
+      rules
     end
 
     def normalize_dirs(dirs, path, findings)
@@ -218,18 +268,40 @@ module HoneycombRegistry
                        "dir must be a normalized relative path")
           next
         end
-        segments = dir.split("/")
-        if segments.include?("..") || segments.any?(&:empty?)
+        projected = normalize_scope_path(dir)
+        unless projected
           findings.add("#{path}[#{index}]", "permissions.invalid_dir",
-                       "dir must not traverse or contain empty path segments")
+                       "dir must be task-relative or use the exact ../../../../ project anchor")
           next
         end
-        clean = Pathname.new(dir).cleanpath.to_s
-        normalized << (clean == "." ? "task" : "task/#{clean.sub(%r{\A\./}, "")}")
+        normalized << projected
       end
       return if findings.errors?
 
       normalized.uniq.sort
+    end
+
+    def normalize_scope_path(dir)
+      return unless dir.is_a?(String) && !dir.empty? && dir == dir.strip
+      return if dir.include?("\0") || dir.include?("\\") || Pathname.new(dir).absolute?
+      return if dir.start_with?("~") || dir.match?(/\A[A-Za-z]:\//)
+
+      if dir == PROJECT_ROOT_DIR
+        return "repository"
+      elsif dir.start_with?("#{PROJECT_ROOT_DIR}/")
+        relative = dir.delete_prefix("#{PROJECT_ROOT_DIR}/")
+        segments = relative.split("/")
+        return if segments.empty? || segments.any? { |segment| segment.empty? || %w[. ..].include?(segment) }
+        return unless Pathname.new(relative).cleanpath.to_s == relative
+
+        return "repository/#{relative}"
+      end
+
+      segments = dir.split("/")
+      return if segments.include?("..") || segments.any?(&:empty?)
+
+      clean = Pathname.new(dir).cleanpath.to_s
+      clean == "." ? "task" : "task/#{clean.sub(%r{\A\./}, "")}"
     end
 
     def bounded_read(label = "read-only", dirs = [])

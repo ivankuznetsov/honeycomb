@@ -138,14 +138,16 @@ append-only heads from becoming current implicitly:
 ruby script/honeycomb-listing-approval export \
   --snapshot /path/to/honeycomb-evidence \
   --lint lint/<head_sha>/<evidence_digest>.json \
-  --previous /path/to/listing-evidence.json \
+  --previous /path/to/honeycomb-evidence/normalized/listing-evidence-v1.json \
   --checked-at 2026-07-17T09:00:00Z \
   --release-tier community \
-  --output /path/to/listing-evidence.json
+  --output /path/to/honeycomb-evidence/normalized/listing-evidence-v1.json
 ```
 
-The required `--previous` file is the current protected normalized evidence.
-Bootstrap it once as an empty `honeycomb-listing-evidence/v1` document. Later
+The required `--previous` and `--output` path is exactly
+`normalized/listing-evidence-v1.json` on the protected `honeycomb-evidence`
+branch. Bootstrap it once as an empty `honeycomb-listing-evidence/v1` document.
+Later
 exports retain unselected records and carry every selected version's release
 and current tier, lifecycle state, verification, history, and advisories
 forward while refreshing only lint and approval evidence. A prior release tier
@@ -178,7 +180,10 @@ Repository administrators must:
 6. create and protect the `honeycomb-listing-approval` environment with the
    required maintainer reviewers;
 7. create/protect the `honeycomb-evidence` branch so ordinary pull requests
-   cannot update it and only the trusted approval workflow may append records.
+   cannot update it and only the trusted approval workflow may append records;
+8. create `normalized/listing-evidence-v1.json` on that branch with the empty
+   v1 record set, and require reviewed administrative updates for normalized
+   lifecycle projections.
 
 After default-branch installation, run a fork canary: confirm the analyzer sees
 no custom secret and cannot comment or set status; apply the gate and confirm the
