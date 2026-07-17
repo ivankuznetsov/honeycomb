@@ -39,6 +39,14 @@ class SecurityLintEvidenceSnapshotTest < Minitest::Test
     }
   end
 
+  def empty_previous(root)
+    path = File.join(root, "previous-listing-evidence.json")
+    File.write(path, HoneycombSecurityLint::Contracts.canonical_json({
+      "schema" => HoneycombRegistry::ListingEvidence::SCHEMA, "records" => []
+    }))
+    path
+  end
+
   def test_exports_selected_lint_and_matching_append_only_approvals_deterministically
     in_tmpdir do |root|
       record = lint
@@ -51,7 +59,7 @@ class SecurityLintEvidenceSnapshotTest < Minitest::Test
 
       document = HoneycombSecurityLint::EvidenceSnapshot.export(
         root: root, lint_paths: [lint_path], checked_at: "2026-07-17T09:00:00Z",
-        release_tier: "community"
+        release_tier: "community", previous_path: empty_previous(root)
       )
 
       assert_equal HoneycombRegistry::ListingEvidence::SCHEMA, document.fetch("schema")
@@ -67,7 +75,8 @@ class SecurityLintEvidenceSnapshotTest < Minitest::Test
       File.write(outside, HoneycombSecurityLint::Contracts.canonical_json(lint))
       assert_raises(HoneycombSecurityLint::EvidenceSnapshot::Invalid) do
         HoneycombSecurityLint::EvidenceSnapshot.export(
-          root: root, lint_paths: [outside], checked_at: "2026-07-17T09:00:00Z", release_tier: "community"
+          root: root, lint_paths: [outside], checked_at: "2026-07-17T09:00:00Z",
+          release_tier: "community", previous_path: empty_previous(root)
         )
       end
 
@@ -81,7 +90,8 @@ class SecurityLintEvidenceSnapshotTest < Minitest::Test
       File.symlink(File.dirname(outside), File.join(directory, SHA))
       assert_raises(HoneycombSecurityLint::EvidenceSnapshot::Invalid) do
         HoneycombSecurityLint::EvidenceSnapshot.export(
-          root: root, lint_paths: [lint_path], checked_at: "2026-07-17T09:00:00Z", release_tier: "community"
+          root: root, lint_paths: [lint_path], checked_at: "2026-07-17T09:00:00Z",
+          release_tier: "community", previous_path: empty_previous(root)
         )
       end
     ensure
@@ -108,7 +118,8 @@ class SecurityLintEvidenceSnapshotTest < Minitest::Test
       File.write(File.join(directory, "maintainer-b.json"), HoneycombSecurityLint::Contracts.canonical_json(latest))
 
       document = HoneycombSecurityLint::EvidenceSnapshot.export(
-        root: root, lint_paths: [lint_path], checked_at: "2026-07-17T12:00:00Z", release_tier: "community"
+        root: root, lint_paths: [lint_path], checked_at: "2026-07-17T12:00:00Z",
+        release_tier: "community", previous_path: empty_previous(root)
       )
 
       assert_equal ["denied"], document.dig("records", 0, "approvals").map { |entry| entry["status"] }
@@ -143,7 +154,8 @@ class SecurityLintEvidenceSnapshotTest < Minitest::Test
       end
 
       document = HoneycombSecurityLint::EvidenceSnapshot.export(
-        root: root, lint_paths: [lint_path], checked_at: "2026-07-17T12:00:00Z", release_tier: "community"
+        root: root, lint_paths: [lint_path], checked_at: "2026-07-17T12:00:00Z",
+        release_tier: "community", previous_path: empty_previous(root)
       )
 
       reviewers = document.fetch("records").map do |item|
@@ -172,10 +184,94 @@ class SecurityLintEvidenceSnapshotTest < Minitest::Test
 
       error = assert_raises(HoneycombSecurityLint::EvidenceSnapshot::Invalid) do
         HoneycombSecurityLint::EvidenceSnapshot.export(
-          root: root, lint_paths: [lint_path], checked_at: "2026-07-17T12:00:00Z", release_tier: "community"
+          root: root, lint_paths: [lint_path], checked_at: "2026-07-17T12:00:00Z",
+          release_tier: "community", previous_path: empty_previous(root)
         )
       end
       assert_includes error.message, "ambiguous audit timestamp"
+    end
+  end
+
+
+  def test_retains_durable_lifecycle_decisions_and_unselected_records
+    in_tmpdir do |root|
+      record = lint
+      lint_path = File.join(root, "lint", SHA, "#{record.fetch("artifact_digest")}.json")
+      approval_path = File.join(root, "approvals", "example", "1.0.0", SHA, "maintainer.json")
+      FileUtils.mkdir_p(File.dirname(lint_path))
+      FileUtils.mkdir_p(File.dirname(approval_path))
+      File.write(lint_path, HoneycombSecurityLint::Contracts.canonical_json(record))
+      File.write(approval_path, HoneycombSecurityLint::Contracts.canonical_json(approval(record)))
+
+      states = %w[soft_hidden yanked revoked listed]
+      states.each_with_index do |state, index|
+        prior_record = HoneycombSecurityLint::ListingEvidenceAdapter.build(
+          lint_evidence: record, approvals: approval(record).fetch("approvals"),
+          checked_at: "2026-07-17T10:00:00Z", release_tier: "community"
+        ).fetch("records").first
+        prior_record["state"] = state
+        prior_record["history"] = if state == "listed"
+                                    [
+                                      {
+                                        "kind" => "state", "from" => "listed", "to" => "yanked",
+                                        "changed_at" => "2026-07-17T12:00:00Z", "actor" => "maintainer",
+                                        "reason" => "Reviewed lifecycle decision",
+                                        "url" => "https://example.test/history/yanked"
+                                      },
+                                      {
+                                        "kind" => "state", "from" => "yanked", "to" => "listed",
+                                        "changed_at" => "2026-07-17T1#{index}:00:00Z", "actor" => "maintainer",
+                                        "reason" => "Reviewed lifecycle decision",
+                                        "url" => "https://example.test/history/#{state}"
+                                      }
+                                    ]
+                                  else
+                                    [{
+                                      "kind" => "state", "from" => "listed", "to" => state,
+                                      "changed_at" => "2026-07-17T1#{index}:00:00Z", "actor" => "maintainer",
+                                      "reason" => "Reviewed lifecycle decision",
+                                      "url" => "https://example.test/history/#{state}"
+                                    }]
+                                  end
+        prior_record["advisories"] = if state == "revoked"
+                                       [{
+                                         "id" => "HC-2026-001", "title" => "Unsafe behavior",
+                                         "severity" => "critical", "url" => "https://example.test/advisories/1",
+                                         "published_at" => "2026-07-17T12:00:00Z"
+                                       }]
+                                     else
+                                       []
+                                     end
+        prior = File.join(root, "previous-#{state}.json")
+        File.write(prior, HoneycombSecurityLint::Contracts.canonical_json({
+          "schema" => HoneycombRegistry::ListingEvidence::SCHEMA,
+          "records" => [prior_record]
+        }))
+
+        exported = HoneycombSecurityLint::EvidenceSnapshot.export(
+          root: root, lint_paths: [lint_path], checked_at: "2026-07-17T14:00:00Z",
+          release_tier: "community", previous_path: prior
+        ).fetch("records").first
+
+        assert_equal state, exported.fetch("state")
+        assert_equal prior_record.fetch("history"), exported.fetch("history")
+        assert_equal prior_record.fetch("advisories"), exported.fetch("advisories")
+      end
+
+      prior = empty_previous(root)
+      retained = HoneycombSecurityLint::ListingEvidenceAdapter.build(
+        lint_evidence: record, approvals: approval(record).fetch("approvals"),
+        checked_at: "2026-07-17T10:00:00Z", release_tier: "community"
+      ).fetch("records").first
+      retained["name"] = "retained"
+      File.write(prior, HoneycombSecurityLint::Contracts.canonical_json({
+        "schema" => HoneycombRegistry::ListingEvidence::SCHEMA, "records" => [retained]
+      }))
+      document = HoneycombSecurityLint::EvidenceSnapshot.export(
+        root: root, lint_paths: [lint_path], checked_at: "2026-07-17T14:00:00Z",
+        release_tier: "community", previous_path: prior
+      )
+      assert_equal %w[example retained], document.fetch("records").map { |item| item.fetch("name") }
     end
   end
 end

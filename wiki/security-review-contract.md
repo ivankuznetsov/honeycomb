@@ -64,9 +64,22 @@ success. It appends canonical records under `honeycomb-evidence`; renewed
 reviewer decisions use distinct immutable records, and export selects the latest
 decision per reviewer. The offline exporter still selects exact lint snapshots.
 
-Reviewer/trust policy prose remains owned by task 1850. Signing/attestation,
-promotion, demotion, advisories, yanking, and revocation use separate catalog
-contract fields rather than implicit lint or approval meanings.
+Task 1850's public policy is shipped in [contributing
+honeycombs](../CONTRIBUTING.md), the [security policy](../SECURITY.md), the
+[trust model](../docs/TRUST.md), and [community
+reviews](../docs/REVIEWS.md). Signing/attestation, promotion, demotion,
+advisories, yanking, and revocation continue to use separate catalog contract
+fields rather than implicit lint or approval meanings.
+
+Community review records live at
+`reviews/<name>/<version>/<github-user>.md`, outside package payloads and the
+protected approval store. Trusted-base validation binds the record and PR
+author to an already-listed base package/catalog identity without executing or
+trusting submitted package/catalog code. Catalog `reviews_url` preserves
+designated approval meaning, while the
+nullable `community_reviews_url` points to the mutable default-branch namespace.
+Designated approval audit URLs also remain under `listing_approval.reviews`.
+Community verdicts have no listing authority.
 
 Exact approved suppressions remain visible and are verified by reconstructing
 the preliminary lint digest. Broad, orphaned, stale, or mismatched suppression

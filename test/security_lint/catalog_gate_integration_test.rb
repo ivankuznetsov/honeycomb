@@ -57,6 +57,42 @@ class SecurityLintCatalogGateIntegrationTest < Minitest::Test
     }
   end
 
+  def write_community_review(root, package, evidence)
+    manifest = HoneycombRegistry::SafeYAML.load_file(package.manifest_path)
+    path = File.join(root, "reviews", package.name, package.version, "community-reviewer.md")
+    FileUtils.mkdir_p(File.dirname(path))
+    File.write(path, <<~MARKDOWN)
+      ---
+      reviewer: "community-reviewer"
+      name: "#{package.name}"
+      version: "#{package.version}"
+      source_sha: "#{manifest.dig("source", "revision")}"
+      release_sha256: "#{manifest.fetch("release_sha256")}"
+      head_sha: "#{evidence.fetch("head_sha")}"
+      reviewed_at: "2026-07-17"
+      verdict: "approve"
+      conflict_of_interest: "none"
+      ---
+      # Community review
+
+      ## Scope reviewed
+
+      I reviewed every packaged file.
+
+      ## Permission observations
+
+      Declared permissions match the observed behavior.
+
+      ## Findings
+
+      None observed.
+
+      ## Rationale
+
+      The package and its declarations agree.
+    MARKDOWN
+  end
+
   def write_listing_evidence(root, lint, approvals)
     document = HoneycombSecurityLint::ListingEvidenceAdapter.build(
       lint_evidence: lint, approvals: approvals,
@@ -76,6 +112,8 @@ class SecurityLintCatalogGateIntegrationTest < Minitest::Test
       package = canonical_honeycomb(root)
       lint = lint_evidence(package)
 
+      write_community_review(root, package, lint)
+
       evidence_path = write_listing_evidence(root, lint, [])
       _stdout, stderr, status = run_catalog(root, evidence_path)
       assert_equal 0, status.exitstatus, stderr
@@ -87,6 +125,10 @@ class SecurityLintCatalogGateIntegrationTest < Minitest::Test
       entries = JSON.parse(File.read(File.join(root, "catalog.json"))).fetch("entries")
       assert_equal ["example"], entries.map { |entry| entry.fetch("name") }
       assert_equal SHA, entries.first.dig("listing_approval", "head_sha")
+      assert_equal "https://github.com/ivankuznetsov/honeycomb/tree/main/reviews/example/1.0.0",
+                   entries.first.fetch("community_reviews_url")
+      assert_equal "https://example.test/reviews/example-1.0.0",
+                   entries.first.fetch("reviews_url")
 
       failed = lint_evidence(package, state: "fail")
       evidence_path = write_listing_evidence(root, failed, [approval(failed)])

@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "optparse"
+$LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
+require "honeycomb_registry"
+
+begin
+  options = {root: File.expand_path("..", __dir__)}
+  parser = OptionParser.new do |opts|
+    opts.banner = "Usage: honeycomb-reviews [--root PATH] [--base SHA --head SHA --reviewer LOGIN]"
+    opts.on("--root PATH", "Repository root") { |value| options[:root] = value }
+    opts.on("--base SHA", "Pull-request base SHA") { |value| options[:base] = value }
+    opts.on("--head SHA", "Pull-request head SHA") { |value| options[:head] = value }
+    opts.on("--reviewer LOGIN", "Authenticated pull-request author") { |value| options[:reviewer] = value }
+    opts.on("-h", "--help", "Show help") { puts opts; exit 0 }
+  end
+  parser.parse!(ARGV)
+  raise HoneycombRegistry::InvocationError, "unexpected positional arguments" unless ARGV.empty?
+
+  pull_mode = options.values_at(:base, :head, :reviewer).compact.any?
+  if pull_mode && options.values_at(:base, :head, :reviewer).any?(&:nil?)
+    raise HoneycombRegistry::InvocationError, "--base, --head, and --reviewer must be supplied together"
+  end
+
+  paths = if pull_mode
+            HoneycombRegistry::CommunityReview.validate_changed(
+              root: options.fetch(:root), base_sha: options.fetch(:base),
+              head_sha: options.fetch(:head), expected_reviewer: options.fetch(:reviewer)
+            )
+          else
+            HoneycombRegistry::CommunityReview.validate_all(root: options.fetch(:root))
+          end
+  puts "Validated #{paths.length} community review#{paths.length == 1 ? "" : "s"}"
+rescue OptionParser::ParseError, HoneycombRegistry::InvocationError,
+       HoneycombRegistry::CommunityReview::Invalid => e
+  warn "honeycomb-reviews: #{e.message}"
+  exit 1
+end

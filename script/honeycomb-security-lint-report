@@ -31,7 +31,8 @@ begin
   ).report
   puts "honeycomb-security-lint-report: #{result}"
   exit 0
-rescue OptionParser::ParseError, ArgumentError, KeyError, HoneycombSecurityLint::Contracts::Invalid => e
+rescue OptionParser::ParseError, ArgumentError, KeyError, HoneycombSecurityLint::Contracts::Invalid,
+       HoneycombSecurityLint::Reporter::Invalid => e
   warn "honeycomb-security-lint-report: #{HoneycombSecurityLint::Redactor.sanitize_text(e.message)}"
   exit 2
 rescue StandardError => e

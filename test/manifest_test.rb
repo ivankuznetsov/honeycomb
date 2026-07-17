@@ -45,6 +45,24 @@ class ManifestTest < Minitest::Test
     end
   end
 
+  def test_external_community_reviews_do_not_change_the_package_fingerprint
+    in_tmpdir do |root|
+      package = HoneycombRegistry::Package.new(install_valid_fixture(root), root: root)
+      before = HoneycombRegistry::Manifest.build(package)
+      refute before.findings.errors?, before.findings.to_h.inspect
+
+      review_path = File.join(root, "reviews", package.name, package.version, "reviewer.md")
+      FileUtils.mkdir_p(File.dirname(review_path))
+      File.write(review_path, "---\nreviewer: reviewer\n---\n")
+
+      after = HoneycombRegistry::Manifest.build(package)
+      refute after.findings.errors?, after.findings.to_h.inspect
+      assert_equal before.bytes, after.bytes
+      assert_equal before.document.fetch("release_sha256"), after.document.fetch("release_sha256")
+      refute after.document.fetch("files").keys.any? { |path| path.start_with?("reviews/") }
+    end
+  end
+
   def test_failure_preserves_existing_manifest
     in_tmpdir do |root|
       package = HoneycombRegistry::Package.new(install_valid_fixture(root), root: root)

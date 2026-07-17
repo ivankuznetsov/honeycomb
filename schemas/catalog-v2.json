@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hive.sh/schemas/catalog-v2.json",
+  "title": "Honeycomb catalog v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "entries"],
+  "properties": {
+    "schema": {"const": "honeycomb-catalog/v2"},
+    "entries": {"type": "array", "items": {"$ref": "#/$defs/entry"}}
+  },
+  "$defs": {
+    "semver": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-((?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(?:\\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\\+([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?$"},
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name", "version", "latest_version", "description", "release_tier",
+        "current_tier", "permission_risk", "state", "discoverable",
+        "exact_resolution", "verification", "history", "advisories", "author",
+        "license", "hive_min_version", "permissions", "install_command",
+        "package_url", "reviews_url", "community_reviews_url", "source_sha",
+        "listing_approval"
+      ],
+      "properties": {
+        "name": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$"},
+        "version": {"$ref": "#/$defs/semver"},
+        "latest_version": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/semver"}]},
+        "description": {"type": "string"},
+        "release_tier": {"enum": ["community", "verified"]},
+        "current_tier": {"enum": ["community", "verified"]},
+        "permission_risk": {"enum": ["low", "moderate", "high"]},
+        "state": {"enum": ["listed", "soft_hidden", "yanked", "revoked"]},
+        "discoverable": {"type": "boolean"},
+        "exact_resolution": {"enum": ["allowed", "blocked"]},
+        "verification": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "listing-evidence-v1.json#/$defs/verification"}
+          ]
+        },
+        "history": {
+          "type": "array",
+          "items": {"$ref": "listing-evidence-v1.json#/$defs/history"}
+        },
+        "advisories": {
+          "type": "array",
+          "items": {"$ref": "listing-evidence-v1.json#/$defs/advisory"}
+        },
+        "author": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "url"],
+          "properties": {
+            "name": {"type": "string", "minLength": 1},
+            "url": {"type": "string", "format": "uri"}
+          }
+        },
+        "license": {"type": "string"},
+        "hive_min_version": {"$ref": "#/$defs/semver"},
+        "permissions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "risk", "capabilities", "network_hosts", "filesystem_read",
+            "filesystem_write", "secrets"
+          ],
+          "properties": {
+            "risk": {"enum": ["low", "moderate", "high"]},
+            "capabilities": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+            "network_hosts": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+            "filesystem_read": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+            "filesystem_write": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+            "secrets": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+          }
+        },
+        "install_command": {"type": "string"},
+        "package_url": {"type": "string", "format": "uri"},
+        "reviews_url": {"type": "string", "format": "uri"},
+        "community_reviews_url": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "string", "format": "uri"}
+          ]
+        },
+        "source_sha": {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
+        "listing_approval": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "release_sha256", "head_sha", "lint_checked_at", "approved_by",
+            "approved_at", "reviews"
+          ],
+          "properties": {
+            "release_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "head_sha": {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
+            "lint_checked_at": {"type": "string", "format": "date-time"},
+            "approved_by": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+            "approved_at": {"type": "string", "format": "date-time"},
+            "reviews": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["reviewer", "reviewed_at", "review_url", "evidence_digest"],
+                "properties": {
+                  "reviewer": {"type": "string", "minLength": 1},
+                  "reviewed_at": {"type": "string", "format": "date-time"},
+                  "review_url": {"type": "string", "format": "uri"},
+                  "evidence_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

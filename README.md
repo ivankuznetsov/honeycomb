@@ -17,6 +17,8 @@ approval-gated catalog generator, and fork-safe security-lint CI. The root
 catalog is intentionally empty until seed honeycombs land. Its contract keeps
 Community/Verified history, permission risk, lifecycle state, verification, and
 public advisories independent; only listed versions participate in discovery.
+Strict community-review validation runs as trusted base code and binds review
+identity to the canonical package and catalog without executing submitted code.
 
 ```sh
 ruby script/honeycomb-manifest --check --all
@@ -25,6 +27,7 @@ ruby script/honeycomb-catalog --check \
   --evidence test/fixtures/listing-evidence/empty.json
 ruby script/honeycomb-security-lint --help
 ruby script/honeycomb-listing-approval --help
+ruby script/honeycomb-reviews
 ruby test/run.rb
 ```
 

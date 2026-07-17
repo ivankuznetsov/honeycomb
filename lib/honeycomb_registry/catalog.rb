@@ -2,11 +2,13 @@
 
 require "optparse"
 require "time"
+require_relative "community_review"
 
 module HoneycombRegistry
   module Catalog
-    SCHEMA = "honeycomb-catalog/v1"
+    SCHEMA = "honeycomb-catalog/v2"
     REPOSITORY_URL = "https://github.com/ivankuznetsov/honeycomb"
+    COMMUNITY_REVIEWS_REF = "main"
     Result = Struct.new(:document, :bytes, :findings, keyword_init: true)
 
     class Revoked < StandardError
@@ -51,9 +53,14 @@ module HoneycombRegistry
       latest = latest_versions(eligible_records, findings)
       return Result.new(document: nil, bytes: nil, findings: findings) if findings.errors?
 
+      review_identities = CommunityReview.validate_catalog(
+        root: root, manifests: manifests, records: evidence.records
+      )
+
       entries = eligible_records.map do |record|
         manifest = manifests.fetch([record.fetch("name"), record.fetch("version")])
-        project_entry(manifest, record, latest[record.fetch("name")])
+        identity = [record.fetch("name"), record.fetch("version")]
+        project_entry(manifest, record, latest[record.fetch("name")], review_identities.include?(identity))
       end
       entries.sort! do |left, right|
         name_comparison = left.fetch("name") <=> right.fetch("name")
@@ -61,6 +68,9 @@ module HoneycombRegistry
       end
       document = {"schema" => SCHEMA, "entries" => entries}
       Result.new(document: document, bytes: CanonicalJSON.dump(document), findings: findings)
+    rescue CommunityReview::Invalid => e
+      findings.add("reviews", "review.invalid", e.message)
+      Result.new(document: nil, bytes: nil, findings: findings)
     rescue SystemCallError, IOError => e
       findings.add("catalog.json", "catalog.io", e.message)
       Result.new(document: nil, bytes: nil, findings: findings)
@@ -97,7 +107,7 @@ module HoneycombRegistry
       end
     end
 
-    def project_entry(manifest, record, latest_version)
+    def project_entry(manifest, record, latest_version, community_reviews)
       lint = record.fetch("lint")
       approvals = record.fetch("approvals").select { |approval| approval["status"] == "approved" }
       head_sha = lint.fetch("head_sha")
@@ -125,6 +135,7 @@ module HoneycombRegistry
         "install_command" => "hive workflow install honeycomb/#{name}",
         "package_url" => "#{REPOSITORY_URL}/tree/#{head_sha}/packages/#{name}/#{version}",
         "reviews_url" => approvals.first.fetch("review_url"),
+        "community_reviews_url" => community_reviews_url(name, version, community_reviews),
         "source_sha" => manifest.fetch("source").fetch("revision"),
         "listing_approval" => {
           "release_sha256" => manifest.fetch("release_sha256"),
@@ -137,6 +148,12 @@ module HoneycombRegistry
           end
         }
       }
+    end
+
+    def community_reviews_url(name, version, present)
+      return nil unless present
+
+      "#{REPOSITORY_URL}/tree/#{COMMUNITY_REVIEWS_REF}/reviews/#{name}/#{version}"
     end
 
     def discovery(document)

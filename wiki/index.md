@@ -16,6 +16,19 @@ change.
 - [[security-review-contract]] - identity binding and boundary with listing CI.
 - [[gaps]] - missing, uncertain, or stale wiki coverage.
 
+## Canonical Public Policy
+
+- [Contributing honeycombs](../CONTRIBUTING.md) - submission, exact-SHA review,
+  promotion, and appeals.
+- [Security policy](../SECURITY.md) - private/public reporting and protective
+  lifecycle actions.
+- [Trust model](../docs/TRUST.md) - tiers, release proof, lifecycle, and
+  openness.
+- [Community reviews](../docs/REVIEWS.md) - structured records and moderation.
+
+These public files are normative. Wiki pages summarize implementation facts and
+link to policy rather than restating it.
+
 ## Update Protocol
 
 - Update affected pages when code behavior, architecture, commands, or

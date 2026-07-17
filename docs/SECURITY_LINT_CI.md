@@ -138,19 +138,30 @@ append-only heads from becoming current implicitly:
 ruby script/honeycomb-listing-approval export \
   --snapshot /path/to/honeycomb-evidence \
   --lint lint/<head_sha>/<evidence_digest>.json \
+  --previous /path/to/listing-evidence.json \
   --checked-at 2026-07-17T09:00:00Z \
   --release-tier community \
   --output /path/to/listing-evidence.json
 ```
 
+The required `--previous` file is the current protected normalized evidence.
+Bootstrap it once as an empty `honeycomb-listing-evidence/v1` document. Later
+exports retain unselected records and carry every selected version's release
+and current tier, lifecycle state, verification, history, and advisories
+forward while refreshing only lint and approval evidence. A prior release tier
+also wins over the command's bootstrap tier. This prevents an export from
+silently resetting a soft-hide, yank, revocation, demotion, or relisting
+decision.
+
 The exporter rejects records outside the snapshot, symlinks, oversized or
 non-canonical records, duplicate honeycomb versions, stale identities, and
-orphaned suppressions before emitting `honeycomb-listing-evidence/v1`.
-Its default projection is a listed Community release. The normalized evidence
-schema separately supports release/current tier, lifecycle history, verification,
-and public advisories; high-risk releases retain both distinct maintainer
-approvals. Trust/lifecycle policy changes remain explicit normalized evidence,
-never an inference from lint or a honeycomb-controlled field.
+orphaned suppressions before emitting `honeycomb-listing-evidence/v1`. Its
+default projection is a listed Community release only for an identity absent
+from `--previous`. High-risk releases retain both distinct maintainer
+approvals. Trust/lifecycle changes are reviewed edits to the protected
+normalized evidence with ordered history and, for revocation, advisories;
+they are never inferred from lint or a honeycomb-controlled field. The output
+may safely replace `--previous` atomically after validation.
 
 ## Repository setup and rollout
 
@@ -182,6 +193,7 @@ ruby test/run.rb
 ruby script/honeycomb-security-lint --help
 ruby script/honeycomb-security-lint-report --help
 ruby script/honeycomb-listing-approval --help
+ruby script/honeycomb-reviews
 ```
 
 Focused acceptance coverage lives under `test/security_lint/`, including the

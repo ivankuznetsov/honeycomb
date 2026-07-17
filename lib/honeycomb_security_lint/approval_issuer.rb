@@ -96,7 +96,7 @@ module HoneycombSecurityLint
       permission = @client.collaborator_permission(reviewer)
       raise Invalid, "reviewer is not an eligible maintainer" unless ELIGIBLE_PERMISSIONS.include?(permission)
       if pull.dig("user", "login").to_s.casecmp?(reviewer)
-        raise Invalid, "a honeycomb author cannot approve their own submission"
+        raise Invalid, "a pull-request submitter cannot approve their own submission"
       end
     end
 
