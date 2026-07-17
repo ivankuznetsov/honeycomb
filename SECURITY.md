@@ -34,7 +34,7 @@ possible.
 ## Request public delisting
 
 Use the [public security/delisting issue
-form](.github/ISSUE_TEMPLATE/security-delisting.yml) for policy, provenance,
+form](https://github.com/ivankuznetsov/honeycomb/issues/new?template=security-delisting.yml) for policy, provenance,
 ownership, permission, quality, or suspicious-behavior reports whose complete
 contents are safe to publish. The issue, attachments, links, and comments are
 public.
@@ -76,6 +76,23 @@ actions retain the version in canonical catalog history:
 | Investigation hold | `soft_hidden` | Excluded immediately | Continues unless separately revoked |
 | Ordinary delisting | `yanked` | Excluded | Continues |
 | Material-harm response | `revoked` | Excluded | Fails closed with public advisory metadata |
+
+### Record a protective decision
+
+The protected normalized listing-evidence file is the durable lifecycle record.
+For an emergency soft-hide, a maintainer changes the affected record's `state`
+to `soft_hidden`, appends an ordered `history` transition with actor, reason,
+time, and a public-safe decision URL, validates the file, regenerates
+`catalog.json`, and lands both through the protected maintainer path. Yank,
+revoke, relist, promotion, and demotion use the same reviewed procedure;
+revocation also requires a public `advisories` record.
+
+The listing exporter requires the current normalized evidence as `--previous`,
+retains records not selected for lint refresh, and carries forward tier, state,
+verification, history, and advisories for selected versions. Omitting lifecycle
+state therefore cannot silently relist a protected version. The exact offline
+commands and bootstrap rule are documented in [Security Lint
+CI](docs/SECURITY_LINT_CI.md#suppressions-and-human-approval).
 
 ### Soft-hide
 

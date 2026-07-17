@@ -11,12 +11,9 @@ class DocumentationContractTest < Minitest::Test
     docs/REVIEWS.md
   ].freeze
   ISSUE_FORM = ".github/ISSUE_TEMPLATE/security-delisting.yml"
-  REVIEW_KEYS = %w[
-    reviewer name version source_sha release_sha256 head_sha reviewed_at verdict
-    conflict_of_interest
-  ].freeze
-  REVIEW_HEADINGS = ["Scope reviewed", "Permission observations", "Findings", "Rationale"].freeze
-  REVIEW_VERDICTS = %w[approve approve-with-notes warn reject].freeze
+  REVIEW_KEYS = HoneycombRegistry::CommunityReview::KEYS
+  REVIEW_HEADINGS = HoneycombRegistry::CommunityReview::HEADINGS
+  REVIEW_VERDICTS = HoneycombRegistry::CommunityReview::VERDICTS
   HEAD_PATTERN = /\A(?:[0-9a-f]{40}|[0-9a-f]{64})\z/
   SHA256_PATTERN = /\A[0-9a-f]{64}\z/
 
@@ -49,6 +46,9 @@ class DocumentationContractTest < Minitest::Test
     assert_includes warning_text, "issue is public"
     assert_includes warning_text, "Do not include secrets"
     assert_includes warning_text, "private vulnerability reporting"
+    security = File.read(File.join(ROOT, "SECURITY.md"))
+    assert_includes security,
+                    "https://github.com/ivankuznetsov/honeycomb/issues/new?template=security-delisting.yml"
 
     identified = form.fetch("body").filter_map { |item| item["id"] }
     assert_equal identified.uniq, identified
@@ -70,6 +70,12 @@ class DocumentationContractTest < Minitest::Test
     assert confirmation.dig("attributes", "options").all? { |option| option["required"] == true }
   end
 
+  def test_local_link_contract_rejects_paths_outside_the_repository
+    assert_raises(Minitest::Assertion) do
+      validate_link("CONTRIBUTING.md", "../../../../../../etc/passwd")
+    end
+  end
+
   def test_review_fixtures_use_the_strict_record_contract
     verdicts = review_fixture_paths.map do |path|
       front, body = parse_review(path)
@@ -85,6 +91,10 @@ class DocumentationContractTest < Minitest::Test
     template_path = File.join(ROOT, "reviews", "example", "1.0.0", "github-user.md")
     front, body = parse_review_text(template[:review], template_path)
     validate_review!(template_path, front, body)
+  end
+
+  def test_real_community_review_namespace_uses_the_production_validator
+    HoneycombRegistry::CommunityReview.validate_all(root: ROOT)
   end
 
   def test_review_contract_rejects_invalid_identity_shape_and_sections
@@ -116,7 +126,7 @@ class DocumentationContractTest < Minitest::Test
   end
 
   def test_review_identities_and_enums_match_landed_schemas
-    catalog = JSON.parse(File.read(File.join(ROOT, "schemas", "catalog-v1.json")))
+    catalog = JSON.parse(File.read(File.join(ROOT, "schemas", "catalog-v2.json")))
     listing = JSON.parse(File.read(File.join(ROOT, "schemas", "listing-evidence-v1.json")))
     catalog_entry = catalog.dig("$defs", "entry", "properties")
     listing_record = listing.dig("$defs", "record", "properties")
@@ -164,7 +174,7 @@ class DocumentationContractTest < Minitest::Test
     assert_includes trust, "remain open source"
 
     package_format = normalized(File.read(File.join(ROOT, "docs", "PACKAGE_FORMAT.md")))
-    assert_match(/`reviews_url` \|[^|]*external[^|]*`reviews\/<name>\/<version>\/`/i,
+    assert_match(/`community_reviews_url` \|[^|]*external[^|]*`reviews\/<name>\/<version>\/`/i,
                  package_format)
   end
 
@@ -176,6 +186,9 @@ class DocumentationContractTest < Minitest::Test
     relative, fragment = target.split("#", 2)
     target_path = relative.empty? ? source_path : File.expand_path(relative, File.dirname(File.join(ROOT, source_path)))
     target_path = File.expand_path(target_path, ROOT) unless target_path.start_with?(File::SEPARATOR)
+    root_prefix = ROOT.end_with?(File::SEPARATOR) ? ROOT : "#{ROOT}#{File::SEPARATOR}"
+    assert target_path == ROOT || target_path.start_with?(root_prefix),
+           "#{source_path}: local link escapes the repository: #{target}"
     assert File.exist?(target_path), "#{source_path}: missing local link target #{target}"
     return unless fragment && !fragment.empty?
 
@@ -204,33 +217,14 @@ class DocumentationContractTest < Minitest::Test
   end
 
   def validate_review!(path, front, body)
-    raise ArgumentError, "review front matter must be an object" unless front.is_a?(Hash)
-    raise ArgumentError, "review keys do not match" unless front.keys.sort == REVIEW_KEYS.sort
-
     parts = path.split(File::SEPARATOR)
     index = parts.rindex("reviews")
     name, version, filename = parts.values_at(index + 1, index + 2, index + 3)
     reviewer = File.basename(filename, ".md")
-    raise ArgumentError, "reviewer mismatch" unless front["reviewer"] == reviewer
-    raise ArgumentError, "name mismatch" unless front["name"] == name
-    raise ArgumentError, "version mismatch" unless front["version"] == version
-    HoneycombRegistry::SemVer.parse(front.fetch("version"))
-    raise ArgumentError, "invalid source SHA" unless HEAD_PATTERN.match?(front.fetch("source_sha"))
-    raise ArgumentError, "invalid release fingerprint" unless SHA256_PATTERN.match?(front.fetch("release_sha256"))
-    raise ArgumentError, "invalid reviewed head" unless HEAD_PATTERN.match?(front.fetch("head_sha"))
-    date = Date.iso8601(front.fetch("reviewed_at"))
-    raise ArgumentError, "noncanonical review date" unless date.iso8601 == front.fetch("reviewed_at")
-    raise ArgumentError, "unknown verdict" unless REVIEW_VERDICTS.include?(front.fetch("verdict"))
-    conflict = front.fetch("conflict_of_interest")
-    raise ArgumentError, "missing conflict disclosure" unless conflict.is_a?(String) && !conflict.strip.empty?
-
-    headings = body.scan(/^## (.+)$/).flatten
-    raise ArgumentError, "review headings do not match" unless headings == REVIEW_HEADINGS
-    REVIEW_HEADINGS.each do |heading|
-      section = body.match(/^## #{Regexp.escape(heading)}\n+(.*?)(?=^## |\z)/m)
-      raise ArgumentError, "empty review section #{heading}" unless section && !section[1].strip.empty?
-    end
-  rescue KeyError, Date::Error, HoneycombRegistry::SemVer::Invalid => e
+    HoneycombRegistry::CommunityReview.validate_record!(
+      "reviews/#{name}/#{version}/#{filename}", front, body, name, version, reviewer
+    )
+  rescue HoneycombRegistry::CommunityReview::Invalid => e
     raise ArgumentError, e.message
   end
 

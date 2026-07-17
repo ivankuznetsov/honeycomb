@@ -97,7 +97,7 @@ class SecurityLintContractsTest < Minitest::Test
     security = JSON.parse(File.read(File.join(ROOT, "schemas", "security-lint-evidence-v1.json")))
     approval_schema = JSON.parse(File.read(File.join(ROOT, "schemas", "listing-approval-v1.json")))
     listing = JSON.parse(File.read(File.join(ROOT, "schemas", "listing-evidence-v1.json")))
-    catalog = JSON.parse(File.read(File.join(ROOT, "schemas", "catalog-v1.json")))
+    catalog = JSON.parse(File.read(File.join(ROOT, "schemas", "catalog-v2.json")))
 
     [security, approval_schema, listing, catalog].each do |schema|
       pattern = Regexp.new(schema.dig("$defs", "semver", "pattern"))

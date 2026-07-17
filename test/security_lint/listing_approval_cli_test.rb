@@ -33,6 +33,7 @@ class SecurityLintListingApprovalCliTest < Minitest::Test
       lint_path = File.join(root, relative_lint)
       approval_path = File.join(root, "approvals", "example", "1.0.0", SHA, "maintainer.json")
       output = File.join(root, "listing-evidence.json")
+      previous = File.join(root, "previous-listing-evidence.json")
       FileUtils.mkdir_p(File.dirname(lint_path))
       FileUtils.mkdir_p(File.dirname(approval_path))
       File.write(lint_path, HoneycombSecurityLint::Contracts.canonical_json(record))
@@ -48,9 +49,13 @@ class SecurityLintListingApprovalCliTest < Minitest::Test
         }]
       }
       File.write(approval_path, HoneycombSecurityLint::Contracts.canonical_json(approval))
+      File.write(previous, HoneycombSecurityLint::Contracts.canonical_json({
+        "schema" => HoneycombRegistry::ListingEvidence::SCHEMA, "records" => []
+      }))
 
       stdout, stderr, status = capture_command(
         SCRIPT, "export", "--snapshot", root, "--lint", relative_lint,
+        "--previous", previous,
         "--checked-at", "2026-07-17T09:00:00Z", "--release-tier", "community",
         "--output", output
       )

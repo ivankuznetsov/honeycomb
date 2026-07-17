@@ -10,30 +10,48 @@ module HoneycombSecurityLint
 
     module_function
 
-    def export(root:, lint_paths:, checked_at:, release_tier:)
+    def export(root:, lint_paths:, checked_at:, release_tier:, previous_path:)
       snapshot = File.realpath(root)
       raise Invalid, "evidence snapshot is not a directory" unless File.directory?(snapshot)
       paths = Array(lint_paths)
       raise Invalid, "at least one lint record is required" if paths.empty?
+      previous = read_previous(previous_path)
+      previous_by_identity = previous.to_h do |record|
+        [[record.fetch("name"), record.fetch("version")], record]
+      end
 
       records = paths.sort.flat_map do |path|
         lint = read_lint(snapshot, path)
         approvals = approvals_for(snapshot, lint)
+        trust = lint.fetch("packages").to_h do |package|
+          identity = package.fetch("identity")
+          prior = previous_by_identity[[identity.fetch("name"), identity.fetch("version")]]
+          [identity.fetch("path"), prior ? prior.slice(*ListingEvidenceAdapter::TRUST_KEYS) : {}]
+        end
         ListingEvidenceAdapter.build(
           lint_evidence: lint, approvals: approvals, checked_at: checked_at,
-          release_tier: release_tier
+          release_tier: release_tier, trust: trust
         ).fetch("records")
       end
       duplicate = records.group_by { |record| record.values_at("name", "version") }
                          .find { |_key, grouped| grouped.length > 1 }
       raise Invalid, "selected lint records contain a duplicate honeycomb version" if duplicate
 
-      {
+      selected = records.to_h { |record| [[record.fetch("name"), record.fetch("version")], record] }
+      retained = previous.reject do |record|
+        selected.key?([record.fetch("name"), record.fetch("version")])
+      end
+      document = {
         "schema" => HoneycombRegistry::ListingEvidence::SCHEMA,
-        "records" => records.sort_by do |record|
+        "records" => (retained + records).sort_by do |record|
           [record.fetch("name"), HoneycombRegistry::SemVer.parse(record.fetch("version"))]
         end
       }
+      findings = HoneycombRegistry::ListingEvidence.validate_document(document)
+      if findings.errors?
+        raise Invalid, findings.to_h.map { |finding| "#{finding.fetch("path")}: #{finding.fetch("message")}" }
+      end
+      document
     rescue Contracts::Invalid, HoneycombRegistry::SemVer::Invalid, SystemCallError, IOError => e
       raise Invalid, Redactor.sanitize_text(e.message)
     end
@@ -45,6 +63,17 @@ module HoneycombSecurityLint
         raise Invalid, "lint record content digest is invalid"
       end
       evidence
+    end
+
+    def read_previous(path)
+      raise Invalid, "previous listing evidence is required" unless path
+      absolute = File.expand_path(path)
+      read_regular(absolute)
+      result = HoneycombRegistry::ListingEvidence.load(absolute)
+      if result.findings.errors?
+        raise Invalid, result.findings.to_h.map { |finding| "#{finding.fetch("path")}: #{finding.fetch("message")}" }
+      end
+      result.records
     end
 
     def approvals_for(snapshot, lint)

@@ -73,9 +73,13 @@ fields rather than implicit lint or approval meanings.
 
 Community review records live at
 `reviews/<name>/<version>/<github-user>.md`, outside package payloads and the
-protected approval store. Catalog `reviews_url` points to that mutable
-default-branch namespace; designated approval audit URLs remain under
-`listing_approval.reviews`. Community verdicts have no listing authority.
+protected approval store. Trusted-base validation binds the record and PR
+author to an already-listed base package/catalog identity without executing or
+trusting submitted package/catalog code. Catalog `reviews_url` preserves
+designated approval meaning, while the
+nullable `community_reviews_url` points to the mutable default-branch namespace.
+Designated approval audit URLs also remain under `listing_approval.reviews`.
+Community verdicts have no listing authority.
 
 Exact approved suppressions remain visible and are verified by reconstructing
 the preliminary lint digest. Broad, orphaned, stale, or mismatched suppression

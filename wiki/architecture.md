@@ -19,17 +19,22 @@ catalog renderer.
   `script/honeycomb-security-lint-report` is default-branch reporter plumbing.
 - `script/honeycomb-listing-approval` is trusted approval workflow plumbing and
   the offline exporter for checked-out evidence snapshots.
+- `script/honeycomb-reviews` validates strict community-review records either
+  from the current tree or from untrusted pull-request objects at an exact SHA.
 - `.github/workflows/security-lint.yml` and `security-lint-report.yml` implement
   the read-only analyzer / metadata-write reporter split.
 - `.github/workflows/listing-approval.yml` verifies a maintainer's current
   review and appends immutable lint/approval records to `honeycomb-evidence`.
+- `.github/workflows/community-reviews.yml` runs trusted base code against
+  submitted Git objects without checking out or executing pull-request code.
 - `packages/<name>/<semver>/` is the immutable release store; it is empty except
   for `.gitkeep` until seeding work lands.
 - `reviews/<name>/<version>/<github-user>.md` is the mutable, external
   community-review namespace; checked documentation fixtures demonstrate its
   strict record shape without creating production reviews.
 - `catalog.json` is canonical generated output and currently contains the empty
-  `honeycomb-catalog/v1` document.
+  `honeycomb-catalog/v2` document; the strict v1 schema remains archived
+  unchanged for explicit legacy consumers.
 - `policy/spdx-license-ids.txt` is the offline license identifier snapshot.
 - `test/fixtures/` and `test/run.rb` prove the format without a network or gem
   install.
@@ -55,6 +60,8 @@ The shared library has three main flows:
    computes `listed`-only SemVer latest values, and atomically replaces
    `catalog.json`.
 4. Security lint discovers changed version roots from the exact base/head diff,
+   rejects modification, rename, or deletion of a version directory already
+   present at the base revision,
    invokes the production validator, scans all bounded text content, statically
    analyzes every UTF-8 instruction surface with item budgets, and emits
    canonical redacted evidence.
@@ -66,16 +73,21 @@ The shared library has three main flows:
    status, artifact, release, and head identities before appending records on a
    separate evidence ref. It can finalize exact requested suppressions from
    preliminary failure to a proven pass. Offline export explicitly selects lint
-   snapshots, projects the latest decision per reviewer, and adapts matching
-   approvals to the catalog reader.
+   snapshots, requires prior normalized evidence, preserves durable lifecycle
+   state and unselected records, projects the latest decision per reviewer, and
+   adapts matching approvals to the catalog reader.
+7. Community-review validation binds strict path/front matter and authenticated
+   PR identity to canonical package, catalog, release, source, and review-head
+   identities. It is informational and cannot mint listing approval.
 
 `source.revision`, generated `release_sha256`, and review `head_sha` are separate
 identities. Evidence binds both lint and human approval to the latter two.
 Release/current trust tier, permission risk, lifecycle state, verification,
 history, and advisories remain independent catalog axes. Revoked entries remain
 auditable but exact resolution fails closed with their public advisories.
-Catalog community-review links resolve to the mutable external namespace, while
-designated maintainer review evidence remains an immutable approval audit.
+Catalog `reviews_url` retains the designated approval audit meaning;
+`community_reviews_url` resolves to the mutable external namespace only when a
+community record exists.
 
 ## Runtime Flow Status
 

@@ -29,7 +29,17 @@ module HoneycombSecurityLint
       changed = @change_set.between(@context.fetch(:base_sha), @context.fetch(:head_sha))
       return finish(base_document("unchanged", [])) if changed.version_roots.empty?
 
-      packages = changed.version_roots.map { |version_root| analyze(version_root) }
+      existing = Array(changed.existing_version_roots)
+      packages = changed.version_roots.map do |version_root|
+        package = analyze(version_root)
+        if existing.include?(version_root)
+          package.fetch("findings") << generic_finding(
+            "package.immutable-version", "integrity", version_root,
+            "A package version already present in the base revision is immutable; publish a new SemVer version"
+          )
+        end
+        package
+      end
       preliminary = Evidence.finalize(base_document("pass", packages))
       evidence = @approvals.empty? ? preliminary : Evidence.apply_approvals(preliminary, @approvals)
       bounded(evidence)

@@ -10,7 +10,10 @@ informational process.
 Every submission adds a new `packages/<name>/<semver>/` directory that follows
 the [honeycomb package format](docs/PACKAGE_FORMAT.md). A merged version
 directory is immutable. Publish a new SemVer version for every fix or change;
-do not edit a listed version in place.
+do not edit a listed version in place. The exact-base security gate rejects any
+modification, rename, or deletion beneath a version directory that already
+exists in the pull request's base revision; only a wholly new SemVer directory
+can enter the listing flow.
 
 Before opening a pull request:
 
@@ -51,7 +54,7 @@ before relying on them:
 - `lib/honeycomb_registry.rb` or `lib/honeycomb_registry/`;
 - the `honeycomb-security-lint`, `honeycomb-security-lint-report`,
   `honeycomb-listing-approval`, `honeycomb-validate`, `honeycomb-manifest`, or
-  `honeycomb-catalog` scripts;
+  `honeycomb-catalog`, or `honeycomb-reviews` scripts;
 - files under `policy/`; and
 - security, listing-evidence, approval, manifest, or catalog schemas under
   `schemas/`.
@@ -126,8 +129,13 @@ authorize the current head.
 ## Maintainer counts and conflicts
 
 Eligible maintainers are repository collaborators with write, maintain, or
-admin permission who are not authors of the submitted honeycomb. Authors cannot
-approve their own submissions, and one GitHub identity cannot count twice.
+admin permission. The protected issuer mechanically rejects approval by the
+pull-request submitter, and one GitHub identity cannot count twice. A maintainer
+who authored, published, or controls the submitted honeycomb under another
+account must disclose that relationship and recuse; the current manifest does
+not carry a verifiable GitHub publisher identity, so this broader conflict rule
+is enforced by maintainer review rather than inferred from display-name or URL
+metadata.
 
 - The v1 catalog gate requires one current eligible-maintainer approval for a
   low- or moderate-risk Community version.

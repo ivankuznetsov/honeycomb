@@ -28,7 +28,8 @@ Install verbs remain outside this repository with Hive tasks 1852/1853.
 | `ruby script/honeycomb-catalog --evidence PATH` | Approval-gated root catalog generation | `--check` |
 | `ruby script/honeycomb-security-lint` | None | PR metadata, gate state, JSON/Markdown output paths |
 | `ruby script/honeycomb-listing-approval issue` | Append immutable trusted evidence | None; protected workflow plumbing |
-| `ruby script/honeycomb-listing-approval export` | Write normalized evidence output | Reads an explicit checked-out evidence snapshot |
+| `ruby script/honeycomb-listing-approval export` | Write normalized evidence output | Reads an explicit evidence snapshot plus required prior normalized evidence |
+| `ruby script/honeycomb-reviews` | None | Validates current-tree or exact-SHA community reviews |
 
 All commands resolve a repository root independently of the caller's current
 directory. `--root` supports automation/fixtures. Catalog `--output` is accepted
@@ -48,7 +49,9 @@ from a default-branch checkout.
 `honeycomb-listing-approval issue` likewise consumes only a trusted
 `workflow_dispatch` event and the scoped automatic token. `export` performs no
 network access and requires one or more explicit immutable lint paths under a
-checked-out `honeycomb-evidence` snapshot. `issue` accepts an exact requested
+checked-out `honeycomb-evidence` snapshot plus `--previous` normalized evidence.
+It retains unselected records and carries durable tier, lifecycle, verification,
+history, and advisory decisions forward. `issue` accepts an exact requested
 suppression against failing preliminary evidence only when trusted finalization
 produces a complete passing result; ordinary affirmative approvals require an
 already-passing result.
@@ -66,10 +69,16 @@ The shipped version layout is:
 
 ## Catalog and API Status
 
-Root `catalog.json` is a shipped deterministic `honeycomb-catalog/v1` artifact.
+Root `catalog.json` is a shipped deterministic `honeycomb-catalog/v2` artifact.
 It carries independent release/current tier, permission risk, lifecycle,
 verification, transition history, and advisory fields. Discovery/latest include
 only listed entries; exact soft-hidden/yanked versions remain resolvable and
 revoked versions fail closed. The file is empty until task 1851 seeds real
 packages. `hive.sh/honeycombs` remains a documented future static rendering
 surface; no route, handler, or site code is implemented here.
+
+Catalog `reviews_url` remains the exact designated-maintainer approval URL.
+Nullable `community_reviews_url` names the default-branch community-review
+directory only when at least one validated record exists.
+The strict v1 schema remains checked in unchanged; v2 is an explicit versioned
+extension rather than a new required property smuggled into v1.

@@ -15,10 +15,16 @@ reviews/<name>/<version>/<github-user>.md
 
 The path is versioned because every review concerns one immutable release. The
 filename and front-matter `reviewer` must match the authenticated GitHub user
-who opens the pull request. A maintainer may accept a verifiable delegation
-only by recording the original identity, delegated identity, evidence, and
-reason in the review pull request. Delegation does not permit an anonymous or
-shared identity.
+who opens the pull request. Shared, delegated, or anonymous identities are not
+accepted in v1; the accountable reviewer opens their own pull request.
+
+The trusted-base `Community reviews` workflow reads submitted objects without
+checking out or executing pull-request code. It validates exact path/front
+matter identity against the pull-request author, rejects unknown or duplicate
+keys and missing sections, and binds `name`, `version`, `source_sha`,
+`release_sha256`, and `head_sha` to the canonical already-listed package and
+catalog entry at the trusted base revision. A community review is therefore a
+follow-up to listing, not part of the package's first-listing pull request.
 
 Reviews never live under `packages/<name>/<version>/`. Adding, correcting,
 moderating, or removing one therefore cannot change manifest `files`,
@@ -118,10 +124,12 @@ file. Update `reviewed_at` when the conclusion or evidence changes and explain
 the correction in the pull request. A newer review does not erase the previous
 text from normal Git history.
 
-Catalog `reviews_url` points to the external
-`reviews/<name>/<version>/` namespace. A site may link or enumerate those files,
-but it must not turn verdicts, review counts, or reviewer popularity into an
-aggregate score. One or many `approve` reviews do not change listability,
+Catalog `community_reviews_url` points to the external
+`reviews/<name>/<version>/` namespace only when at least one record exists;
+otherwise it is `null`. Catalog `reviews_url` retains the exact designated
+maintainer approval URL. A site may link or enumerate community files, but it
+must not turn verdicts, review counts, or reviewer popularity into an aggregate
+score. One or many `approve` reviews do not change listability,
 `release_tier`, `current_tier`, `permission_risk`, lifecycle `state`, or the
 required designated-maintainer approvals in `listing_approval`.
 
@@ -136,7 +144,7 @@ that is:
 - abusive, harassing, discriminatory, doxxing, or otherwise unsafe to publish;
 - a fabricated or materially misleading claim presented as evidence;
 - retaliation, coercion, brigading, impersonation, or review manipulation;
-- undisclosed conflict of interest or unverifiable delegated identity; or
+- undisclosed conflict of interest, impersonation, or a shared identity; or
 - confidential vulnerability information, secrets, exploit steps, private
   data, or unredacted logs that belong in private reporting.
 

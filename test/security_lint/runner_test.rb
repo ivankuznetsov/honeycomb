@@ -6,9 +6,11 @@ require "honeycomb_security_lint"
 class SecurityLintRunnerTest < Minitest::Test
   SHA = "d" * 40
 
-  FakeChangeSet = Struct.new(:roots) do
+  FakeChangeSet = Struct.new(:roots, :existing) do
     def between(_base, _head)
-      HoneycombSecurityLint::ChangeSet::Result.new(version_roots: roots, paths: [])
+      HoneycombSecurityLint::ChangeSet::Result.new(
+        version_roots: roots, paths: [], existing_version_roots: Array(existing)
+      )
     end
   end
 
@@ -127,6 +129,22 @@ class SecurityLintRunnerTest < Minitest::Test
 
       assert_equal "expired", result.evidence.fetch("state")
       assert_equal 1, result.exit_status
+    end
+  end
+
+  def test_existing_version_mutation_fails_while_a_new_version_can_pass
+    in_tmpdir do |root|
+      write_honeycomb(root)
+      existing = FakeChangeSet.new(["packages/example/1.0.0"], ["packages/example/1.0.0"])
+      blocked = runner(root, change_set: existing).run
+
+      assert_equal "fail", blocked.evidence.fetch("state")
+      assert_equal 1, blocked.exit_status
+      assert_equal ["package.immutable-version"],
+                   blocked.evidence.dig("packages", 0, "findings").map { |finding| finding["rule_id"] }
+
+      added = FakeChangeSet.new(["packages/example/1.0.0"], [])
+      assert_equal "pass", runner(root, change_set: added).run.evidence.fetch("state")
     end
   end
 end

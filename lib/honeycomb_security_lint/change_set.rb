@@ -5,7 +5,7 @@ require "pathname"
 
 module HoneycombSecurityLint
   class ChangeSet
-    Result = Struct.new(:version_roots, :paths, keyword_init: true)
+    Result = Struct.new(:version_roots, :paths, :existing_version_roots, keyword_init: true)
 
     class Invalid < StandardError; end
 
@@ -18,13 +18,18 @@ module HoneycombSecurityLint
       validate_sha!(base_sha, "base")
       validate_sha!(head_sha, "head")
       stdout, stderr, status = @executor.call(
-        ["git", "diff", "--name-only", "-z", "--diff-filter=ACMRTUXBD", "#{base_sha}...#{head_sha}", "--", "packages"]
+        ["git", "diff", "--no-renames", "--name-only", "-z", "--diff-filter=ACMRTUXBD", "#{base_sha}...#{head_sha}", "--", "packages"]
       )
       exit_status = status.respond_to?(:exitstatus) ? status.exitstatus : Integer(status)
       raise Invalid, "git diff failed" unless exit_status.zero?
       raise Invalid, "git diff wrote an unexpected diagnostic" unless stderr.to_s.empty?
 
-      parse(stdout)
+      result = parse(stdout)
+      existing = existing_at_base(base_sha, result.version_roots)
+      Result.new(
+        version_roots: result.version_roots, paths: result.paths,
+        existing_version_roots: existing
+      )
     rescue SystemCallError, IOError, ArgumentError => e
       raise Invalid, "could not determine changed honeycombs: #{e.class}"
     end
@@ -38,13 +43,33 @@ module HoneycombSecurityLint
       raise Invalid, "changed path list contains duplicates" unless paths.uniq.length == paths.length
 
       roots = paths.map { |path| version_root(path) }.uniq.sort
-      Result.new(version_roots: roots, paths: paths.sort)
+      Result.new(version_roots: roots, paths: paths.sort, existing_version_roots: [])
     end
 
     private
 
     def execute(argv)
       Open3.capture3(*argv, chdir: @root)
+    end
+
+    def existing_at_base(base_sha, roots)
+      return [] if roots.empty?
+
+      stdout, stderr, status = @executor.call(
+        ["git", "ls-tree", "-d", "--name-only", "-z", base_sha, "--", *roots]
+      )
+      exit_status = status.respond_to?(:exitstatus) ? status.exitstatus : Integer(status)
+      raise Invalid, "git ls-tree failed" unless exit_status.zero?
+      raise Invalid, "git ls-tree wrote an unexpected diagnostic" unless stderr.to_s.empty?
+      source = stdout.to_s.dup.force_encoding(Encoding::UTF_8)
+      unless source.valid_encoding? && (source.empty? || source.end_with?("\0"))
+        raise Invalid, "base package path list is malformed"
+      end
+      existing = source.split("\0", -1).tap(&:pop)
+      unless existing.uniq.length == existing.length && (existing - roots).empty?
+        raise Invalid, "base package path list is inconsistent"
+      end
+      existing.sort
     end
 
     def validate_sha!(value, label)

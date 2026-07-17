@@ -87,12 +87,17 @@ class SchemaTest < Minitest::Test
 
   def test_checked_in_catalog_and_listing_evidence_schemas_match_runtime_versions
     listing = JSON.parse(File.read(File.join(ROOT, "schemas", "listing-evidence-v1.json")))
-    catalog = JSON.parse(File.read(File.join(ROOT, "schemas", "catalog-v1.json")))
+    catalog = JSON.parse(File.read(File.join(ROOT, "schemas", "catalog-v2.json")))
+    legacy_catalog = JSON.parse(File.read(File.join(ROOT, "schemas", "catalog-v1.json")))
 
     assert_equal HoneycombRegistry::ListingEvidence::SCHEMA,
                  listing.dig("properties", "schema", "const")
     assert_equal HoneycombRegistry::Catalog::SCHEMA,
                  catalog.dig("properties", "schema", "const")
+    assert_equal "honeycomb-catalog/v1",
+                 legacy_catalog.dig("properties", "schema", "const")
+    refute_includes legacy_catalog.dig("$defs", "entry", "properties"),
+                    "community_reviews_url"
     assert_equal HoneycombRegistry::ListingEvidence::STATES,
                  listing.dig("$defs", "record", "properties", "state", "enum")
     assert_equal HoneycombRegistry::ListingEvidence::TIERS,

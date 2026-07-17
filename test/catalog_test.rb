@@ -70,6 +70,43 @@ class CatalogTest < Minitest::Test
     path
   end
 
+  def write_community_review(root, package, record, reviewer: "community-reviewer")
+    manifest = HoneycombRegistry::SafeYAML.load_file(package.manifest_path)
+    path = File.join(root, "reviews", package.name, package.version, "#{reviewer}.md")
+    FileUtils.mkdir_p(File.dirname(path))
+    File.write(path, <<~MARKDOWN)
+      ---
+      reviewer: "#{reviewer}"
+      name: "#{package.name}"
+      version: "#{package.version}"
+      source_sha: "#{manifest.dig("source", "revision")}"
+      release_sha256: "#{manifest.fetch("release_sha256")}"
+      head_sha: "#{record.dig("lint", "head_sha")}"
+      reviewed_at: "2026-07-17"
+      verdict: "approve"
+      conflict_of_interest: "none"
+      ---
+      # Community review
+
+      ## Scope reviewed
+
+      I reviewed every packaged file.
+
+      ## Permission observations
+
+      Declared permissions match the observed behavior.
+
+      ## Findings
+
+      None observed.
+
+      ## Rationale
+
+      The package and its declarations agree.
+    MARKDOWN
+    path
+  end
+
   def test_missing_pending_and_denied_evidence_omit_without_failure
     in_tmpdir do |root|
       package = canonical_package(root)
@@ -89,12 +126,13 @@ class CatalogTest < Minitest::Test
   def test_dual_current_approval_projects_one_consumer_entry
     in_tmpdir do |root|
       package = canonical_package(root)
-      evidence = write_evidence(root, [evidence_record(package)])
+      record = evidence_record(package)
+      evidence = write_evidence(root, [record])
       result = HoneycombRegistry::Catalog.build(root: root, evidence_path: evidence)
 
       refute result.findings.errors?, result.findings.to_h.inspect
       entry = result.document.fetch("entries").fetch(0)
-      schema = JSON.parse(File.read(File.join(ROOT, "schemas", "catalog-v1.json")))
+      schema = JSON.parse(File.read(File.join(ROOT, "schemas", "catalog-v2.json")))
       assert_equal schema.dig("$defs", "entry", "required").sort, entry.keys.sort
       assert_equal "example", entry["name"]
       assert_equal "1.0.0", entry["latest_version"]
@@ -107,9 +145,45 @@ class CatalogTest < Minitest::Test
       assert_equal "listed", entry["state"]
       assert entry["discoverable"]
       assert_includes entry["package_url"], "/tree/#{"d" * 40}/packages/example/1.0.0"
-      assert_equal "https://github.com/ivankuznetsov/honeycomb/tree/main/reviews/example/1.0.0",
-                   entry["reviews_url"]
+      assert_equal "https://example.test/reviews/example-1.0.0-1", entry["reviews_url"]
+      assert_nil entry["community_reviews_url"]
       refute entry.key?("files")
+    end
+  end
+
+  def test_community_review_url_is_distinct_and_only_emitted_for_existing_records
+    in_tmpdir do |root|
+      package = canonical_package(root)
+      record = evidence_record(package)
+      evidence = write_evidence(root, [record])
+      directory = File.join(root, "reviews", "example", "1.0.0")
+      FileUtils.mkdir_p(directory)
+
+      empty = HoneycombRegistry::Catalog.build(root: root, evidence_path: evidence)
+      assert_nil empty.document.dig("entries", 0, "community_reviews_url")
+
+      write_community_review(root, package, record, reviewer: "reviewer")
+      populated = HoneycombRegistry::Catalog.build(root: root, evidence_path: evidence)
+      assert_equal "https://github.com/ivankuznetsov/honeycomb/tree/main/reviews/example/1.0.0",
+                   populated.document.dig("entries", 0, "community_reviews_url")
+      assert_equal "https://example.test/reviews/example-1.0.0-1",
+                   populated.document.dig("entries", 0, "reviews_url")
+    end
+  end
+
+
+  def test_malformed_community_review_aborts_catalog_generation
+    in_tmpdir do |root|
+      package = canonical_package(root)
+      evidence = write_evidence(root, [evidence_record(package)])
+      path = File.join(root, "reviews", "example", "1.0.0", "reviewer.md")
+      FileUtils.mkdir_p(File.dirname(path))
+      File.write(path, "not a review\n")
+
+      result = HoneycombRegistry::Catalog.build(root: root, evidence_path: evidence)
+
+      assert_nil result.document
+      assert_includes result.findings.codes, "review.invalid"
     end
   end
 

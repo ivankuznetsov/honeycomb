@@ -63,9 +63,10 @@ module HoneycombSecurityLint
     def export(argv, out:, default_root:)
       options = {root: default_root, lint: []}
       parser = OptionParser.new do |opts|
-        opts.banner = "Usage: honeycomb-listing-approval export --snapshot PATH --lint PATH --checked-at TIME --release-tier TIER --output PATH"
+        opts.banner = "Usage: honeycomb-listing-approval export --snapshot PATH --lint PATH --previous PATH --checked-at TIME --release-tier TIER --output PATH"
         opts.on("--snapshot PATH", "Checked-out honeycomb-evidence branch") { |value| options[:snapshot] = value }
         opts.on("--lint PATH", "Selected immutable lint record (repeatable)") { |value| options[:lint] << value }
+        opts.on("--previous PATH", "Current normalized evidence whose lifecycle state must be retained") { |value| options[:previous] = value }
         opts.on("--checked-at TIME", "RFC 3339 lint audit time") { |value| options[:checked_at] = value }
         opts.on("--release-tier TIER", "Immutable release tier") { |value| options[:release_tier] = value }
         opts.on("--output PATH", "Normalized listing evidence output") { |value| options[:output] = value }
@@ -73,7 +74,7 @@ module HoneycombSecurityLint
       end
       arguments = parser.parse(argv)
       raise HoneycombRegistry::InvocationError, "unexpected positional arguments" unless arguments.empty?
-      %i[snapshot checked_at release_tier output].each do |key|
+      %i[snapshot previous checked_at release_tier output].each do |key|
         raise HoneycombRegistry::InvocationError, "--#{key.to_s.tr('_', '-')} is required" unless options[key]
       end
       raise HoneycombRegistry::InvocationError, "at least one --lint PATH is required" if options[:lint].empty?
@@ -82,7 +83,8 @@ module HoneycombSecurityLint
       lint_paths = options.fetch(:lint).map { |path| File.expand_path(path, snapshot) }
       document = EvidenceSnapshot.export(
         root: snapshot, lint_paths: lint_paths,
-        checked_at: options.fetch(:checked_at), release_tier: options.fetch(:release_tier)
+        checked_at: options.fetch(:checked_at), release_tier: options.fetch(:release_tier),
+        previous_path: File.expand_path(options.fetch(:previous), options[:root] || Dir.pwd)
       )
       output = File.expand_path(options.fetch(:output), options[:root] || Dir.pwd)
       HoneycombRegistry::AtomicWrite.replace(output, Contracts.canonical_json(document))
