@@ -68,6 +68,12 @@ meaning of `source.revision`. Scoped descriptor directories and file rules use
 Hive's exact `../../../..` project anchor so manifests can distinguish
 `repository/docs/**` from repository-wide write access.
 
+Bench stage scripts ask Git for the nested `.hive-state` checkout root, verify
+that identity, use its containing HiveBench source worktree, then verify
+`harness/hive_run.rb` exists before continuing. This avoids fixed
+parent-directory traversal, remains independent of Hive's task-directory
+depth, and requires no security-lint suppression requests.
+
 ## Handoffs
 
 - Task 1849: produce/adapt normalized evidence and invoke validator/catalog

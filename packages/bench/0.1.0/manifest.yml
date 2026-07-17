@@ -1,0 +1,49 @@
+schema: "honeycomb-manifest/v1"
+name: "bench"
+version: "0.1.0"
+description: "Run reproducible Hive benchmark campaigns"
+author:
+  name: "Ivan Kuznetsov"
+  url: "https://github.com/ivankuznetsov"
+license: "MIT"
+hive_min_version: "0.4.2"
+source:
+  url: "https://github.com/ivankuznetsov/hive-bench"
+  revision: "b4f462848d439d07e97e1e37943d738e8ca8d28a"
+permissions:
+  risk: "high"
+  capabilities:
+    - "filesystem-read"
+    - "filesystem-write"
+    - "network"
+    - "shell"
+  network_hosts:
+    - "*"
+  filesystem_read:
+    - "*"
+  filesystem_write:
+    - "*"
+  secrets:
+    - "*"
+files:
+  "packages/bench/0.1.0/README.md": "18c1228c614dc8da39dd6f4b348edb535d828543d7eda1f1d3153bfcc5eab074"
+  "packages/bench/0.1.0/instructions/extract.md": "903393564e84837734521ee28ebd4a284c5782404fc29e48a6a79a54b2e083f5"
+  "packages/bench/0.1.0/instructions/generate.md": "2c4cae7d63677647e02e4574c47d05fd19508e47d24f140450990e213cf3e566"
+  "packages/bench/0.1.0/instructions/judge.md": "cd04fe61f7db5eed278c0091e50a66ff479911fc1bf3c2cc168644bdaeb1e79c"
+  "packages/bench/0.1.0/instructions/publish.md": "18e2767e83225f571220f172d29e61cd7a94d1383bb1fce7e0c14e93f9367339"
+  "packages/bench/0.1.0/workflow.yml": "91ffda50fbddf27bd32647fa37c814ef6ad55ed44be173c571363106a5459ec7"
+release_sha256: "9c3a12f63d4175b0b99c37c4e92256f72d197bba6845985a1179c9ae58b15047"
+x-provenance:
+  pull_request: "https://github.com/ivankuznetsov/hive-bench/pull/1"
+  source_paths:
+    - "workflows/bench.yml"
+    - "workflows/bench/extract.md"
+    - "workflows/bench/generate.md"
+    - "workflows/bench/judge.md"
+    - "workflows/bench/publish.md"
+  translations:
+    - "Package-relative instruction references changed from ./bench/<stage>.md to instructions/<stage>.md."
+    - "Stage scripts resolve and verify the nested hive-state checkout through Git instead of using a fixed parent-directory traversal."
+x-security:
+  network_host_reasons: {}
+  suppressions: []
