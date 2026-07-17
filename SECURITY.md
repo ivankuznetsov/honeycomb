@@ -12,10 +12,10 @@ private channel. Do **not** open a public issue for that material.
 
 Use [GitHub private vulnerability
 reporting](https://github.com/ivankuznetsov/honeycomb/security/advisories/new)
-when the repository offers the private report form. If that interface is not
-available, email `ivan@ikuznetsov.com` with the subject `honeycomb security
-report`. The address is the repository owner's published security fallback;
-do not copy a public mailing list or issue address.
+through the repository's enabled private report form. If GitHub is unavailable,
+email `ivan@ikuznetsov.com` with the subject `honeycomb security report`. The
+address is the repository owner's published security fallback; do not copy a
+public mailing list or issue address.
 
 Include, where known:
 

@@ -8,6 +8,6 @@
 - Added dependency-free contract coverage for policy links, issue-form YAML,
   review records, landed schema identities/enums, numeric targets, and review
   isolation from immutable releases and listing authority.
-- Recorded GitHub private-vulnerability-reporting enablement as a rollout gap;
-  the security policy provides the repository owner's published private email
+- Enabled and verified GitHub private vulnerability reporting; the security
+  policy also retains the repository owner's published email as an outage
   fallback.

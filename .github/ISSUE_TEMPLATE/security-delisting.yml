@@ -7,7 +7,7 @@ body:
       value: |
         ## This issue is public
 
-        Do not include secrets, exploit steps, private data, private repository names, or unredacted logs here. Use [private vulnerability reporting](https://github.com/ivankuznetsov/honeycomb/security/advisories/new) when available, or email `ivan@ikuznetsov.com` with the subject `honeycomb security report`. Redact public links and attachments before continuing.
+        Do not include secrets, exploit steps, private data, private repository names, or unredacted logs here. Use [private vulnerability reporting](https://github.com/ivankuznetsov/honeycomb/security/advisories/new), or email `ivan@ikuznetsov.com` with the subject `honeycomb security report` if GitHub is unavailable. Redact public links and attachments before continuing.
 
   - type: "input"
     id: "honeycomb_name"
