@@ -172,6 +172,11 @@ drive, backslash, empty, null-containing, ambiguous, or escaping paths fail.
 Unknown presets, keys, tools, blank blocks, or future permission-bearing
 constructs fail closed rather than publishing a narrower summary.
 
+A honeycomb using qualified file rules must set `hive_min_version` to the
+first released Hive version that contains the portable path-rule contract.
+Hive v0.4.2 predates that contract; do not use it as the minimum merely because
+its parser accepts the rule-shaped string.
+
 ## Read-only validation and Hive compatibility
 
 Validate one version or all discovered versions:
