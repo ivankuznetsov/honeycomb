@@ -1,0 +1,108 @@
+name: "Report a honeycomb for delisting"
+description: "Public report for suspicious behavior, provenance, permissions, ownership, policy, or delisting concerns"
+title: "[Security/delisting]: "
+body:
+  - type: "markdown"
+    attributes:
+      value: |
+        ## This issue is public
+
+        Do not include secrets, exploit steps, private data, private repository names, or unredacted logs here. Use [private vulnerability reporting](https://github.com/ivankuznetsov/honeycomb/security/advisories/new) when available, or email `ivan@ikuznetsov.com` with the subject `honeycomb security report`. Redact public links and attachments before continuing.
+
+  - type: "input"
+    id: "honeycomb_name"
+    attributes:
+      label: "Honeycomb name"
+      description: "The catalog or package name, without the honeycomb/ prefix."
+      placeholder: "example"
+    validations:
+      required: true
+
+  - type: "input"
+    id: "honeycomb_version"
+    attributes:
+      label: "Affected version"
+      description: "The exact SemVer version. File separate reports when unrelated versions differ."
+      placeholder: "1.0.0"
+    validations:
+      required: true
+
+  - type: "textarea"
+    id: "identities"
+    attributes:
+      label: "Source or package identity"
+      description: "Provide any known source_sha, release_sha256, head_sha, archive digest, package URL, or catalog URL."
+      placeholder: "release_sha256: ...\nsource_sha: ...\nhttps://..."
+    validations:
+      required: true
+
+  - type: "dropdown"
+    id: "report_category"
+    attributes:
+      label: "Report category"
+      description: "Choose the closest primary concern."
+      options:
+        - "Suspicious or harmful behavior"
+        - "Permissions or capability mismatch"
+        - "Source provenance or ownership"
+        - "Policy or quality delisting"
+        - "Publicly disclosed vulnerability"
+        - "Other public concern"
+    validations:
+      required: true
+
+  - type: "textarea"
+    id: "observed_behavior"
+    attributes:
+      label: "Observed behavior"
+      description: "Describe what happened, what you expected, and the safe-to-publish reproduction scope."
+      placeholder: "In a disposable public fixture..."
+    validations:
+      required: true
+
+  - type: "textarea"
+    id: "evidence_links"
+    attributes:
+      label: "Public evidence links"
+      description: "Link only redacted evidence that is already safe for anyone to view. Write none if evidence must be reported privately."
+      placeholder: "https://... or none (reported privately)"
+    validations:
+      required: true
+
+  - type: "textarea"
+    id: "impact"
+    attributes:
+      label: "Impact"
+      description: "Who or what may be affected, how severe the effect is, and whether it is ongoing."
+    validations:
+      required: true
+
+  - type: "dropdown"
+    id: "requested_action"
+    attributes:
+      label: "Requested action"
+      description: "Maintainers will choose the final lifecycle state after triage."
+      options:
+        - "Investigate"
+        - "Soft-hide during investigation"
+        - "Yank from discovery and new installs"
+        - "Revoke exact resolution with an advisory"
+        - "Correct public metadata or policy"
+    validations:
+      required: true
+
+  - type: "textarea"
+    id: "relationship_and_conflicts"
+    attributes:
+      label: "Relationship and conflicts"
+      description: "Disclose authorship, employment, financial, personal, competitive, or other relevant relationships. Write none when there is no conflict."
+    validations:
+      required: true
+
+  - type: "checkboxes"
+    id: "safe_to_publish"
+    attributes:
+      label: "Public disclosure confirmation"
+      options:
+        - label: "I confirm this issue and every linked item are safe to publish and contain no secrets, exploit steps, private data, private repository names, or unredacted logs."
+          required: true

@@ -189,8 +189,8 @@ for a public repository and includes:
 - the appellant's relationship to the honeycomb and any conflict of interest.
 
 If the appeal contains vulnerability details, secrets, exploit steps, private
-data, or unredacted logs, use the repository's private vulnerability-reporting
-channel instead of a public issue.
+data, or unredacted logs, use the [private channel in the security
+policy](SECURITY.md#report-privately) instead of a public issue.
 
 An appeal does not restore discovery, resolve an approval, republish a moderated
 review, remove an advisory, promote a version, or relax a soft-hide, yank, or

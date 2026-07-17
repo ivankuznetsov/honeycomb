@@ -146,6 +146,9 @@ Relisting requires resolution of the report or policy concern and fresh current
 lint/approval evidence wherever security-relevant content or identity changed.
 History and any notice needed by installed users remain auditable.
 
+Reporting, response targets, notifications, and state-selection criteria are
+defined in the [root security policy](../SECURITY.md).
+
 ## Suspension, demotion, and history
 
 Maintainers may suspend discovery, demote `current_tier`, yank, or revoke after

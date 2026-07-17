@@ -82,8 +82,8 @@ reasonably affect the review.
 
 Each body section must be substantive and limited to information safe to place
 in a public repository. Send vulnerability details, secrets, exploit steps,
-private data, and unredacted logs through the private channel in the root
-security policy instead.
+private data, and unredacted logs through the [private channel in the root
+security policy](../SECURITY.md#report-privately) instead.
 
 ## Verdicts
 
@@ -154,9 +154,9 @@ the category and decision without republishing that material.
 
 Appeal a rejected, edited, or removed review through the [general appeal
 process](../CONTRIBUTING.md#appeals), identifying the review path, moderation
-decision, requested remedy, new evidence, and conflicts. Use private
-vulnerability reporting if the appeal itself contains confidential security
-details.
+decision, requested remedy, new evidence, and conflicts. Use [private
+vulnerability reporting](../SECURITY.md#report-privately) if the appeal itself
+contains confidential security details.
 
 Filing an appeal does not republish or restore a review. The active moderation
 decision remains in force until a recorded decision changes it. A maintainer
