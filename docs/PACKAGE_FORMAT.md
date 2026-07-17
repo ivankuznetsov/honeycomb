@@ -102,6 +102,32 @@ and deterministic collection indentation. It does not use Psych's emitter.
 These values are deliberately not interchangeable. Catalog inclusion requires
 current evidence for the release fingerprint and agreement on the review head.
 
+### Registry-original source commits
+
+An original honeycomb authored directly in this registry still uses a Git
+commit for `source.revision`; the 64-character form does not authorize a
+payload digest. Avoid a self-referential manifest/commit cycle with a
+two-commit release: first commit the behavior-bearing source, then generate the
+final manifest in a later commit that cites the first commit. The source commit
+must remain reachable from the default branch, so merge the release pull
+request with a merge commit rather than squash or rebase. Point `source.url` at
+the exact source commit and record the behavior-bearing paths:
+
+```yaml
+x-provenance:
+  kind: registry-original
+  source_paths:
+    - workflow.yml
+    - instructions/example.md
+```
+
+The source commit may contain an incomplete or stale generated manifest; the
+later release commit is the authority for generated fields and must pass full
+validation. Every listed `source_path` in the final package must be byte-equal
+to that path at `source.revision`. A changed behavior source therefore requires
+a new source commit and package version. This preserves the existing commit-ID
+schema while making provenance independently inspectable.
+
 ## Permission projection
 
 The generator visits active stages, council reviewers, and council revise
@@ -127,16 +153,24 @@ unbounded access and, when present, is the only array value.
 | Hive descriptor request | Projection |
 |---|---|
 | `read-only` | Repository/task read, `filesystem-read`, low risk. |
-| `scoped` + `Read`, `LS`, `Grep`, `Glob` | Bounded read scopes, low risk. |
-| `scoped` + `Write`, `Edit`, `MultiEdit`, `NotebookEdit` | Bounded write scopes, moderate risk. |
+| `scoped` + bare `Read`, `LS`, `Grep`, `Glob` | Task plus declared read scopes, low risk. |
+| `scoped` + bare `Write`, `Edit`, `MultiEdit`, `NotebookEdit` | Task plus declared write scopes, moderate risk. |
+| `Read(path)` / `Edit(path)` | Only the normalized task/project path for that capability. |
 | `scoped` + `WebFetch`, `WebSearch` | Unbounded host `*`, network capability, high risk. |
 | Missing permissions, `yolo`, or Bash (including the Bash tool) | All four capabilities and `*` hosts/read/write/secrets, high risk. |
 
-Safe `dirs` entries are projected as `task/<relative-path>` and supplement the
-repository/task scopes for the requested file capabilities. Absolute,
-backslash, empty, null-containing, or traversing directories fail. Unknown
-presets, keys, tools, blank blocks, or future permission-bearing constructs fail
-closed rather than publishing a narrower summary.
+Safe ordinary `dirs` entries are projected as `task/<relative-path>`. Hive
+workflow tasks have a stable four-level anchor from the task folder to the
+project root, so exact `../../../..` projects as `repository` and
+`../../../../<normalized-path>` projects as `repository/<normalized-path>`.
+No other `..` traversal is accepted. A bare file tool uses `task` plus its
+declared `dirs`; a qualified `Read(path)` or `Edit(path)` contributes only that
+normalized path. `Write(path)`, `MultiEdit(path)`, `NotebookEdit(path)`,
+`LS(path)`, `Grep(path)`, and `Glob(path)` fail because Hive does not enforce
+those forms; use `Edit(path)` or `Read(path)`. Absolute, home-relative, Windows
+drive, backslash, empty, null-containing, ambiguous, or escaping paths fail.
+Unknown presets, keys, tools, blank blocks, or future permission-bearing
+constructs fail closed rather than publishing a narrower summary.
 
 ## Read-only validation and Hive compatibility
 

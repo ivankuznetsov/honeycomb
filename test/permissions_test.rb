@@ -67,7 +67,7 @@ class PermissionsTest < Minitest::Test
     assert_equal %w[filesystem-read filesystem-write network], result.permissions["capabilities"]
     assert_equal ["*"], result.permissions["network_hosts"]
     assert_equal %w[repository task task/artifacts task/cache], result.permissions["filesystem_read"]
-    assert_equal %w[repository task task/artifacts task/cache], result.permissions["filesystem_write"]
+    assert_equal %w[task task/artifacts task/cache], result.permissions["filesystem_write"]
     assert result.findings.to_h.any? { |finding| finding["path"].include?("reviewers[0]") }
     assert result.findings.to_h.any? { |finding| finding["path"].include?("revise") }
   end
@@ -93,7 +93,10 @@ class PermissionsTest < Minitest::Test
   end
 
   def test_rejects_unsafe_dirs
-    ["/tmp", "../outside", "safe\\ambiguous", "bad\0dir"].each do |dir|
+    [
+      "/tmp", "../outside", "../../../docs", "../../../../../outside",
+      "../../../../docs/../outside", "safe\\ambiguous", "bad\0dir"
+    ].each do |dir|
       result = HoneycombRegistry::Permissions.derive(
         descriptor_with(active_stage(permissions: {
           "preset" => "scoped", "tools" => ["Read"], "dirs" => [dir]
@@ -103,6 +106,70 @@ class PermissionsTest < Minitest::Test
       assert result.findings.errors?, dir.inspect
       assert_includes result.findings.codes, "permissions.invalid_dir"
     end
+  end
+
+  def test_maps_the_stable_hive_task_anchor_to_project_scopes
+    result = HoneycombRegistry::Permissions.derive(
+      descriptor_with(active_stage(permissions: {
+        "preset" => "scoped", "tools" => %w[Read Write],
+        "dirs" => ["../../../..", "../../../../docs", "artifacts"]
+      })),
+      path: "workflow.yml"
+    )
+
+    refute result.findings.errors?, result.findings.to_h.inspect
+    assert_equal %w[repository repository/docs task task/artifacts], result.permissions["filesystem_read"]
+    assert_equal %w[repository repository/docs task task/artifacts], result.permissions["filesystem_write"]
+  end
+
+  def test_projects_path_qualified_read_and_edit_rules_without_widening_writes
+    result = HoneycombRegistry::Permissions.derive(
+      descriptor_with(active_stage(permissions: {
+        "preset" => "scoped",
+        "tools" => ["Read", "Edit(./inspect.md)", "Edit(../../../../docs/**)"],
+        "dirs" => ["../../../.."]
+      })),
+      path: "workflow.yml"
+    )
+
+    refute result.findings.errors?, result.findings.to_h.inspect
+    assert_equal %w[repository task], result.permissions["filesystem_read"]
+    assert_equal %w[repository/docs/** task/inspect.md], result.permissions["filesystem_write"]
+  end
+
+  def test_rejects_unsupported_or_unsafe_path_qualified_file_rules
+    rules = [
+      "Write(./state.md)", "MultiEdit(./state.md)", "NotebookEdit(./state.md)",
+      "LS(../../../../docs)", "Grep(../../../../docs)", "Glob(../../../../docs/**)",
+      "Read(../outside)", "Edit(/tmp/outside)", "Edit(C:/outside)", "Edit(~user/outside)"
+    ]
+
+    rules.each do |rule|
+      result = HoneycombRegistry::Permissions.derive(
+        descriptor_with(active_stage(permissions: {"preset" => "scoped", "tools" => [rule]})),
+        path: "workflow.yml"
+      )
+      assert result.findings.errors?, rule
+      assert_nil result.permissions
+    end
+  end
+
+  def test_qualified_network_and_shell_rules_are_conservatively_unbounded
+    network = HoneycombRegistry::Permissions.derive(
+      descriptor_with(active_stage(permissions: {
+        "preset" => "scoped", "tools" => ["WebFetch(domain:example.com)"]
+      }))
+    )
+    shell = HoneycombRegistry::Permissions.derive(
+      descriptor_with(active_stage(permissions: {
+        "preset" => "scoped", "tools" => ["Bash(git:status)"]
+      }))
+    )
+
+    assert_equal "high", network.permissions["risk"]
+    assert_equal ["*"], network.permissions["network_hosts"]
+    assert_equal "high", shell.permissions["risk"]
+    assert_equal ["*"], shell.permissions["filesystem_write"]
   end
 
   def test_fails_closed_for_unknown_permission_shapes_and_tools
