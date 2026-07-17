@@ -32,7 +32,7 @@ files:
   "packages/bench/0.1.0/instructions/judge.md": "d2441d36d776dbe970e88816410b9c9c4c0d22598d3ff4a6f955a8927cf89ccd"
   "packages/bench/0.1.0/instructions/publish.md": "81ae24aa477a2041ecc84a6d47b7a1ab177d5ea9759293cd50333e6193bbd786"
   "packages/bench/0.1.0/workflow.yml": "91ffda50fbddf27bd32647fa37c814ef6ad55ed44be173c571363106a5459ec7"
-release_sha256: "e398f47e171a44406d0d444fea24c606614c300e2b44c157825b8ce67db574d1"
+release_sha256: "6c1d8ee38591423b49fb724c03e2864c7a399567c884a749f0f4518d2cbcd234"
 x-provenance:
   pull_request: "https://github.com/ivankuznetsov/hive-bench/pull/1"
   source_paths:
@@ -43,3 +43,42 @@ x-provenance:
     - "workflows/bench/publish.md"
   translations:
     - "Package-relative instruction references changed from ./bench/<stage>.md to instructions/<stage>.md."
+x-security:
+  network_host_reasons: {}
+  suppressions:
+    -
+      fingerprint: "0520b7300b9598aecf6fe490f06d66681e9a9c14c2eb5951a0e04c0d3c0e7435"
+      reason: "Bench uses the documented Hive package anchor to resolve its source repository root; this match is the guarded resolution or its inert diagnostic."
+    -
+      fingerprint: "14d703b68ad1621551ef3b8cbc71c2d0d44bb160ba54940ea149a80c20c81b4c"
+      reason: "Bench uses the documented Hive package anchor to resolve its source repository root; this match is the guarded resolution or its inert diagnostic."
+    -
+      fingerprint: "2dc87aa672784e08bd1a09561846999c29fedb6e4865a4dc0b60ee893bd648a8"
+      reason: "Bench uses the documented Hive package anchor to resolve its source repository root; this match is the guarded resolution or its inert diagnostic."
+    -
+      fingerprint: "5f9b5974beb570f3dc98f47d4fc6503c87d95325c26ade72d228b3a707341f31"
+      reason: "Bench uses the documented Hive package anchor to resolve its source repository root; this match is the guarded resolution or its inert diagnostic."
+    -
+      fingerprint: "691c9a10b604f026f6028fe53d8bebb904f9c1ada5fe802f45f50e6b4d39a138"
+      reason: "Bench uses the documented Hive package anchor to resolve its source repository root; this match is the guarded resolution or its inert diagnostic."
+    -
+      fingerprint: "71f3509b44a90332c0be624cf351252d523d43bfed6123911548f9e8fb16d487"
+      reason: "Bench uses the documented Hive package anchor to resolve its source repository root; this match is the guarded resolution or its inert diagnostic."
+    -
+      fingerprint: "907f5eb28ea921d06273fe01e106f5b742fb6588cdc8258cde68c74eccbafcd5"
+      reason: "Bench uses the documented Hive package anchor to resolve its source repository root; this match is the guarded resolution or its inert diagnostic."
+    -
+      fingerprint: "af7256fda3a82b581adfaa69c9e69f6044dda44147f72690242bf887fde71e50"
+      reason: "Bench uses the documented Hive package anchor to resolve its source repository root; this match is the guarded resolution or its inert diagnostic."
+    -
+      fingerprint: "b47cd76b04333007f0ed29f48a8d4880ce962ba0e9f8be1f26b70d9f4498f16c"
+      reason: "Bench uses the documented Hive package anchor to resolve its source repository root; this match is the guarded resolution or its inert diagnostic."
+    -
+      fingerprint: "b773f24a85498e2f8bf47f930e8250db671195ffb261c1a288850fcac2abc112"
+      reason: "Bench uses the documented Hive package anchor to resolve its source repository root; this match is the guarded resolution or its inert diagnostic."
+    -
+      fingerprint: "db6e303ac6c3816375ff7e9525b5ac85992809341fcf872488afc4d14aba6638"
+      reason: "Bench uses the documented Hive package anchor to resolve its source repository root; this match is the guarded resolution or its inert diagnostic."
+    -
+      fingerprint: "e7b67c6cca7b7f6e7039542e011ccd45a8c4e2fa441447a9ecd534764b701e55"
+      reason: "Bench uses the documented Hive package anchor to resolve its source repository root; this match is the guarded resolution or its inert diagnostic."

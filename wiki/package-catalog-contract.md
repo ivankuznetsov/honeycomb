@@ -68,6 +68,12 @@ meaning of `source.revision`. Scoped descriptor directories and file rules use
 Hive's exact `../../../..` project anchor so manifests can distinguish
 `repository/docs/**` from repository-wide write access.
 
+Bench retains the canonical Hive package-to-repository anchor used by its
+guarded stage scripts. Security lint reports each executable or diagnostic
+occurrence as a hard parent-traversal finding. The package requests suppression
+only for those exact finding fingerprints; requests remain visible and do not
+pass lint until eligible maintainers explicitly approve the complete set.
+
 ## Handoffs
 
 - Task 1849: produce/adapt normalized evidence and invoke validator/catalog

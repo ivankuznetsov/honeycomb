@@ -40,6 +40,13 @@ class SeedCatalogTest < Minitest::Test
     assert_equal ["*"], document.dig("permissions", "network_hosts")
     assert_equal ["*"], document.dig("permissions", "filesystem_write")
     assert_equal ["*"], document.dig("permissions", "secrets")
+    security = document.fetch("x-security")
+    assert_equal({}, security.fetch("network_host_reasons"))
+    suppressions = security.fetch("suppressions")
+    assert_equal 12, suppressions.length
+    assert_equal suppressions.length, suppressions.map { |entry| entry.fetch("fingerprint") }.uniq.length
+    assert suppressions.all? { |entry| entry.fetch("fingerprint").match?(/\A[0-9a-f]{64}\z/) }
+    assert suppressions.all? { |entry| entry.fetch("reason").include?("documented Hive package anchor") }
   end
 
   def test_docs_sync_is_a_bounded_two_stage_honeycomb_with_content_provenance
