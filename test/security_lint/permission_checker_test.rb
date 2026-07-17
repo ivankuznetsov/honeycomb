@@ -78,4 +78,25 @@ class SecurityLintPermissionCheckerTest < Minitest::Test
     )
     assert_equal "advisory", findings.first.fetch("disposition")
   end
+
+  def test_secret_wildcard_authorizes_observed_secret_names
+    commands = [command("echo $OPENROUTER_API_KEY")]
+    findings, = @checker.check(
+      commands: commands, observations: [], permissions: permissions("secrets" => ["*"]),
+      security_extension: {"network_host_reasons" => {}, "suppressions" => []}
+    )
+
+    refute_includes findings.map { |finding| finding["rule_id"] }, "permission.secret"
+    assert_includes findings.map { |finding| finding["rule_id"] }, "permission.broad-declaration"
+  end
+
+  def test_anchored_regexp_literal_is_not_an_absolute_path
+    commands = [command('ruby -e \'abort unless id.match?(/\\A[a-z0-9-]+\\z/)\'')]
+    findings, = @checker.check(
+      commands: commands, observations: [], permissions: permissions,
+      security_extension: {"network_host_reasons" => {}, "suppressions" => []}
+    )
+
+    refute_includes findings.map { |finding| finding["rule_id"] }, "permission.absolute-path"
+  end
 end

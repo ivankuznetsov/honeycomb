@@ -90,6 +90,16 @@ Instruction analysis covers README/workflow surfaces plus every UTF-8 file under
 extensions. Commands, network observations, and findings have policy budgets;
 budget exhaustion is an operational error rather than truncated evidence.
 
+Workflow `permissions.tools` and `permissions.dirs` values are descriptor data,
+not executable YAML instruction strings. Other YAML scalars enter command
+analysis only when they are command-like. Shell option setup such as
+`set -euo pipefail` and embedded-language variables named `env` are not
+environment dumps. A declared secret wildcard authorizes observed secret
+variable names while remaining a broad-permission advisory. Anchored regular
+expression literals are not absolute paths, and hexadecimal content digests are
+not phone-like PII. These exclusions preserve actual parent-traversal findings,
+bare environment dumps, conventional absolute paths, and undeclared secrets.
+
 ## Compatibility gate
 
 Registry structure and permission derivation are standalone. CI additionally
