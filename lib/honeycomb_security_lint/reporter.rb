@@ -68,7 +68,8 @@ module HoneycombSecurityLint
       run = @event["workflow_run"]
       raise Invalid, "workflow_run metadata is missing" unless run.is_a?(Hash)
       valid_path = run["path"].to_s.split("@", 2).first == ".github/workflows/security-lint.yml"
-      unless run["name"] == "Security lint" && run["event"] == "pull_request" && valid_path
+      valid_name = run["name"] == "Security lint" || run["name"].to_s.start_with?("Security lint / ")
+      unless valid_name && run["event"] == "pull_request" && valid_path
         raise Invalid, "workflow_run identity is invalid"
       end
       unless run["id"].is_a?(Integer) && run["id"].positive? &&

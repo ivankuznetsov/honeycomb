@@ -49,7 +49,8 @@ class SecurityLintReporterTest < Minitest::Test
     {
       "action" => "completed", "repository" => {"full_name" => "hive-sh/honeycomb"},
       "workflow_run" => {
-        "id" => 7, "run_attempt" => 1, "run_number" => 3, "name" => "Security lint",
+        "id" => 7, "run_attempt" => 1, "run_number" => 3,
+        "name" => "Security lint / labeled / safe-to-validate",
         "event" => "pull_request", "path" => ".github/workflows/security-lint.yml",
         "head_sha" => SHA, "html_url" => "https://github.com/hive-sh/honeycomb/actions/runs/7",
         "pull_requests" => [{"number" => 42}]
@@ -117,6 +118,21 @@ class SecurityLintReporterTest < Minitest::Test
     assert_equal :reported, reporter(client).report
     assert_empty client.created_comments
     assert_equal 9, client.updated_comments.first.first
+  end
+
+  def test_workflow_identity_rejects_foreign_run_names_even_with_the_trusted_path
+    ["", "Foreign workflow / labeled / safe-to-validate"].each do |name|
+      client = client_for
+      event_data = event
+      event_data["workflow_run"]["name"] = name
+
+      error = assert_raises(HoneycombSecurityLint::Reporter::Invalid) do
+        reporter(client, event_data: event_data).report
+      end
+
+      assert_equal "workflow_run identity is invalid", error.message
+      assert_empty client.statuses
+    end
   end
 
   def test_matching_marker_from_another_author_is_not_hijacked

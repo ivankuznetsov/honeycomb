@@ -10,3 +10,5 @@
 - Required prior normalized listing evidence during export, retaining
   unselected records and carrying lifecycle, tier, verification, history, and
   advisories across lint refreshes.
+- Bound reporter events to the exact trusted workflow path and source event
+  while accepting GitHub's custom `run-name` value in workflow-run metadata.
