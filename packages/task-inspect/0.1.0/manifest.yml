@@ -1,0 +1,17 @@
+schema: honeycomb-manifest/v1
+name: task-inspect
+version: 0.1.0
+description: Inspect a Hive task workspace without mutation
+author:
+  name: Honeycomb Maintainers
+  url: https://github.com/ivankuznetsov/honeycomb
+license: MIT
+hive_min_version: 0.5.2
+source:
+  url: https://github.com/ivankuznetsov/honeycomb/tree/SOURCE_REVISION/packages/task-inspect/0.1.0
+  revision: SOURCE_REVISION
+x-provenance:
+  kind: registry-original
+  source_paths:
+    - workflow.yml
+    - instructions/inspect.md
