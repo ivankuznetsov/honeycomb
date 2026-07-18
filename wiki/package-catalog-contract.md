@@ -74,6 +74,11 @@ meaning of `source.revision`. Scoped descriptor directories and file rules use
 Hive's exact `../../../..` project anchor so manifests can distinguish
 `repository/docs/**` from repository-wide write access.
 
+The catalog publication workflow fetches complete registry history. Seed
+provenance tests intentionally read the preserved source commit, which may live
+on a retained release branch rather than the pull request's first-parent
+history; a shallow pull-request checkout cannot prove that content identity.
+
 Bench stage scripts ask Git for the nested `.hive-state` checkout root, verify
 that identity, use its containing HiveBench source worktree, then verify
 `harness/hive_run.rb` exists before continuing. This avoids fixed

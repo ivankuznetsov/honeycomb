@@ -25,6 +25,7 @@ class CatalogPublicationWorkflowTest < Minitest::Test
     end
 
     assert_equal false, source_checkout.dig("with", "persist-credentials")
+    assert_equal 0, source_checkout.dig("with", "fetch-depth")
     assert_equal "ivankuznetsov/hive", hive_checkout.dig("with", "repository")
     assert_match(/\A[0-9a-f]{40}\z/, hive_checkout.dig("with", "ref"))
     assert_equal false, hive_checkout.dig("with", "persist-credentials")
