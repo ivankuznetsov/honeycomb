@@ -1,0 +1,117 @@
+{
+  "artifact_digest": "85b93ee3e5fc9bcdcbf78cd8c0526a470617c44440f64a53feef6862d79ebb95",
+  "base_sha": "ec1b04467a9cf01049d697921eeb822097df1a35",
+  "event": {
+    "action": "labeled",
+    "gate": "applied",
+    "label_sha": "ee835762227c189fa82d4253058c38518ae5f187"
+  },
+  "head_sha": "ee835762227c189fa82d4253058c38518ae5f187",
+  "packages": [
+    {
+      "commands": [
+        {
+          "column": 1,
+          "kind": "fenced",
+          "line": 10,
+          "path": "packages/task-inspect/0.1.0/README.md",
+          "redacted": "hive workflow install honeycomb/task-inspect"
+        }
+      ],
+      "counts": {
+        "advisory": 2,
+        "downgraded": 0,
+        "hard": 0
+      },
+      "findings": [
+
+      ],
+      "hosts": [
+
+      ],
+      "identity": {
+        "name": "task-inspect",
+        "path": "packages/task-inspect/0.1.0",
+        "release_sha256": "37fc8806b3d54a1d304eede69e453a6d131053e50d0007aabcd104f97929c839",
+        "version": "0.1.0"
+      },
+      "requested_permissions": {
+        "capabilities": [
+          "filesystem-read"
+        ],
+        "filesystem_read": [
+          "task"
+        ],
+        "filesystem_write": [
+
+        ],
+        "network_hosts": [
+
+        ],
+        "risk": "low",
+        "secrets": [
+
+        ]
+      },
+      "scanned_files": [
+        {
+          "bytes": 437,
+          "kind": "text",
+          "path": "packages/task-inspect/0.1.0/README.md",
+          "sha256": "b3f763f37ff1b17b7b4a936975ce8b005b0f968faa91dfa5c81b1344ae0fda35"
+        },
+        {
+          "bytes": 337,
+          "kind": "text",
+          "path": "packages/task-inspect/0.1.0/instructions/inspect.md",
+          "sha256": "8298620d09a59960cc9a8866d1886c332b2b289fea691b798ef86733328b1fa7"
+        },
+        {
+          "bytes": 1158,
+          "kind": "text",
+          "path": "packages/task-inspect/0.1.0/manifest.yml",
+          "sha256": "d7020e8fb8d745e691160332379d1341c120b942a00178e7cb02668c64370163"
+        },
+        {
+          "bytes": 254,
+          "kind": "text",
+          "path": "packages/task-inspect/0.1.0/workflow.yml",
+          "sha256": "37de162518c0fe5965869f330f84f1fc5e6a43aeff1e1153617507ab0d31ae4b"
+        }
+      ],
+      "suppressions": [
+
+      ],
+      "validator_findings": [
+        {
+          "code": "hive.missing",
+          "message": "Hive is not installed; descriptor compatibility was not checked",
+          "path": "packages/task-inspect/0.1.0/workflow.yml",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/task-inspect/0.1.0/workflow.yml.stages[0] contributes scoped tools permissions",
+          "path": "packages/task-inspect/0.1.0/workflow.yml.stages[0].permissions",
+          "severity": "info"
+        }
+      ],
+      "verdict": "pass"
+    }
+  ],
+  "pull_request": 10,
+  "run": {
+    "attempt": 1,
+    "id": 29654320932,
+    "repository": "ivankuznetsov/honeycomb",
+    "workflow": "Security lint"
+  },
+  "schema": "honeycomb.security-lint/v1",
+  "state": "pass",
+  "totals": {
+    "advisory": 2,
+    "downgraded": 0,
+    "hard": 0
+  },
+  "verdict": "Security lint passed"
+}
