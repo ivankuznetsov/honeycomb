@@ -1,0 +1,14 @@
+id: task-inspect
+stages:
+  - name: inspect
+    kind: agent
+    state_file: inspect.md
+    instruction: instructions/inspect.md
+    agent: claude
+    permissions:
+      preset: scoped
+      tools:
+        - Read
+        - LS
+        - Grep
+        - Glob
