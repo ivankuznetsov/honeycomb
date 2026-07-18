@@ -1,0 +1,21 @@
+{
+  "approvals": [
+    {
+      "approved_suppressions": [
+
+      ],
+      "decision": "approved",
+      "evidence_digest": "85b93ee3e5fc9bcdcbf78cd8c0526a470617c44440f64a53feef6862d79ebb95",
+      "head_sha": "ee835762227c189fa82d4253058c38518ae5f187",
+      "name": "task-inspect",
+      "notes": "Production E2E canary: exact-head lint passed; task-local read-only access; pinned Hive v0.5.2 catalog contract passed.",
+      "path": "packages/task-inspect/0.1.0",
+      "release_sha256": "37fc8806b3d54a1d304eede69e453a6d131053e50d0007aabcd104f97929c839",
+      "review_url": "https://github.com/ivankuznetsov/honeycomb/pull/10#pullrequestreview-4728979764",
+      "reviewed_at": "2026-07-18T17:39:43Z",
+      "reviewer": "ivankuznetsov",
+      "version": "0.1.0"
+    }
+  ],
+  "schema": "honeycomb.listing-approval/v1"
+}
