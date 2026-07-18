@@ -1,0 +1,27 @@
+# Submission Canary
+
+`.github/workflows/submission-canary.yml` is a maintainer-dispatched production
+smoke path for the real contributor boundary. It creates a fixed
+`task-inspect/<semver>` package as `github-actions[bot]`, using one source commit
+and a second canonical-manifest commit. A human maintainer must still inspect
+the diff, apply `safe-to-validate`, submit a current GitHub review, approve the
+protected environment deployment, and dispatch the listing-approval workflow.
+
+The canary deliberately cannot approve itself, write listing evidence, update
+the catalog, deploy the site, or bypass normal branch protection. Its only
+input is a strict numeric SemVer, and it refuses an existing package directory
+or remote branch. The submitted workflow requests the currently lossless Hive
+v2 permission shape: low-risk task-local filesystem read with no writes,
+network, shell, repository access, or secrets.
+
+GitHub repository settings may disallow pull-request creation by
+`GITHUB_TOKEN`. An operator may enable that setting only for the dispatched
+canary run and must restore it after the PR is opened. GitHub marks workflow-
+created pull-request runs as approval-required; approving those runs is part of
+the canary rather than a product bypass.
+
+Registry-original provenance still requires the source commit to remain
+reachable after merge. Use a merge commit for the two-commit canary submission,
+then restore the default branch's linear-history protection if it was
+temporarily relaxed. Do not squash or rebase the submission.
+

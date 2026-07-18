@@ -14,6 +14,8 @@ change.
 - [[package-catalog-contract]] - shipped package, manifest, evidence, and catalog
   contracts.
 - [[security-review-contract]] - identity binding and boundary with listing CI.
+- [[submission-canary]] - maintainer-dispatched bot submission used to smoke
+  the real lint, non-self approval, publication, site, and Hive boundaries.
 - [[gaps]] - missing, uncertain, or stale wiki coverage.
 
 ## Canonical Public Policy
