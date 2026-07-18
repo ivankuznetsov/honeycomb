@@ -6,7 +6,7 @@ surfaces. Full field and safety details live in `docs/PACKAGE_FORMAT.md`.
 ## Public Terms
 
 - A published Hive workflow package is a **honeycomb**.
-- The public catalog is named `hive.sh/honeycombs`.
+- The public catalog is named `hivecli.sh/honeycombs`.
 - User-facing surfaces should use "honeycomb" for published workflow packages.
 
 ## Documented Install Command
@@ -73,9 +73,16 @@ Root `catalog.json` is a shipped deterministic `honeycomb-catalog/v2` artifact.
 It carries independent release/current tier, permission risk, lifecycle,
 verification, transition history, and advisory fields. Discovery/latest include
 only listed entries; exact soft-hidden/yanked versions remain resolvable and
-revoked versions fail closed. The file is empty until task 1851 seeds real
-packages. `hive.sh/honeycombs` remains a documented future static rendering
-surface; no route, handler, or site code is implemented here.
+revoked versions fail closed. The default branch contains seed packages, but
+the file remains empty until eligible protected evidence lists them.
+`hivecli.sh/honeycombs` remains a documented external static rendering surface;
+no route, handler, or site code is implemented here.
+
+`.github/workflows/catalog-check.yml` is the read-only publication gate. It
+compares the committed catalog with
+`honeycomb-evidence:normalized/listing-evidence-v1.json` on pull requests,
+default-branch pushes, and manual reruns. Publication remains an ordinary
+reviewed catalog commit followed by a validated `hive-site` snapshot commit.
 
 Catalog `reviews_url` remains the exact designated-maintainer approval URL.
 Nullable `community_reviews_url` names the default-branch community-review

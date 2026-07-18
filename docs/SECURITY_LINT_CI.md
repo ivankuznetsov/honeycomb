@@ -165,6 +165,22 @@ normalized evidence with ordered history and, for revocation, advisories;
 they are never inferred from lint or a honeycomb-controlled field. The output
 may safely replace `--previous` atomically after validation.
 
+## Catalog publication gate
+
+`.github/workflows/catalog-check.yml` checks every pull request, default-branch
+push, and manual dispatch against the protected normalized evidence snapshot.
+It has only `contents: read`, checks out both trees without persisted
+credentials, and runs `honeycomb-catalog --check`; it cannot publish evidence,
+rewrite `catalog.json`, or bypass review. A maintainer first exports the
+explicitly selected lint records to `honeycomb-evidence`, regenerates
+`catalog.json` locally from that exact snapshot, and submits the changed
+catalog through an ordinary pull request. Rerun the manual gate after an
+evidence-only update when the source pull request itself did not change.
+
+The public site consumes the resulting committed `catalog.json` through its
+own validated snapshot pull request. Neither this workflow nor the site build
+fetches or reconstructs catalog entries from package manifests.
+
 ## Repository setup and rollout
 
 Repository administrators must:
@@ -183,7 +199,9 @@ Repository administrators must:
    cannot update it and only the trusted approval workflow may append records;
 8. create `normalized/listing-evidence-v1.json` on that branch with the empty
    v1 record set, and require reviewed administrative updates for normalized
-   lifecycle projections.
+   lifecycle projections;
+9. require the `Catalog publication / check` result before merging catalog or
+   package changes.
 
 After default-branch installation, run a fork canary: confirm the analyzer sees
 no custom secret and cannot comment or set status; apply the gate and confirm the

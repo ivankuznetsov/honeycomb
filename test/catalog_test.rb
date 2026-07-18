@@ -144,7 +144,9 @@ class CatalogTest < Minitest::Test
       assert_equal "community", entry["current_tier"]
       assert_equal "listed", entry["state"]
       assert entry["discoverable"]
-      assert_includes entry["package_url"], "/tree/#{"d" * 40}/packages/example/1.0.0"
+      assert_equal "https://github.com/ivankuznetsov/honeycomb/tree/main/packages/example/1.0.0",
+                   entry["package_url"]
+      refute_includes entry["package_url"], record.dig("lint", "head_sha")
       assert_equal "https://example.test/reviews/example-1.0.0-1", entry["reviews_url"]
       assert_nil entry["community_reviews_url"]
       refute entry.key?("files")

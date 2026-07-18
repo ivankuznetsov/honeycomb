@@ -27,8 +27,12 @@ catalog renderer.
   review and appends immutable lint/approval records to `honeycomb-evidence`.
 - `.github/workflows/community-reviews.yml` runs trusted base code against
   submitted Git objects without checking out or executing pull-request code.
-- `packages/<name>/<semver>/` is the immutable release store; it is empty except
-  for `.gitkeep` until seeding work lands.
+- `.github/workflows/catalog-check.yml` is a read-only publication gate that
+  runs the complete source contract suite against an exact Hive source commit,
+  then compares submitted `catalog.json` bytes with the protected normalized
+  evidence branch.
+- `packages/<name>/<semver>/` is the immutable release store; `bench/0.1.0` and
+  `docs-sync/0.1.0` are present on the current default branch.
 - `reviews/<name>/<version>/<github-user>.md` is the mutable, external
   community-review namespace; checked documentation fixtures demonstrate its
   strict record shape without creating production reviews.
@@ -82,6 +86,10 @@ The shared library has three main flows:
 
 `source.revision`, generated `release_sha256`, and review `head_sha` are separate
 identities. Evidence binds both lint and human approval to the latter two.
+The installer materializes package bytes from its verified catalog commit;
+`head_sha` remains review evidence because squash merging need not preserve it
+as a default-branch ancestor. Human package links use the default branch and
+immutable version path.
 Release/current trust tier, permission risk, lifecycle state, verification,
 history, and advisories remain independent catalog axes. Revoked entries remain
 auditable but exact resolution fails closed with their public advisories.
@@ -91,10 +99,11 @@ community record exists.
 
 ## Runtime Flow Status
 
-Author tooling and security-lint CI are shipped. Analyzer/exporter code is
-deterministic and offline; only the trusted reporter and approval issuer use
-GitHub HTTPS metadata APIs. The remaining consumer flow is future work: task
-1851 seeds real honeycombs, a
-static site exposes `hive.sh/honeycombs`, and Hive tasks 1852/1853 implement
-`hive workflow install honeycomb/<name>`. Evidence branch/environment creation
-and protection remain post-merge repository rollout operations.
+Author tooling, seed packages, security-lint CI, and the read-only catalog drift
+gate are shipped on this branch. Analyzer/exporter code is deterministic and
+offline; only the trusted reporter and approval issuer use GitHub HTTPS metadata
+APIs. The catalog remains empty until eligible approvals populate the protected
+normalized evidence. The static site and Hive installer are separate consumers
+and must consume catalog v2 without reconstructing entries. Evidence
+branch/environment protection and live lifecycle canaries remain repository
+rollout operations.

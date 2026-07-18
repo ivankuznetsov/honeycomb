@@ -8,6 +8,7 @@ module HoneycombRegistry
   module Catalog
     SCHEMA = "honeycomb-catalog/v2"
     REPOSITORY_URL = "https://github.com/ivankuznetsov/honeycomb"
+    PACKAGE_REF = "main"
     COMMUNITY_REVIEWS_REF = "main"
     Result = Struct.new(:document, :bytes, :findings, keyword_init: true)
 
@@ -133,7 +134,7 @@ module HoneycombRegistry
         "hive_min_version" => manifest.fetch("hive_min_version"),
         "permissions" => manifest.fetch("permissions"),
         "install_command" => "hive workflow install honeycomb/#{name}",
-        "package_url" => "#{REPOSITORY_URL}/tree/#{head_sha}/packages/#{name}/#{version}",
+        "package_url" => "#{REPOSITORY_URL}/tree/#{PACKAGE_REF}/packages/#{name}/#{version}",
         "reviews_url" => approvals.first.fetch("review_url"),
         "community_reviews_url" => community_reviews_url(name, version, community_reviews),
         "source_sha" => manifest.fetch("source").fetch("revision"),

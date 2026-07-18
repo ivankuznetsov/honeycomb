@@ -29,6 +29,8 @@ The catalog projects manifest description/author/license/Hive minimum/permission
 data, independent trust/lifecycle/review metadata, deterministic package and
 review URLs, source SHA, and a compact listing-approval identity. It does not
 embed full manifests or timestamps generated at runtime.
+Canonical JSON compacts empty arrays and objects explicitly so committed bytes
+do not depend on the Ruby runtime's bundled JSON library version.
 
 Catalog `reviews_url` preserves the exact designated-maintainer approval URL.
 Nullable `community_reviews_url` is the default-branch external community-review
@@ -54,6 +56,12 @@ current denial makes the version ineligible. Verified evidence binds the
 canonical immutable archive identity to an exact GitHub Actions keyless signer
 and attestation workflow identity.
 
+The designated review `head_sha` is an audit identity, not the installation
+source commit: squash merging may make it unreachable from the catalog commit.
+Installers materialize `packages/<name>/<version>/` from the verified catalog
+commit and validate the manifest/file hashes there. Human `package_url` links
+use the default branch plus the immutable version path.
+
 Catalog generation validates all packages before filtering. Therefore a broken
 unlisted package aborts output rather than hiding behind missing evidence.
 Offline approval export requires prior normalized evidence and preserves
@@ -67,6 +75,11 @@ manifest commit. This avoids a manifest/commit hash cycle without changing the
 meaning of `source.revision`. Scoped descriptor directories and file rules use
 Hive's exact `../../../..` project anchor so manifests can distinguish
 `repository/docs/**` from repository-wide write access.
+
+The catalog publication workflow fetches complete registry history. Seed
+provenance tests intentionally read the preserved source commit, which may live
+on a retained release branch rather than the pull request's first-parent
+history; a shallow pull-request checkout cannot prove that content identity.
 
 Bench stage scripts ask Git for the nested `.hive-state` checkout root, verify
 that identity, use its containing HiveBench source worktree, then verify

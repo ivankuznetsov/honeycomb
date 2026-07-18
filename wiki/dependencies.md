@@ -31,6 +31,13 @@ GitHub workflows use hosted ephemeral runners and pin `actions/checkout` and
 `actions/upload-artifact` to full commit SHAs. There is no dependency cache,
 self-hosted runner, artifact extraction action, or gem installation.
 
+The read-only catalog publication gate checks out Hive at the exact compatible
+commit recorded in the workflow, exposes that checkout through `RUBYLIB`, and
+runs the complete registry test suite. Only then does it compare root
+`catalog.json` with the normalized snapshot from the protected
+`honeycomb-evidence` branch. It receives no secret or write permission and does
+not publish any checkout.
+
 The approval workflow additionally depends on a protected
 `honeycomb-listing-approval` environment and an append-only
 `honeycomb-evidence` branch. Those GitHub repository settings are rollout
@@ -38,7 +45,8 @@ configuration, not runtime package dependencies.
 
 ## Services
 
-- `hive.sh/honeycombs` is the documented catalog surface.
-- GitHub URLs in generated catalog entries are deterministic strings; catalog
-  generation never calls GitHub.
+- `hivecli.sh/honeycombs` is the documented catalog surface.
+- GitHub URLs in generated catalog entries use immutable version paths on the
+  default branch; catalog generation never calls GitHub. Installers use their
+  verified catalog commit rather than trusting the presentation URL.
 - No service implementation or deployment configuration is present here.

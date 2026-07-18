@@ -85,7 +85,7 @@ class SchemaTest < Minitest::Test
     refute HoneycombRegistry::Schema.validate_manifest(manifest).errors?
   end
 
-  def test_checked_in_catalog_and_listing_evidence_schemas_match_runtime_versions
+  def test_checked_in_schemas_match_runtime_versions_and_public_domain
     listing = JSON.parse(File.read(File.join(ROOT, "schemas", "listing-evidence-v1.json")))
     catalog = JSON.parse(File.read(File.join(ROOT, "schemas", "catalog-v2.json")))
     legacy_catalog = JSON.parse(File.read(File.join(ROOT, "schemas", "catalog-v1.json")))
@@ -105,5 +105,17 @@ class SchemaTest < Minitest::Test
     fixture = JSON.parse(File.read(fixture_path("listing-evidence", "passing.json")))
     assert_equal listing.dig("$defs", "record", "required").sort,
                  fixture.fetch("records").first.keys.sort
+
+    assert_equal "https://hive.sh/schemas/catalog-v1.json", legacy_catalog.fetch("$id")
+
+    current_schemas = Dir[File.join(ROOT, "schemas", "*.json")].reject do |path|
+      File.basename(path) == "catalog-v1.json"
+    end
+    current_schemas.each do |path|
+      schema = JSON.parse(File.read(path))
+      assert_equal "https://hivecli.sh/schemas/#{File.basename(path)}",
+                   schema.fetch("$id"),
+                   path
+    end
   end
 end
