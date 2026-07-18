@@ -1,0 +1,130 @@
+name: Submission canary
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: New task-inspect SemVer to submit
+        required: true
+        default: "0.1.0"
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: honeycomb-submission-canary
+  cancel-in-progress: false
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out trusted registry source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+
+      - name: Open a bot-authored task-inspect submission
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          [[ "$VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]
+
+          PACKAGE_DIR="packages/task-inspect/$VERSION"
+          BRANCH="canary/task-inspect-v${VERSION//./-}"
+          test ! -e "$PACKAGE_DIR"
+          git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1 && exit 1
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$BRANCH"
+          mkdir -p "$PACKAGE_DIR/instructions"
+
+          cat >"$PACKAGE_DIR/README.md" <<'README'
+          # Task Inspect honeycomb
+
+          Produce a concise inventory of the current Hive task workspace without
+          modifying files, invoking shell commands, accessing the project repository,
+          using the network, or reading secrets.
+
+          ## Install
+
+          ```sh
+          hive workflow install honeycomb/task-inspect
+          ```
+
+          ## Permissions
+
+          Task Inspect can use only read-oriented tools inside the task workspace.
+          The generated manifest is the authoritative permission projection.
+          README
+
+          cat >"$PACKAGE_DIR/instructions/inspect.md" <<'INSTRUCTIONS'
+          # Inspect the task workspace
+
+          Read only files available inside the current task workspace. Return a
+          concise Markdown inventory of the files, their apparent purpose, and any
+          missing inputs that prevent the task from proceeding. Do not modify files,
+          invoke shell commands, access a project repository, use the network, or
+          request secrets.
+          INSTRUCTIONS
+
+          cat >"$PACKAGE_DIR/workflow.yml" <<'WORKFLOW'
+          id: task-inspect
+          stages:
+            - name: inspect
+              kind: agent
+              state_file: inspect.md
+              instruction: instructions/inspect.md
+              agent: claude
+              permissions:
+                preset: scoped
+                tools:
+                  - Read
+                  - LS
+                  - Grep
+                  - Glob
+          WORKFLOW
+
+          cat >"$PACKAGE_DIR/manifest.yml" <<MANIFEST
+          schema: honeycomb-manifest/v1
+          name: task-inspect
+          version: $VERSION
+          description: Inspect a Hive task workspace without mutation
+          author:
+            name: Honeycomb Maintainers
+            url: https://github.com/ivankuznetsov/honeycomb
+          license: MIT
+          hive_min_version: 0.5.2
+          source:
+            url: https://github.com/ivankuznetsov/honeycomb/tree/SOURCE_REVISION/$PACKAGE_DIR
+            revision: SOURCE_REVISION
+          x-provenance:
+            kind: registry-original
+            source_paths:
+              - workflow.yml
+              - instructions/inspect.md
+          MANIFEST
+
+          git add "$PACKAGE_DIR"
+          git commit -m "feat(task-inspect): add $VERSION source"
+          SOURCE_SHA=$(git rev-parse HEAD)
+          sed -i "s/SOURCE_REVISION/$SOURCE_SHA/g" "$PACKAGE_DIR/manifest.yml"
+          ruby script/honeycomb-manifest "$PACKAGE_DIR"
+          ruby script/honeycomb-manifest --check "$PACKAGE_DIR"
+          ruby script/honeycomb-validate "$PACKAGE_DIR"
+          git add "$PACKAGE_DIR/manifest.yml"
+          git commit -m "chore(task-inspect): finalize $VERSION manifest"
+          git push --set-upstream origin "$BRANCH"
+
+          gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "feat(task-inspect): submit $VERSION" \
+            --body "Bot-authored production submission canary for the documented exact-SHA lint, non-self approval, catalog publication, site sync, and Hive install path."
+
