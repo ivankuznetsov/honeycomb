@@ -52,6 +52,40 @@ class SecurityLintContractsTest < Minitest::Test
     assert_equal Hash, JSON.parse(File.read(File.join(ROOT, "schemas", "listing-approval-v1.json"))).class
   end
 
+  def test_canonical_json_has_runtime_independent_empty_containers_and_escaping
+    value = {
+      "z" => [],
+      "a" => {"empty" => {}, "text" => "line\nquote\"slash\\snowman ☃", "true" => true},
+      "n" => nil
+    }
+    expected = <<~JSON
+      {
+        "a": {
+          "empty": {},
+          "text": "line\\nquote\\\"slash\\\\snowman ☃",
+          "true": true
+        },
+        "n": null,
+        "z": []
+      }
+    JSON
+
+    assert_equal expected, HoneycombSecurityLint::Contracts.canonical_json(value)
+    assert_equal "99b3b5488259e03501eb6b1c210d30b2182ffe6a227d672f854475cd1aa9272c",
+                 Digest::SHA256.hexdigest(expected)
+  end
+
+  def test_canonical_json_rejects_values_without_a_portable_contract_encoding
+    error = assert_raises(JSON::GeneratorError) do
+      HoneycombSecurityLint::Contracts.canonical_json({"ratio" => 1.5})
+    end
+    assert_includes error.message, "unsupported Float"
+
+    assert_raises(JSON::GeneratorError) do
+      HoneycombSecurityLint::Contracts.canonical_json({:symbol => "value"})
+    end
+  end
+
   def test_rejects_unknown_duplicate_and_mismatched_identity_fields
     invalid = Marshal.load(Marshal.dump(evidence))
     invalid["packages"][0]["identity"]["surprise"] = true

@@ -11,6 +11,11 @@ submitted instructions. It emits strict redacted
 `honeycomb.security-lint/v1` evidence bound to `release_sha256`, the exact PR
 `head_sha`, workflow run/attempt, and a content digest.
 
+Evidence and approval JSON use the registry's own sorted, UTF-8 canonical
+encoder. Empty containers, escaping, indentation, and integer rendering do not
+depend on the runner's Ruby `json` gem version, so a digest issued by the
+GitHub analyzer is re-verifiable by the offline evidence exporter.
+
 The separate `workflow_run` reporter runs default-branch code with metadata-only
 write permissions. It verifies the current head and hostile artifact before
 writing the authoritative `honeycomb/security-lint` status or one bot-owned
