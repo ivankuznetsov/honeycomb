@@ -29,6 +29,8 @@ The catalog projects manifest description/author/license/Hive minimum/permission
 data, independent trust/lifecycle/review metadata, deterministic package and
 review URLs, source SHA, and a compact listing-approval identity. It does not
 embed full manifests or timestamps generated at runtime.
+Canonical JSON compacts empty arrays and objects explicitly so committed bytes
+do not depend on the Ruby runtime's bundled JSON library version.
 
 Catalog `reviews_url` preserves the exact designated-maintainer approval URL.
 Nullable `community_reviews_url` is the default-branch external community-review

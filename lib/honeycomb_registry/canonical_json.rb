@@ -7,7 +7,12 @@ module HoneycombRegistry
     module_function
 
     def dump(value)
-      JSON.pretty_generate(value, allow_nan: false) + "\n"
+      normalize_empty_containers(JSON.pretty_generate(value, allow_nan: false)) + "\n"
+    end
+
+    def normalize_empty_containers(bytes)
+      bytes.gsub(/\[\n[[:space:]]*\]/, "[]")
+           .gsub(/\{\n[[:space:]]*\}/, "{}")
     end
   end
 end
