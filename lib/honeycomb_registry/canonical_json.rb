@@ -7,12 +7,39 @@ module HoneycombRegistry
     module_function
 
     def dump(value)
-      normalize_empty_containers(JSON.pretty_generate(value, allow_nan: false)) + "\n"
+      "#{JSON.generate(normalize(value))}\n"
     end
 
-    def normalize_empty_containers(bytes)
-      bytes.gsub(/\[\n[[:space:]]*\]/, "[]")
-           .gsub(/\{\n[[:space:]]*\}/, "{}")
+    def normalize(value)
+      case value
+      when Hash
+        value.each_with_object({}) do |(key, child), normalized|
+          normalized[normalize_string(key.to_s)] = normalize(child)
+        end.sort.to_h
+      when Array
+        value.map { |child| normalize(child) }
+      when String
+        normalize_string(value)
+      when Symbol
+        value.to_s
+      when Integer, TrueClass, FalseClass, NilClass
+        value
+      when Float
+        raise ArgumentError, "canonical JSON does not permit non-finite numbers" unless value.finite?
+
+        value
+      else
+        raise ArgumentError, "canonical JSON cannot encode #{value.class}"
+      end
+    end
+
+    def normalize_string(value)
+      string = value.encode(Encoding::UTF_8)
+      raise ArgumentError, "canonical JSON requires valid UTF-8" unless string.valid_encoding?
+
+      string.unicode_normalize(:nfc)
+    rescue EncodingError
+      raise ArgumentError, "canonical JSON requires valid UTF-8"
     end
   end
 end

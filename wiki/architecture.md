@@ -37,10 +37,11 @@ catalog renderer.
 - `reviews/<name>/<version>/<github-user>.md` is the mutable, external
   community-review namespace; checked documentation fixtures demonstrate its
   strict record shape without creating production reviews.
-- `catalog.json` is canonical generated output. Its first listed entry is the
-  low-risk Community `task-inspect/0.1.0` canary selected by protected listing
-  evidence; the strict v1 schema remains archived unchanged for explicit
-  legacy consumers.
+- `catalog.json` is canonical generated output using Hive's compact,
+  lexicographically keyed, NFC-normalized workflow-registry JSON bytes. Its
+  first listed entry is the low-risk Community `task-inspect/0.1.0` canary
+  selected by protected listing evidence; the strict v1 schema remains
+  archived unchanged for explicit legacy consumers.
 - `policy/spdx-license-ids.txt` is the offline license identifier snapshot.
 - `test/fixtures/` and `test/run.rb` prove the format without a network or gem
   install. The production listing-evidence fixture mirrors the public protected

@@ -300,7 +300,10 @@ The root document is:
 
 Each dual-gated version remains in the canonical catalog, including
 soft-hidden, yanked, and revoked history. `schemas/catalog-v2.json` describes the
-output. Entries carry these projections:
+output. The emitted bytes match Hive's workflow-registry canonical JSON
+contract: object keys are recursively sorted, keys and string values are NFC
+normalized, the document is compact, and one trailing line feed is present.
+Entries carry these projections:
 
 | Field | Source |
 |---|---|
