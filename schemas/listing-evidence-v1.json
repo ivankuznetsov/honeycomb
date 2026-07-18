@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hive.sh/schemas/listing-evidence-v1.json",
+  "$id": "https://hivecli.sh/schemas/listing-evidence-v1.json",
   "title": "Honeycomb normalized listing evidence v1",
   "type": "object",
   "additionalProperties": false,

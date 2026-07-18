@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hive.sh/schemas/listing-approval-v1.json",
+  "$id": "https://hivecli.sh/schemas/listing-approval-v1.json",
   "title": "Honeycomb listing approval v1",
   "type": "object",
   "additionalProperties": false,

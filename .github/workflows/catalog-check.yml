@@ -1,0 +1,52 @@
+name: Catalog publication
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: catalog-publication-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out registry source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: source
+          persist-credentials: false
+
+      - name: Check out compatible Hive source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: ivankuznetsov/hive
+          ref: 3184d3d10b2ea5d152d5676a61fa01a483e113ce
+          path: hive
+          persist-credentials: false
+
+      - name: Check out protected listing evidence
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: honeycomb-evidence
+          path: evidence
+          persist-credentials: false
+
+      - name: Verify source contracts
+        working-directory: source
+        env:
+          RUBYLIB: ${{ github.workspace }}/hive/lib
+        run: ruby test/run.rb
+
+      - name: Verify canonical catalog against protected evidence
+        working-directory: source
+        run: >-
+          ruby script/honeycomb-catalog --check
+          --evidence ../evidence/normalized/listing-evidence-v1.json

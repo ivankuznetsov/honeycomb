@@ -54,6 +54,12 @@ current denial makes the version ineligible. Verified evidence binds the
 canonical immutable archive identity to an exact GitHub Actions keyless signer
 and attestation workflow identity.
 
+The designated review `head_sha` is an audit identity, not the installation
+source commit: squash merging may make it unreachable from the catalog commit.
+Installers materialize `packages/<name>/<version>/` from the verified catalog
+commit and validate the manifest/file hashes there. Human `package_url` links
+use the default branch plus the immutable version path.
+
 Catalog generation validates all packages before filtering. Therefore a broken
 unlisted package aborts output rather than hiding behind missing evidence.
 Offline approval export requires prior normalized evidence and preserves

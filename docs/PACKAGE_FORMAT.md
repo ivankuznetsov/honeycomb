@@ -310,7 +310,7 @@ output. Entries carry these projections:
 | `discoverable`, `exact_resolution` | Derived lifecycle behavior. |
 | `verification`, `history`, `advisories` | Strict listing evidence copied without reinterpretation. |
 | `install_command` | Fixed `hive workflow install honeycomb/<name>`. |
-| `package_url` | Fixed registry repository URL at the evidence head SHA and exact version path. |
+| `package_url` | Registry default-branch URL for the immutable exact-version path. The evidence head remains an audit identity and may not survive a squash merge; installers read package bytes from their verified catalog commit instead. |
 | `reviews_url` | Exact designated-maintainer pull-request approval URL retained for v1 compatibility. |
 | `community_reviews_url` | External `reviews/<name>/<version>/` namespace on the default branch, or `null` when no review exists. |
 | `source_sha` | Manifest `source.revision`. |

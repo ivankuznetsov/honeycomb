@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hive.sh/schemas/catalog-v2.json",
+  "$id": "https://hivecli.sh/schemas/catalog-v2.json",
   "title": "Honeycomb catalog v2",
   "type": "object",
   "additionalProperties": false,

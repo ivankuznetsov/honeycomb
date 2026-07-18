@@ -10,7 +10,7 @@ for publishable Hive workflows. The Hive inbox task notes also carry the same
 naming guidance.
 
 Decision: call each published workflow package a "honeycomb" in user-facing
-surfaces. The public catalog URL is `hive.sh/honeycombs`, and the documented
+surfaces. The public catalog URL is `hivecli.sh/honeycombs`, and the documented
 future install form is `hive workflow install honeycomb/<name>`.
 
 Consequence: future manifest docs, CLI output, CI comments, README catalog
@@ -87,3 +87,20 @@ Consequence: discovery/latest use only listed releases, exact soft-hidden and
 yanked resolution remains available, and revoked exact resolution fails closed
 with mandatory public advisories. No trust signal substitutes for lint or human
 approval.
+
+## 2026-07-18: Installation Uses the Catalog Commit, Not the Review Head
+
+Context: designated review evidence binds a pull-request head, but this
+repository uses squash merges. A reviewed head is therefore not necessarily an
+ancestor of the resulting default-branch catalog and may become unreachable
+after branch deletion.
+
+Decision: keep `listing_approval.head_sha` as the immutable review audit
+identity, while package installation materializes the exact version directory
+from the already-verified catalog commit. Human `package_url` links use the
+default branch plus an immutable version path rather than the transient review
+head.
+
+Consequence: the installer remains reproducible without depending on retained
+pull-request refs, and the two identities are not conflated. History-based CI
+must continue rejecting any mutation to an existing version directory.
