@@ -32,8 +32,11 @@ GitHub workflows use hosted ephemeral runners and pin `actions/checkout` and
 self-hosted runner, artifact extraction action, or gem installation.
 
 The read-only catalog publication gate checks out Hive at the exact compatible
-commit recorded in the workflow, exposes that checkout through `RUBYLIB`, and
-runs the complete registry test suite. Only then does it compare root
+commit recorded in the workflow. The current pin is
+`81adb5c12569dc752ce9d1ec73b2afcc05bc9205`, the merged Hive v0.5.2 release
+source containing the production catalog-v2 client. The gate exposes that
+checkout through `RUBYLIB` and runs the complete registry test suite. Only then
+does it compare root
 `catalog.json` with the normalized snapshot from the protected
 `honeycomb-evidence` branch. It receives no secret or write permission and does
 not publish any checkout.

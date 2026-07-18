@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           repository: ivankuznetsov/hive
-          ref: 3184d3d10b2ea5d152d5676a61fa01a483e113ce
+          ref: 81adb5c12569dc752ce9d1ec73b2afcc05bc9205
           path: hive
           persist-credentials: false
 
