@@ -31,17 +31,20 @@ catalog renderer.
   runs the complete source contract suite against an exact Hive source commit,
   then compares submitted `catalog.json` bytes with the protected normalized
   evidence branch.
-- `packages/<name>/<semver>/` is the immutable release store; `bench/0.1.0` and
-  `docs-sync/0.1.0` are present on the current default branch.
+- `packages/<name>/<semver>/` is the immutable release store; `bench/0.1.0`,
+  `docs-sync/0.1.0`, and the production canary `task-inspect/0.1.0` are present
+  on the current default branch.
 - `reviews/<name>/<version>/<github-user>.md` is the mutable, external
   community-review namespace; checked documentation fixtures demonstrate its
   strict record shape without creating production reviews.
-- `catalog.json` is canonical generated output and currently contains the empty
-  `honeycomb-catalog/v2` document; the strict v1 schema remains archived
-  unchanged for explicit legacy consumers.
+- `catalog.json` is canonical generated output. Its first listed entry is the
+  low-risk Community `task-inspect/0.1.0` canary selected by protected listing
+  evidence; the strict v1 schema remains archived unchanged for explicit
+  legacy consumers.
 - `policy/spdx-license-ids.txt` is the offline license identifier snapshot.
 - `test/fixtures/` and `test/run.rb` prove the format without a network or gem
-  install.
+  install. The production listing-evidence fixture mirrors the public protected
+  record solely so the committed catalog can be re-derived offline in tests.
 - `docs/PACKAGE_FORMAT.md` is the authoritative public format/command contract;
   root `CONTRIBUTING.md`/`SECURITY.md` and `docs/TRUST.md`/`REVIEWS.md` are the
   canonical public policy; `wiki/` records agent-facing architecture and
