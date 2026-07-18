@@ -29,8 +29,11 @@ The catalog projects manifest description/author/license/Hive minimum/permission
 data, independent trust/lifecycle/review metadata, deterministic package and
 review URLs, source SHA, and a compact listing-approval identity. It does not
 embed full manifests or timestamps generated at runtime.
-Canonical JSON compacts empty arrays and objects explicitly so committed bytes
-do not depend on the Ruby runtime's bundled JSON library version.
+Canonical catalog JSON matches Hive's workflow-registry consumer bytes:
+objects are recursively key-sorted, keys and string values are NFC-normalized,
+the document is compact, and it ends with one line feed. The producer keeps a
+fixed byte vector for this boundary; its evidence/approval JSON uses a separate
+indented canonical representation.
 
 Catalog `reviews_url` preserves the exact designated-maintainer approval URL.
 Nullable `community_reviews_url` is the default-branch external community-review
