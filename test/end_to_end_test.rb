@@ -89,7 +89,7 @@ class EndToEndTest < Minitest::Test
     refute JSON.parse(stdout).any? { |finding| finding["severity"] == "error" }
 
     stdout, stderr, status = capture_command(
-      CATALOG, "--check", "--evidence", fixture_path("listing-evidence", "empty.json")
+      CATALOG, "--check", "--evidence", fixture_path("listing-evidence", "production.json")
     )
     assert_equal 0, status.exitstatus, [stdout, stderr].join("\n")
   end

@@ -25,3 +25,10 @@ reachable after merge. Use a merge commit for the two-commit canary submission,
 then restore the default branch's linear-history protection if it was
 temporarily relaxed. Do not squash or rebase the submission.
 
+The first production exercise used pull request 10 and `task-inspect/0.1.0`.
+It fail-closed before publication when Ruby JSON versions disagreed on evidence
+digest bytes, then succeeded after the stable canonical encoder landed. The
+refreshed exact head `9ce3648afd6f6f8def80701d89b35448417d0def` is bound to
+portable lint digest
+`3fb099f20893e900963d85aa056ec8b6a93d29ebc712ea18b503d0fb4d65b554`,
+protected normalized evidence, and a provenance-preserving merge to `main`.
