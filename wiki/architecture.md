@@ -106,8 +106,12 @@ community record exists.
 Author tooling, seed packages, security-lint CI, and the read-only catalog drift
 gate are shipped on this branch. Analyzer/exporter code is deterministic and
 offline; only the trusted reporter and approval issuer use GitHub HTTPS metadata
-APIs. The catalog remains empty until eligible approvals populate the protected
-normalized evidence. The static site and Hive installer are separate consumers
-and must consume catalog v2 without reconstructing entries. Evidence
-branch/environment protection and live lifecycle canaries remain repository
-rollout operations.
+APIs. Protected normalized evidence now projects the listed Community
+`task-inspect/0.1.0` release into catalog commit
+`bf67e8a6bc4a85e2d6663c57595d337e17ce9f73` with canonical SHA-256
+`2e6c27ed6ec22bc3e6afc5ff07244418d48a6e878c53a3e850326748d8d5c497`.
+The static site consumes that exact snapshot without reconstructing entries,
+and released Hive v0.5.2 installs it from the official registry with immutable
+catalog/digest task pins and task-local read-only runtime policy. Evidence
+branch/environment protection remains live; emergency lifecycle transitions
+and positive community-review identity cases remain rollout operations.
