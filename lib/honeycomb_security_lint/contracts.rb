@@ -84,7 +84,7 @@ module HoneycombSecurityLint
     end
 
     def canonical_json(value)
-      JSON.pretty_generate(deep_sort(value), allow_nan: false) + "\n"
+      "#{render_json(deep_sort(value), 0)}\n"
     end
 
     def digestable_evidence(value)
@@ -282,12 +282,64 @@ module HoneycombSecurityLint
     def deep_sort(value)
       case value
       when Hash
+        unless value.keys.all? { |key| key.is_a?(String) }
+          raise JSON::GeneratorError, "canonical JSON object keys must be strings"
+        end
         value.keys.sort.each_with_object({}) { |key, sorted| sorted[key] = deep_sort(value[key]) }
       when Array
         value.map { |entry| deep_sort(entry) }
       else
         value
       end
+    end
+
+    def render_json(value, depth)
+      case value
+      when Hash
+        return "{}" if value.empty?
+
+        entries = value.map do |key, child|
+          "#{'  ' * (depth + 1)}#{json_string(key)}: #{render_json(child, depth + 1)}"
+        end
+        "{\n#{entries.join(",\n")}\n#{'  ' * depth}}"
+      when Array
+        return "[]" if value.empty?
+
+        entries = value.map { |child| "#{'  ' * (depth + 1)}#{render_json(child, depth + 1)}" }
+        "[\n#{entries.join(",\n")}\n#{'  ' * depth}]"
+      when String
+        json_string(value)
+      when Integer
+        value.to_s
+      when TrueClass
+        "true"
+      when FalseClass
+        "false"
+      when NilClass
+        "null"
+      else
+        raise JSON::GeneratorError, "canonical JSON contains unsupported #{value.class}"
+      end
+    end
+
+    def json_string(value)
+      source = value.dup.force_encoding(Encoding::UTF_8)
+      raise JSON::GeneratorError, "canonical JSON string must be valid UTF-8" unless source.valid_encoding?
+
+      escaped = source.each_codepoint.map do |codepoint|
+        case codepoint
+        when 0x08 then "\\b"
+        when 0x09 then "\\t"
+        when 0x0a then "\\n"
+        when 0x0c then "\\f"
+        when 0x0d then "\\r"
+        when 0x22 then '\\"'
+        when 0x5c then "\\\\"
+        when 0x00..0x1f then format("\\u%04x", codepoint)
+        else codepoint.chr(Encoding::UTF_8)
+        end
+      end.join
+      "\"#{escaped}\""
     end
 
     def plain_copy(value)
