@@ -52,4 +52,7 @@ into the managed lock, and copied those pins into a new task's metadata. The
 released runtime compiled the package to task-folder-only `Read`, `LS`, `Grep`,
 and `Glob`; write, shell, network, skill, subagent, and interactive tools were
 denied. Repository permissions and linear-history protection were restored to
-their original fail-closed settings after the canary operations.
+their original fail-closed settings after the canary operations. Cloudflare's
+replacement Workers check `88115025357` completed successfully on exact site
+commit `f5979cca40a0a2e86a7cafbae581f2c97323b3bd`; the earlier in-progress check
+record was superseded rather than left as a production blocker.
