@@ -8,8 +8,8 @@ author:
 license: "MIT"
 hive_min_version: "0.6.0"
 source:
-  url: "https://github.com/ivankuznetsov/honeycomb/tree/548dd28b5193791faea439b9a354f0cbd0c8c834/packages/seo-content/1.0.0"
-  revision: "548dd28b5193791faea439b9a354f0cbd0c8c834"
+  url: "https://github.com/ivankuznetsov/honeycomb/tree/062b3df6108cb70b9d1443b888771f39e1489323/packages/seo-content/1.0.0"
+  revision: "062b3df6108cb70b9d1443b888771f39e1489323"
 permissions:
   risk: "high"
   capabilities:
@@ -40,10 +40,10 @@ files:
   "packages/seo-content/1.0.0/instructions/repo-research.md": "ba6f8fcb0f8f657f8ed99f87b3dce448897efdcb7317912e75030861168ca8da"
   "packages/seo-content/1.0.0/instructions/research.md": "0b89370741f2036b796f9fe4f40fe84532874e9d3c0173a00aa2c1082c610db3"
   "packages/seo-content/1.0.0/instructions/web-research.md": "b4d6ed40b5659f2153bad616d2d34392ef38dc1389d4e0c7011b82930558a54c"
-  "packages/seo-content/1.0.0/tools/provider-metrics.rb": "6df8a82c517489b9191756f1ff29cfc818e260927986a448890484c7470e83dd"
+  "packages/seo-content/1.0.0/tools/provider-metrics.rb": "9ebca97491993e8d62a4c653b72e470ac9da2707f08af7a4e5cbde4aa05cf463"
   "packages/seo-content/1.0.0/tools/seo-analyze.rb": "a8d426f391794e164acd4c8bc63fc6500452c6af2aaefe9ba9dfd3b7c70d8c76"
   "packages/seo-content/1.0.0/workflow.yml": "7e57fd159d43dbf15c8381f1463d2ae4179c9fa4e45eb8821c328b6c4e56714a"
-release_sha256: "fb0be9b19fd37d9e8fad6a365efc6960813610dea955cfbdb11a40e1b893948f"
+release_sha256: "ae074c34d6f6b640fbea5bdee52f429823e0aa62566e0fbb6c5d1450d6060da6"
 x-hive:
   tools:
     -
