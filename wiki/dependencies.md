@@ -15,6 +15,10 @@ The registry implementation is deliberately offline and dependency-light.
 - No Gemfile, Bundler runtime, application framework, database, network fetch,
   schema registry, or hidden cache is used.
 
+Package tools follow the same explicit standard-library rule. In particular,
+SEO provider metrics loads `time` directly before using ISO 8601 timestamps so
+behavior is identical across supported Ruby default-library loading modes.
+
 The unprivileged analyzer and evidence snapshot exporter remain offline. The
 trusted `workflow_run` reporter and protected approval issuer share one isolated
 standard-library `Net::HTTP` adapter for GitHub metadata, artifact, Git ref, and

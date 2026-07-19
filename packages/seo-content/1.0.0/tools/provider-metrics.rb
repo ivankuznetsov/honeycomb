@@ -5,6 +5,7 @@ require "base64"
 require "date"
 require "json"
 require "net/http"
+require "time"
 require "uri"
 
 module SeoProviderMetrics
