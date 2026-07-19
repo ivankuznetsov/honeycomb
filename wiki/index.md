@@ -39,8 +39,10 @@ Architecture, Writing, and SEO Content 1.0.1 packages and canonical manifests
 are present under `packages/` with a Hive 0.6.0 minimum. They are agent-agnostic
 and exercised through Hive's real registry install, configuration-pin,
 task-creation, Agent, Council, and package-root paths using deterministic test
-agents. Hive 0.6.0 is released, but the flagships are not catalog listings until
-protected lint evidence plus repository-owner publication records exist.
+agents. Hive 0.6.0 is released, protected repository-owner publication records
+exist for the exact listing head, and the normalized evidence now projects all
+three flagships into `catalog.json`. Static-site sync and public install/live
+acceptance remain rollout gates.
 
 ## Update Protocol
 

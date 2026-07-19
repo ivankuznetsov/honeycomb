@@ -118,17 +118,17 @@ Author tooling, seed packages, security-lint CI, and the read-only catalog drift
 gate are shipped on this branch. Analyzer/exporter code is deterministic and
 offline; only the trusted reporter and approval issuer use GitHub HTTPS metadata
 APIs. Protected normalized evidence now projects the listed Community
-`task-inspect/0.1.0` release into catalog commit
-`bf67e8a6bc4a85e2d6663c57595d337e17ce9f73` with canonical SHA-256
-`2e6c27ed6ec22bc3e6afc5ff07244418d48a6e878c53a3e850326748d8d5c497`.
-The static site consumes that exact snapshot without reconstructing entries,
-and released Hive v0.6.0 installs it from the official registry with immutable
-catalog/digest task pins and task-local read-only runtime policy. Evidence
-branch/environment protection remains live; emergency lifecycle transitions
-and positive community-review identity cases remain rollout operations.
+`task-inspect/0.1.0`, `architecture/1.0.1`, `writing/1.0.1`, and
+`seo-content/1.0.1` releases into `catalog.json`. The static site consumes that
+exact snapshot without reconstructing entries, and released Hive v0.6.0
+installs it from the official registry with immutable catalog/digest task pins
+and task-local read-only runtime policy. Evidence branch/environment protection
+remains live; static-site publication, public flagship acceptance, emergency
+lifecycle transitions, and positive community-review identity cases remain
+rollout operations.
 
 The flagship packages target that released runtime: their per-slot agent
 mapping, configuration digest, exact actor policy, optional input, prompt-asset,
-and package-root contracts require Hive 0.6.0. Local cross-repository proof does
-not make those versions public. Protected reviews, catalog projection, site
-publication, and live provider evidence remain ordered gates.
+and package-root contracts require Hive 0.6.0. Protected reviews and catalog
+projection are complete. Site publication, public installs, complete workflow
+runs, and claimed provider evidence remain ordered gates.
