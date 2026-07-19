@@ -23,6 +23,11 @@ class SecurityLintPolicyTest < Minitest::Test
 
     assert_equal "Fetches public release metadata", result.dig("network_host_reasons", "api.example.test")
     assert_equal "a" * 64, result.fetch("suppressions").first.fetch("fingerprint")
+
+    wildcard = manifest
+    wildcard["permissions"]["network_hosts"] = ["*"]
+    assert_equal "Fetches public release metadata",
+                 @policy.security_extension(wildcard).dig("network_host_reasons", "api.example.test")
   end
 
   def test_extension_cannot_grant_hosts_or_use_broad_suppressions

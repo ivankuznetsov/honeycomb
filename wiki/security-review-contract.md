@@ -102,6 +102,12 @@ executes them. Evidence records statically extracted Ruby tool sinks with the
 `ruby` command kind, distinct from fenced, inline, plain, and YAML instruction
 origins.
 
+Derived wildcard network disclosure remains a broad-permission advisory. A
+package may narrow its observed destinations for human review by giving each
+concrete host an exact `x-security.network_host_reasons` entry; this cannot
+authorize network capability that the workflow did not already declare, and
+dynamic or unreasoned destinations still fail closed.
+
 Workflow `permissions.tools` and `permissions.dirs` values are descriptor data,
 not executable YAML instruction strings. Other YAML scalars enter command
 analysis only when they are command-like. Shell option setup such as

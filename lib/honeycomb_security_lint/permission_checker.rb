@@ -58,8 +58,10 @@ module HoneycombSecurityLint
 
     def host_result(observation, permissions, extension, findings)
       declared_hosts = Array(permissions["network_hosts"])
-      declared = !observation.dynamic && declared_hosts.include?(observation.host)
       reason = extension.fetch("network_host_reasons", {})[observation.host]
+      exact_or_narrowed_wildcard = declared_hosts.include?(observation.host) ||
+                                   (declared_hosts.include?("*") && !reason.to_s.strip.empty?)
+      declared = !observation.dynamic && exact_or_narrowed_wildcard
       rule_id = if observation.dynamic
                   "network.dynamic-destination"
                 elsif !declared
