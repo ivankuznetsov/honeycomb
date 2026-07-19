@@ -1,0 +1,58 @@
+schema: "honeycomb-manifest/v1"
+name: "writing"
+version: "1.0.0"
+description: "Produce a grounded article through research and adversarial editorial review"
+author:
+  name: "Honeycomb Maintainers"
+  url: "https://github.com/ivankuznetsov/honeycomb"
+license: "MIT"
+hive_min_version: "0.6.0"
+source:
+  url: "https://github.com/ivankuznetsov/honeycomb/tree/548dd28b5193791faea439b9a354f0cbd0c8c834/packages/writing/1.0.0"
+  revision: "548dd28b5193791faea439b9a354f0cbd0c8c834"
+permissions:
+  risk: "moderate"
+  capabilities:
+    - "filesystem-read"
+    - "filesystem-write"
+    - "network"
+  network_hosts:
+    - "*"
+  filesystem_read:
+    - "repository"
+    - "task"
+  filesystem_write:
+    - "task/article.md"
+    - "task/draft.md"
+    - "task/repo-research.md"
+    - "task/research.md"
+    - "task/reviews/**"
+    - "task/verification.md"
+    - "task/web-research.md"
+  secrets: []
+files:
+  "packages/writing/1.0.0/NOTICE.md": "b8ccf56f1fe45243638cfd7531059db1e41bb11cd5057b94e67727a72851f646"
+  "packages/writing/1.0.0/README.md": "c119b172fcec921bff84ac41b0e35e89717628e87742bf38ee654ecb8548cc8a"
+  "packages/writing/1.0.0/instructions/deliver.md": "b0c425f7c9669fb6c4c32f42f64e1f76aa2306b9561025644a50b441fe8a8d0d"
+  "packages/writing/1.0.0/instructions/draft.md": "4a283310fe566bbd453e0cd228045186e8d87d12dc38174dc8065da4ce70fd5f"
+  "packages/writing/1.0.0/instructions/repo-research.md": "350c47ba6a05be2e2c62065c6702fd7e9bca61dbfe97969b7f6858f2447c8404"
+  "packages/writing/1.0.0/instructions/research.md": "c34575d72e082eaffeb5c23e0f24c27ed23b672214c12c5e7d822e17e4583a56"
+  "packages/writing/1.0.0/instructions/revise.md": "2cba643a828b31e6fa38bb2ba9086e4cbdda812847f762c6385d533135f0b666"
+  "packages/writing/1.0.0/instructions/web-research.md": "8637e54d67b30e6e60240b75771dc2ccecbccf1cec4cd7c92bd18c0cb30c48e3"
+  "packages/writing/1.0.0/workflow.yml": "dc07b0d2d07ea4dd6ddfa5d8123b6c6372c7c4dfbfd4b25b6ed22d920ea0b47f"
+release_sha256: "941e0860c8a775b26b4cc5dfc49e1e71db9f45623c59888e29195510487dabe0"
+x-hive:
+  tools: []
+  prompt_assets: []
+  optional_inputs: []
+x-provenance:
+  kind: "adaptation"
+  upstream_revision: "e2caed2878ff1996f235ad0122bf7fea2eea3a27"
+  source_paths:
+    - "workflow.yml"
+    - "instructions/deliver.md"
+    - "instructions/draft.md"
+    - "instructions/repo-research.md"
+    - "instructions/research.md"
+    - "instructions/revise.md"
+    - "instructions/web-research.md"

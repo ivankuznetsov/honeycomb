@@ -31,13 +31,14 @@ change.
 These public files are normative. Wiki pages summarize implementation facts and
 link to policy rather than restating it.
 
-## Flagship Source Status
+## Flagship Package Status
 
-Architecture, Writing, and SEO Content 1.0.0 behavior sources are present under
-`packages/`. They are agent-agnostic and are exercised by a focused test against
-Hive's real registry install, configuration-pin, task-creation, and package-root
-seams. They are not catalog listings until canonical manifests, released-Hive
-compatibility, protected lint evidence, and independent approvals exist.
+Architecture, Writing, and SEO Content 1.0.0 packages and canonical manifests
+are present under `packages/` with a Hive 0.6.0 minimum. They are agent-agnostic
+and are exercised through Hive's real registry install, configuration-pin,
+task-creation, Agent, Council, and package-root paths using deterministic test
+agents. They are not catalog listings until Hive 0.6.0 is released and protected
+lint evidence plus independent approvals exist.
 
 ## Update Protocol
 

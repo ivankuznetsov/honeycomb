@@ -1,0 +1,47 @@
+schema: "honeycomb-manifest/v1"
+name: "architecture"
+version: "1.0.0"
+description: "Turn repository evidence into an implementation-ready architecture record"
+author:
+  name: "Honeycomb Maintainers"
+  url: "https://github.com/ivankuznetsov/honeycomb"
+license: "MIT"
+hive_min_version: "0.6.0"
+source:
+  url: "https://github.com/ivankuznetsov/honeycomb/tree/548dd28b5193791faea439b9a354f0cbd0c8c834/packages/architecture/1.0.0"
+  revision: "548dd28b5193791faea439b9a354f0cbd0c8c834"
+permissions:
+  risk: "moderate"
+  capabilities:
+    - "filesystem-read"
+    - "filesystem-write"
+  network_hosts: []
+  filesystem_read:
+    - "repository"
+    - "task"
+  filesystem_write:
+    - "task/architecture.md"
+    - "task/draft.md"
+    - "task/research.md"
+    - "task/reviews/**"
+  secrets: []
+files:
+  "packages/architecture/1.0.0/README.md": "c08d60b825b663957405b14192f2027611e58e46b9083021a9d72e829c1281fe"
+  "packages/architecture/1.0.0/instructions/architecture.md": "3513fb7320230cb806584c63665b4e73a199a6b169a3c731fadbd18e9cd00f7a"
+  "packages/architecture/1.0.0/instructions/draft.md": "c550c19b073b7328e4ce269420eb71df1b2d71fad1cb8d196d1eb89de1f8b250"
+  "packages/architecture/1.0.0/instructions/research.md": "fe95348952e495f3e12fce4a1f6535cbb1308005a77167bc9127ab3cea9674ab"
+  "packages/architecture/1.0.0/instructions/revise.md": "4d4f5c55924551102b0e3f09369a7fc2abd27a1e1ebf06c0676a0c53b5824826"
+  "packages/architecture/1.0.0/workflow.yml": "2471e12ed4918a5b69ab1a550ca571a15b1e5c91400800630fca0e87cdbc505c"
+release_sha256: "2e8fdcfdabb0f774f7f5bfdde3e21fbe88aec6d459cfaa278dbd2bd4cc6abe33"
+x-hive:
+  tools: []
+  prompt_assets: []
+  optional_inputs: []
+x-provenance:
+  kind: "registry-original"
+  source_paths:
+    - "workflow.yml"
+    - "instructions/architecture.md"
+    - "instructions/draft.md"
+    - "instructions/research.md"
+    - "instructions/revise.md"

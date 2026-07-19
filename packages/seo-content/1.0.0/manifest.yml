@@ -1,0 +1,99 @@
+schema: "honeycomb-manifest/v1"
+name: "seo-content"
+version: "1.0.0"
+description: "Produce search-led content through research, verification, and measurable optimization"
+author:
+  name: "Honeycomb Maintainers"
+  url: "https://github.com/ivankuznetsov/honeycomb"
+license: "MIT"
+hive_min_version: "0.6.0"
+source:
+  url: "https://github.com/ivankuznetsov/honeycomb/tree/548dd28b5193791faea439b9a354f0cbd0c8c834/packages/seo-content/1.0.0"
+  revision: "548dd28b5193791faea439b9a354f0cbd0c8c834"
+permissions:
+  risk: "high"
+  capabilities:
+    - "filesystem-read"
+    - "filesystem-write"
+    - "network"
+    - "shell"
+  network_hosts:
+    - "*"
+  filesystem_read:
+    - "*"
+  filesystem_write:
+    - "*"
+  secrets:
+    - "*"
+files:
+  "packages/seo-content/1.0.0/NOTICE.md": "854a43eab3ed1d1b2fcfb8600c52d6cb39bb5b793a60acf85042c9d6d24ea800"
+  "packages/seo-content/1.0.0/README.md": "849e1964dfdb7e16b1179a520e7ab54121b6ddc3914782523451e10368462ccd"
+  "packages/seo-content/1.0.0/assets/quality-rubric.md": "8f3258b7101d53d64ef8d52e3ede415315288a48818deaa1d51f3fd17e7d084c"
+  "packages/seo-content/1.0.0/instructions/analyze.md": "fa714a0b95422e6196e56b54efa28e355d74fc162e325734be221feeb88e9a29"
+  "packages/seo-content/1.0.0/instructions/draft.md": "e01c635aef1e7712a7d4adafda14c7a95029b41023a808082ceb194f6f44ee4f"
+  "packages/seo-content/1.0.0/instructions/fact-check.md": "976e496898231803e08fa00693529cf80b6bd19ac10d4836175c30b52fed41ef"
+  "packages/seo-content/1.0.0/instructions/humanize.md": "a50c5232e9d25bd01e196e93079bceff754b51e738efa5819595292fe592ca9d"
+  "packages/seo-content/1.0.0/instructions/intent.md": "2207fb8b197a2a1039d58a51386b6e2e5652326bbe48429e13a2a0e347fce3c1"
+  "packages/seo-content/1.0.0/instructions/optimize.md": "cb0faeece268706b4a6da910705ff95f4121d3f6dbb366084518d1d8a5bb9866"
+  "packages/seo-content/1.0.0/instructions/outline.md": "70d156b6061b4c176b04a6c462dd4cfb89e5439cf8636a98c26bf869a273f5eb"
+  "packages/seo-content/1.0.0/instructions/provider-data.md": "d4a823e3aa9d76633405fe300f05f9f2df150d0629ba18e44dc14e8dba126fe6"
+  "packages/seo-content/1.0.0/instructions/repo-research.md": "ba6f8fcb0f8f657f8ed99f87b3dce448897efdcb7317912e75030861168ca8da"
+  "packages/seo-content/1.0.0/instructions/research.md": "0b89370741f2036b796f9fe4f40fe84532874e9d3c0173a00aa2c1082c610db3"
+  "packages/seo-content/1.0.0/instructions/web-research.md": "b4d6ed40b5659f2153bad616d2d34392ef38dc1389d4e0c7011b82930558a54c"
+  "packages/seo-content/1.0.0/tools/provider-metrics.rb": "6df8a82c517489b9191756f1ff29cfc818e260927986a448890484c7470e83dd"
+  "packages/seo-content/1.0.0/tools/seo-analyze.rb": "a8d426f391794e164acd4c8bc63fc6500452c6af2aaefe9ba9dfd3b7c70d8c76"
+  "packages/seo-content/1.0.0/workflow.yml": "7e57fd159d43dbf15c8381f1463d2ae4179c9fa4e45eb8821c328b6c4e56714a"
+release_sha256: "fb0be9b19fd37d9e8fad6a365efc6960813610dea955cfbdb11a40e1b893948f"
+x-hive:
+  tools:
+    -
+      path: "tools/provider-metrics.rb"
+    -
+      path: "tools/seo-analyze.rb"
+  prompt_assets:
+    -
+      path: "assets/quality-rubric.md"
+  optional_inputs:
+    -
+      name: "AHREFS_API_KEY"
+      authorized_slots:
+        - "stages.provider-data"
+    -
+      name: "DATAFORSEO_LOGIN"
+      authorized_slots:
+        - "stages.provider-data"
+    -
+      name: "DATAFORSEO_PASSWORD"
+      authorized_slots:
+        - "stages.provider-data"
+    -
+      name: "GA4_ACCESS_TOKEN"
+      authorized_slots:
+        - "stages.provider-data"
+    -
+      name: "GA4_PROPERTY_ID"
+      authorized_slots:
+        - "stages.provider-data"
+    -
+      name: "GSC_ACCESS_TOKEN"
+      authorized_slots:
+        - "stages.provider-data"
+x-provenance:
+  kind: "adaptation"
+  upstream_revision: "e2caed2878ff1996f235ad0122bf7fea2eea3a27"
+  source_paths:
+    - "workflow.yml"
+    - "assets/quality-rubric.md"
+    - "instructions/analyze.md"
+    - "instructions/draft.md"
+    - "instructions/fact-check.md"
+    - "instructions/humanize.md"
+    - "instructions/intent.md"
+    - "instructions/optimize.md"
+    - "instructions/outline.md"
+    - "instructions/provider-data.md"
+    - "instructions/repo-research.md"
+    - "instructions/research.md"
+    - "instructions/web-research.md"
+    - "tools/provider-metrics.rb"
+    - "tools/seo-analyze.rb"

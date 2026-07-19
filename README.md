@@ -30,10 +30,10 @@ packages:
 - `seo-content` — research, intent, outline, draft, fact-check, humanization,
   and optimization, including an immutable package-local analyzer.
 
-Source presence is not catalog listing. Until each package has its generated
-immutable manifest, compatible released Hive minimum, protected lint evidence,
-and the required independent approvals, it is not discoverable or publicly
-installable from `honeycomb/<name>`.
+Package presence is not catalog listing. The three immutable manifests require
+Hive 0.6.0; until that runtime is released and each package has protected lint
+evidence plus the required independent approvals, it is not discoverable or
+publicly installable from `honeycomb/<name>`.
 
 ```sh
 ruby script/honeycomb-manifest --check --all
