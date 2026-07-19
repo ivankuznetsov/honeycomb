@@ -1,0 +1,20 @@
+{
+  "approvals": [
+    {
+      "approved_suppressions": [],
+      "authority": "repository_owner",
+      "decision": "approved",
+      "evidence_digest": "9978251dbe8cd2649dc7cb3a1eeacfd05dbaa9bf43f373f4fcdeab29e866bed2",
+      "head_sha": "ee1e681f9e82ce691923141444f0491120ad5f61",
+      "name": "writing",
+      "notes": "First-party Writing 1.0.1 publication accepted after exact-head security lint and release review",
+      "path": "packages/writing/1.0.1",
+      "release_sha256": "2daf087f0712b44a53d5dd8fab94033a2735cf5035ea1262192e1d780f352127",
+      "review_url": "https://github.com/ivankuznetsov/honeycomb/actions/runs/29683010260",
+      "reviewed_at": "2026-07-19T10:14:57Z",
+      "reviewer": "ivankuznetsov",
+      "version": "1.0.1"
+    }
+  ],
+  "schema": "honeycomb.listing-approval/v1"
+}
