@@ -30,6 +30,9 @@ module HoneycombRegistry
         findings.concat(package.validate_instruction_references(workflow))
         permission_result = Permissions.derive(workflow, path: package.repository_path("workflow.yml"))
         findings.concat(permission_result.findings)
+        findings.concat(HiveCompatibility.validate_package_contract(
+          package, metadata, workflow: workflow, inventory: inspection.files
+        ))
       end
       return Result.new(document: nil, bytes: nil, findings: findings) if findings.errors?
 

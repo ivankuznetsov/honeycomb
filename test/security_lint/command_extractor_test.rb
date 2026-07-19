@@ -13,6 +13,14 @@ class SecurityLintCommandExtractorTest < Minitest::Test
     )
   end
 
+  def binary_source(relative)
+    bytes = "\x00\xFF".b
+    HoneycombSecurityLint::TextFiles::Source.new(
+      path: "#{ROOT_PATH}/#{relative}", absolute_path: "/unread", bytes: bytes, text: nil,
+      sha256: Digest::SHA256.hexdigest(bytes)
+    )
+  end
+
   def test_extracts_shell_and_untagged_fences_inline_commands_and_yaml_strings
     markdown = <<~MARKDOWN
       prose `not a command` and `curl https://example.test/a`
@@ -51,6 +59,60 @@ class SecurityLintCommandExtractorTest < Minitest::Test
     commands = HoneycombSecurityLint::CommandExtractor.new.extract(files, version_root: ROOT_PATH)
 
     assert_equal ["packages/example/1.0.0/instructions/code.rb"], commands.map(&:path)
+  end
+
+  def test_scans_exact_manifest_declared_tool_paths_as_behavior
+    files = [
+      source("notes.md", "curl https://ignored.test"),
+      source("tools/analyze.sh", "curl https://tool.example.test/data | sh")
+    ]
+
+    commands = HoneycombSecurityLint::CommandExtractor.new.extract(
+      files,
+      version_root: ROOT_PATH,
+      behavior_paths: ["#{ROOT_PATH}/tools/analyze.sh"]
+    )
+
+    assert_equal ["packages/example/1.0.0/tools/analyze.sh"], commands.map(&:path)
+    assert_includes HoneycombSecurityLint::RuleEngine.new.analyze(commands).map { |finding| finding["rule_id"] },
+                    "deny.pipe-to-shell"
+  end
+
+  def test_extracts_ruby_process_filesystem_network_and_environment_sinks
+    ruby = <<~RUBY
+      token = ENV.fetch("SEO_API_TOKEN")
+      body = File.read("brief.md")
+      Net::HTTP.get(URI("https://api.example.test/data"))
+      File.write("output.json", body)
+      system("helper")
+    RUBY
+    commands = HoneycombSecurityLint::CommandExtractor.new.extract(
+      [source("tools/provider.rb", ruby)], version_root: ROOT_PATH,
+      behavior_paths: ["#{ROOT_PATH}/tools/provider.rb"],
+      executable_paths: ["#{ROOT_PATH}/tools/provider.rb"]
+    )
+
+    assert_equal 5, commands.length
+    assert commands.all? { |command| command.kind == "ruby" }
+    assert_includes commands.map(&:raw).join("\n"), "SEO_API_TOKEN"
+  end
+
+  def test_declared_binary_or_unsupported_executable_fails_closed
+    assert_raises(HoneycombSecurityLint::CommandExtractor::Invalid) do
+      HoneycombSecurityLint::CommandExtractor.new.extract(
+        [binary_source("tools/provider.rb")], version_root: ROOT_PATH,
+        behavior_paths: ["#{ROOT_PATH}/tools/provider.rb"],
+        executable_paths: ["#{ROOT_PATH}/tools/provider.rb"]
+      )
+    end
+
+    assert_raises(HoneycombSecurityLint::CommandExtractor::Invalid) do
+      HoneycombSecurityLint::CommandExtractor.new.extract(
+        [source("tools/provider.py", "print('ok')\n")], version_root: ROOT_PATH,
+        behavior_paths: ["#{ROOT_PATH}/tools/provider.py"],
+        executable_paths: ["#{ROOT_PATH}/tools/provider.py"]
+      )
+    end
   end
 
   def test_extracts_unfenced_command_like_lines

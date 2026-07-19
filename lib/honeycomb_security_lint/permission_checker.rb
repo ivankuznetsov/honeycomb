@@ -11,6 +11,11 @@ module HoneycombSecurityLint
     NETWORK_COMMAND = NetworkExtractor::NETWORK_COMMAND
     ABSOLUTE_PATH = %r{(?:\A|\s)(/(?![/\\])[^\s"']+)}
     SECRET_VARIABLE = /\$(?:\{)?([A-Z][A-Z0-9_]*(?:TOKEN|KEY|SECRET|PASSWORD)[A-Z0-9_]*)(?:\})?/i
+    RUBY_PROCESS = /(?:Kernel\.)?(?:system|exec|spawn)\s*\(|Open3\.|IO\.popen|`[^`]+`/
+    RUBY_WRITE = /File\.(?:write|binwrite|delete|unlink|rename|chmod|chown|truncate)\b/
+    RUBY_READ = /File\.(?:read|binread|open)\b/
+    RUBY_NETWORK = /\b(?:Net::H[T]TP|URI[.]open|OpenURI)\b/
+    RUBY_SECRET_VARIABLE = /ENV(?:\.fetch\s*\(\s*|\s*\[\s*)["']([A-Z][A-Z0-9_]*(?:TOKEN|KEY|SECRET|PASSWORD)[A-Z0-9_]*)["']/i
 
     def initialize(policy:)
       @policy = policy
@@ -22,16 +27,21 @@ module HoneycombSecurityLint
       declared_secrets = Array(permissions["secrets"])
       findings = []
       commands.each do |command|
-        findings << finding("permission.shell", "Observed shell command is not declared", command, command.raw) if command.raw.match?(SHELL_COMMAND) && !capabilities.include?("shell")
-        findings << finding("permission.filesystem-write", "Observed write is not declared", command, command.raw) if command.raw.match?(WRITE_COMMAND) && !capabilities.include?("filesystem-write")
-        findings << finding("permission.filesystem-read", "Observed read is not declared", command, command.raw) if command.raw.match?(READ_COMMAND) && !capabilities.include?("filesystem-read")
-        findings << finding("permission.network", "Observed network use is not declared", command, command.raw) if command.raw.match?(NETWORK_COMMAND) && !capabilities.include?("network")
+        findings << finding("permission.shell", "Observed shell command is not declared", command, command.raw) if (command.raw.match?(SHELL_COMMAND) || command.raw.match?(RUBY_PROCESS)) && !capabilities.include?("shell")
+        findings << finding("permission.filesystem-write", "Observed write is not declared", command, command.raw) if (command.raw.match?(WRITE_COMMAND) || command.raw.match?(RUBY_WRITE)) && !capabilities.include?("filesystem-write")
+        findings << finding("permission.filesystem-read", "Observed read is not declared", command, command.raw) if (command.raw.match?(READ_COMMAND) || command.raw.match?(RUBY_READ)) && !capabilities.include?("filesystem-read")
+        findings << finding("permission.network", "Observed network use is not declared", command, command.raw) if (command.raw.match?(NETWORK_COMMAND) || command.raw.match?(RUBY_NETWORK)) && !capabilities.include?("network")
         command.raw.scan(ABSOLUTE_PATH).flatten.each do |path|
           next if path == "/dev/null"
 
           findings << finding("permission.absolute-path", "Absolute filesystem path is outside declared scopes", command, path)
         end
         command.raw.scan(SECRET_VARIABLE).flatten.each do |name|
+          next if declared_secrets.include?("*") || declared_secrets.include?(name)
+
+          findings << finding("permission.secret", "Observed secret variable is not declared", command, name)
+        end
+        command.raw.scan(RUBY_SECRET_VARIABLE).flatten.each do |name|
           next if declared_secrets.include?("*") || declared_secrets.include?(name)
 
           findings << finding("permission.secret", "Observed secret variable is not declared", command, name)

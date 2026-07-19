@@ -103,4 +103,38 @@ class ManifestTest < Minitest::Test
       assert_equal before, File.binread(package.manifest_path)
     end
   end
+
+  def test_specialized_runtime_metadata_survives_generation_and_hashes_the_tool
+    in_tmpdir do |root|
+      package = HoneycombRegistry::Package.new(install_valid_fixture(root), root: root)
+      tool_path = File.join(package.path, "tools", "analyze.rb")
+      FileUtils.mkdir_p(File.dirname(tool_path))
+      File.write(tool_path, "#!/usr/bin/env ruby\nputs :ok\n")
+      File.chmod(0o755, tool_path)
+      manifest_path = package.manifest_path
+      File.write(
+        manifest_path,
+        File.read(manifest_path).sub(
+          "x-hive:\n  tools: []\n  optional_inputs: []\n",
+          <<~YAML
+            x-hive:
+              tools:
+                - path: tools/analyze.rb
+              optional_inputs:
+                - name: SEO_API_TOKEN
+                  authorized_slots:
+                    - stages.build
+          YAML
+        )
+      )
+
+      result = HoneycombRegistry::Manifest.build(package)
+
+      refute result.findings.errors?, result.findings.to_h.inspect
+      assert_equal [{"path" => "tools/analyze.rb"}], result.document.dig("x-hive", "tools")
+      assert_equal ["stages.build"],
+                   result.document.dig("x-hive", "optional_inputs", 0, "authorized_slots")
+      assert result.document.fetch("files").key?("packages/example/1.0.0/tools/analyze.rb")
+    end
+  end
 end

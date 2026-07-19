@@ -22,17 +22,30 @@ module HoneycombSecurityLint
     COMMAND_START = /\A\s*(?:\$\s*)?(?:(?:bash|sh|zsh|pwsh|powershell|curl|wget|iwr|invoke-webrequest|git|gh|ruby|python\d*|node|npm|npx|bundle|rake|cat|grep|rg|find|ls|head|tail|sed|awk|tar|zip|gzip|base64|openssl|env|printenv|export|set|cp|mv|rm|mkdir|chmod|chown|tee|echo|printf|source)\b|\.\/[^\s]+)(?:\s|[|;&<>()]|\z)/i
     SHELL_FENCE = /\A\s*```\s*(bash|sh|shell|zsh|powershell|pwsh)?\s*\z/i
     YAML_EXTENSION = /\.ya?ml\z/i
+    RUBY_EXTENSION = /\.rb\z/i
+    SHELL_EXTENSIONS = /\.(?:sh|bash|zsh|ps1)\z/i
+    RUBY_SINK = %r{
+      https?://|(?:Kernel\.)?(?:system|exec|spawn)\s*\(|Open3\.|IO\.popen|`[^`]+`|
+      File\.(?:read|binread|open|write|binwrite|delete|unlink|rename|chmod|chown|truncate)|
+      (?:Net::H[T]TP|URI[.]open|OpenURI)|ENV(?:\.fetch\s*\(|\s*\[)
+    }ix
 
     def initialize(max_commands: nil)
       @max_commands = max_commands
     end
 
-    def extract(files, version_root:)
+    def extract(files, version_root:, behavior_paths: [], executable_paths: [])
       @command_count = 0
-      scoped = files.select { |file| file.text && InstructionScope.include?(file.path, version_root) }
+      scoped = files.select do |file|
+        InstructionScope.include?(file.path, version_root, behavior_paths: behavior_paths)
+      end
       scoped.flat_map do |file|
+        raise Invalid, "#{file.path}: declared behavior must be scannable text" unless file.text
+
         if YAML_EXTENSION.match?(file.path)
           extract_yaml(file, version_root: version_root)
+        elsif executable_paths.include?(file.path)
+          extract_executable(file)
         else
           extract_markdown(file)
         end
@@ -44,6 +57,23 @@ module HoneycombSecurityLint
     end
 
     private
+
+    def extract_executable(file)
+      return extract_ruby(file) if RUBY_EXTENSION.match?(file.path)
+      return extract_markdown(file) if SHELL_EXTENSIONS.match?(file.path) || File.extname(file.path).empty?
+
+      raise Invalid, "#{file.path}: declared executable type is unsupported"
+    end
+
+    def extract_ruby(file)
+      commands = []
+      file.text.each_line.with_index(1) do |line, line_number|
+        next unless RUBY_SINK.match?(line)
+
+        append(commands, build(file.path, line_number, first_column(line), "ruby", line.chomp))
+      end
+      commands
+    end
 
     def extract_markdown(file)
       commands = []

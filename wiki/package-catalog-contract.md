@@ -17,12 +17,32 @@ cross-task contract for agents implementing CI, seeding, site, or installers.
 - `source.revision` is upstream provenance, not registry release or reviewed-head
   identity.
 
+## Managed runtime metadata
+
+New packages are agent-agnostic. Every executable stage, reviewer, and reviser
+declares a stable `mapping_role`, `mapping_contract` revision, and exact
+permission block; embedded `agent`, `model`, and `effort` are rejected. The
+manifest permission union remains deterministic disclosure/catalog data, not an
+actor execution policy.
+
+The strict `x-hive` extension has only `tools`, `prompt_assets`, and
+`optional_inputs`. Tool paths must be normalized, manifest-inventoried regular
+files with Git's trusted executable bit; undeclared executable payload files
+fail. Prompt assets are normalized manifest-inventoried regular files exposed
+from the pinned package root as inert context. Optional input names authorize
+an explicit sorted set of derived executable slot IDs, never terminal or
+unknown slots. Secret values are not package content.
+
+Historical immutable releases `bench/0.1.0`, `docs-sync/0.1.0`, and
+`task-inspect/0.1.0` alone retain the pre-contract parser path. The allowlist is
+exact by name and version; new versions use the full managed contract.
+
 ## Consumer catalog
 
 `honeycomb-catalog/v2` is a flat name-then-SemVer list. Every dual-gated version
 remains present, including soft-hidden, yanked, and revoked releases. Each entry
 contains its own version plus the highest dual-gated `listed` `latest_version`
-or `null`. The future install string always selects `honeycomb/<name>`;
+or `null`. The user-facing install string always selects `honeycomb/<name>`;
 `HoneycombRegistry::Catalog.resolve` defines the catalog-side exact behavior.
 
 The catalog projects manifest description/author/license/Hive minimum/permission
@@ -96,8 +116,10 @@ depth, and requires no security-lint suppression requests.
   checks in CI.
 - Task 1850: shipped the canonical public contribution, security, trust, and
   community-review policies plus their documentation contract tests.
-- Task 1851: add real packages, generated manifests, evidence integration, and a
-  populated catalog.
+- Flagship packages: behavior sources may land before their generated manifests
+  and evidence, but only protected evidence can add them to the populated
+  catalog.
 - Static site: consume catalog entries as generated; do not reinterpret package
   manifests independently.
-- Hive tasks 1852/1853: consume the documented install command/latest semantics.
+- Hive: consumes the documented install/latest semantics and owns per-slot
+  execution mappings plus immutable task configuration pins.

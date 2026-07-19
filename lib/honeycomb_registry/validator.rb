@@ -32,6 +32,10 @@ module HoneycombRegistry
         findings.concat(package.validate_instruction_references(workflow))
         permission_result = Permissions.derive(workflow, path: package.repository_path("workflow.yml"))
         findings.concat(permission_result.findings)
+        findings.concat(HiveCompatibility.validate_package_contract(
+          package, manifest, workflow: workflow, inventory: inspection.files,
+          declared_files: manifest["files"]
+        ))
         if permission_result.permissions && manifest["permissions"] != permission_result.permissions
           findings.add("#{package.relative_manifest_path}.permissions", "permissions.drift",
                        "manifest permissions do not match workflow-derived permissions")
