@@ -80,8 +80,8 @@ Decision: preserve immutable release tier separately from current tier,
 permission risk, and the closed `listed`/`soft_hidden`/`yanked`/`revoked`
 lifecycle. Retain dual-gated versions and ordered transition/advisory history in
 the canonical catalog. Verified history requires digest-bound GitHub Actions
-signature/attestation evidence; high-risk listing requires two distinct current
-maintainers.
+signature/attestation evidence; high-risk independent listing requires two
+distinct current maintainers.
 
 Consequence: discovery/latest use only listed releases, exact soft-hidden and
 yanked resolution remains available, and revoked exact resolution fails closed
@@ -104,3 +104,21 @@ head.
 Consequence: the installer remains reproducible without depending on retained
 pull-request refs, and the two identities are not conflated. History-based CI
 must continue rejecting any mutation to an existing version directory.
+
+## 2026-07-19: First-Party Publication Has Explicit Owner Authority
+
+Context: a repository with one human collaborator cannot satisfy a non-author
+approval rule for its own first-party packages. Requiring a fictitious second
+identity would create misleading evidence rather than independent review.
+
+Decision: retain independent authority for community submissions and add a
+protected `repository_owner` authority for canonical first-party Community
+releases. It requires the admin namespace owner to author and dispatch the pull
+request, exact-head passing lint, no suppressions, an exact responsibility
+acknowledgement, audit notes, and an immutable Actions-run URL. It does not
+satisfy Verified promotion.
+
+Consequence: a single-maintainer repository can publish its own packages
+without pretending independence, while forks and community publishers retain
+the existing one/two-reviewer gates. Protected evidence records the authority;
+historical records without the field remain independent.

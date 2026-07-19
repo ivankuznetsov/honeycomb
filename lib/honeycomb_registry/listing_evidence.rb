@@ -14,8 +14,10 @@ module HoneycombRegistry
     ].freeze
     LINT_KEYS = %w[status release_sha256 head_sha checked_at].freeze
     APPROVAL_KEYS = %w[
-      status release_sha256 head_sha reviewer reviewed_at review_url evidence_digest
+      status release_sha256 head_sha reviewer reviewed_at review_url evidence_digest authority
     ].freeze
+    APPROVAL_REQUIRED_KEYS = (APPROVAL_KEYS - ["authority"]).freeze
+    APPROVAL_AUTHORITIES = %w[independent repository_owner].freeze
     VERIFICATION_KEYS = %w[archive_sha256 signature attestation verified_at].freeze
     SIGNATURE_KEYS = %w[identity issuer url].freeze
     ATTESTATION_KEYS = %w[repository workflow url].freeze
@@ -83,8 +85,12 @@ module HoneycombRegistry
       return false unless approvals.is_a?(Array)
       return false if approvals.any? { |approval| approval["status"] == "denied" }
 
-      approved = approvals.select { |approval| approval["status"] == "approved" }
-                           .map { |approval| approval["reviewer"].to_s.downcase }.uniq
+      approved_records = approvals.select { |approval| approval["status"] == "approved" }
+      owner_approved = approved_records.any? { |approval| approval["authority"] == "repository_owner" }
+      return true if owner_approved && record.values_at("release_tier", "current_tier") == %w[community community]
+
+      approved = approved_records.select { |approval| approval.fetch("authority", "independent") == "independent" }
+                                 .map { |approval| approval["reviewer"].to_s.downcase }.uniq
       approved.length >= (record["permission_risk"] == "high" ? 2 : 1)
     end
 
@@ -221,8 +227,11 @@ module HoneycombRegistry
           invalid_type(approval_path, "approval", findings)
           next
         end
-        validate_keys(approval, approval_path, APPROVAL_KEYS, APPROVAL_KEYS, findings)
+        validate_keys(approval, approval_path, APPROVAL_REQUIRED_KEYS, APPROVAL_KEYS, findings)
         validate_enum(approval["status"], "#{approval_path}.status", APPROVAL_STATUSES, findings)
+        if approval.key?("authority")
+          validate_enum(approval["authority"], "#{approval_path}.authority", APPROVAL_AUTHORITIES, findings)
+        end
         validate_identity(approval, approval_path,
                           %w[release_sha256 head_sha reviewer reviewed_at review_url evidence_digest],
                           true, findings)

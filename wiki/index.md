@@ -15,7 +15,9 @@ change.
   contracts.
 - [[security-review-contract]] - identity binding and boundary with listing CI.
 - [[submission-canary]] - maintainer-dispatched bot submission used to smoke
-  the real lint, non-self approval, publication, site, and Hive boundaries.
+  the real lint, independent approval, publication, site, and Hive boundaries;
+  canonical first-party submissions also have an explicit repository-owner
+  publication lane.
 - [[gaps]] - missing, uncertain, or stale wiki coverage.
 
 ## Canonical Public Policy
@@ -35,10 +37,10 @@ link to policy rather than restating it.
 
 Architecture, Writing, and SEO Content 1.0.1 packages and canonical manifests
 are present under `packages/` with a Hive 0.6.0 minimum. They are agent-agnostic
-and are exercised through Hive's real registry install, configuration-pin,
+and exercised through Hive's real registry install, configuration-pin,
 task-creation, Agent, Council, and package-root paths using deterministic test
-agents. They are not catalog listings until Hive 0.6.0 is released and protected
-lint evidence plus independent approvals exist.
+agents. Hive 0.6.0 is released, but the flagships are not catalog listings until
+protected lint evidence plus repository-owner publication records exist.
 
 ## Update Protocol
 

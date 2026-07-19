@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "../test_helper"
+require "honeycomb_security_lint"
 
 class SecurityLintListingApprovalWorkflowTest < Minitest::Test
   WORKFLOW = File.join(ROOT, ".github", "workflows", "listing-approval.yml")
@@ -20,6 +21,8 @@ class SecurityLintListingApprovalWorkflowTest < Minitest::Test
     refute_includes workflow, "secrets."
     assert_includes workflow, "persist-credentials: false"
     assert_includes workflow, "ruby script/honeycomb-listing-approval issue"
+    assert_includes workflow, "options: [independent, repository_owner]"
+    assert_includes workflow, HoneycombSecurityLint::ApprovalIssuer::OWNER_ACKNOWLEDGEMENT
     refute_match(/^\s*run:[^\n]*\$\{\{\s*(?:inputs|github\.event)/, workflow)
     uses = workflow.scan(/^\s*-?\s*uses:\s*([^\s]+)/).flatten
     refute_empty uses

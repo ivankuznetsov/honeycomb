@@ -73,9 +73,11 @@ allowed for `soft_hidden` and `yanked`; `revoked` raises with mandatory public
 advisories. Historic Verified releases retain verification even after current
 demotion to Community.
 
-Low/moderate risk needs one current approved maintainer. High risk needs two
-distinct current approvals for the same release and exact review head; any
-current denial makes the version ineligible. Verified evidence binds the
+Independent low/moderate risk needs one current approved maintainer and high
+risk needs two distinct current approvals for the same release and exact review
+head. A canonical first-party Community release may instead use one protected
+repository-owner approval at any risk; any current denial makes the version
+ineligible. Verified evidence binds the
 canonical immutable archive identity to an exact GitHub Actions keyless signer
 and attestation workflow identity.
 

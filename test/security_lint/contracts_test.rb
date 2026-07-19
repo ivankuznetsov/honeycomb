@@ -128,6 +128,13 @@ class SecurityLintContractsTest < Minitest::Test
       HoneycombSecurityLint::Contracts.validate_approvals(invalid)
     end
     assert_includes error.message, "exact SHA-256"
+
+    invalid = Marshal.load(Marshal.dump(approval))
+    invalid["approvals"][0]["authority"] = "self_approved"
+    error = assert_raises(HoneycombSecurityLint::Contracts::Invalid) do
+      HoneycombSecurityLint::Contracts.validate_approvals(invalid)
+    end
+    assert_includes error.message, "authority"
   end
 
   def test_allows_distinct_maintainers_but_rejects_case_insensitive_reviewer_duplicates

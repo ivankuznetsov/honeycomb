@@ -137,7 +137,7 @@ class DocumentationContractTest < Minitest::Test
     assert catalog_entry.key?("source_sha")
     %w[name version].each { |field| assert listing_record.key?(field), field }
     %w[release_sha256 head_sha].each { |field| assert lint.key?(field), field }
-    %w[reviewer reviewed_at].each { |field| assert approval.key?(field), field }
+    %w[authority reviewer reviewed_at].each { |field| assert approval.key?(field), field }
     assert_equal %w[archive_sha256 attestation signature verified_at], verification.keys.sort
     assert_equal %w[identity issuer url], verification.dig("signature", "properties").keys.sort
     assert_equal %w[repository url workflow], verification.dig("attestation", "properties").keys.sort
@@ -163,7 +163,9 @@ class DocumentationContractTest < Minitest::Test
     assert_includes contributing, "two business days"
     assert_includes contributing, "seven business days"
     assert_includes contributing, "best-effort targets"
-    assert_includes contributing, "`permission_risk: high` version requires two distinct"
+    assert_includes contributing, "Under independent authority, every `permission_risk: high` version requires"
+    assert_includes contributing, "`repository_owner` authority"
+    assert_includes trust, "ownership accountability, not independent review"
     assert_includes security, "48 hours"
     assert_includes security, "seven calendar days"
     assert_includes security, "not resolution deadlines"

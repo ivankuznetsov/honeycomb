@@ -63,6 +63,7 @@
         "release_sha256": {"$ref": "#/$defs/sha256"},
         "head_sha": {"$ref": "#/$defs/headSha"},
         "reviewer": {"type": "string", "minLength": 1},
+        "authority": {"enum": ["independent", "repository_owner"]},
         "reviewed_at": {"type": "string", "format": "date-time"},
         "review_url": {"$ref": "#/$defs/uri"},
         "evidence_digest": {"$ref": "#/$defs/sha256"}

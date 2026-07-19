@@ -129,25 +129,30 @@ authorize the current head.
 ## Maintainer counts and conflicts
 
 Eligible maintainers are repository collaborators with write, maintain, or
-admin permission. The protected issuer mechanically rejects approval by the
-pull-request submitter, and one GitHub identity cannot count twice. A maintainer
-who authored, published, or controls the submitted honeycomb under another
-account must disclose that relationship and recuse; the current manifest does
-not carry a verifiable GitHub publisher identity, so this broader conflict rule
-is enforced by maintainer review rather than inferred from display-name or URL
-metadata.
+admin permission. Independent authority mechanically rejects approval by the
+pull-request submitter, and one GitHub identity cannot count twice. A
+maintainer who authored, published, or controls the submitted honeycomb under
+another account must disclose that relationship and recuse; the current
+manifest does not carry a verifiable GitHub publisher identity, so this broader
+conflict rule is enforced by maintainer review rather than inferred from
+display-name or URL metadata.
 
 - The v1 catalog gate requires one current eligible-maintainer approval for a
   low- or moderate-risk Community version.
-- While only one eligible maintainer is active, that reviewer may complete an
-  ordinary first listing if they have no conflict. Once two eligible
-  maintainers are active, project policy requires both for a first Community
-  listing; maintainers must keep the version pending until the second review is
-  recorded.
-- Every `permission_risk: high` version requires two distinct eligible
-  maintainers, regardless of project size or tier. There is no one-maintainer,
-  self-approval, timeout, or emergency waiver. If the second reviewer is not
-  available, the version remains pending.
+- Under independent authority, every `permission_risk: high` version requires
+  two distinct eligible maintainers. If the second reviewer is unavailable,
+  the version remains pending.
+- A first-party release authored by the repository owner in the canonical
+  repository may instead use `repository_owner` authority. The protected
+  issuer requires the dispatching identity to be the admin namespace owner and
+  pull-request author, requires current passing lint, rejects every suppression,
+  requires the exact responsibility acknowledgement plus non-empty audit notes,
+  and records the trusted Actions run URL. One such owner record satisfies the
+  Community listing count at any permission risk. It is an explicit publication
+  decision, not independent review or a safety endorsement.
+- `repository_owner` authority is not available to forks, community publishers,
+  non-admin collaborators, denials, suppression approvals, or Verified
+  promotion requirements.
 - A denial from any current eligible reviewer makes the version ineligible
   until that reviewer records a newer current decision or the concern is
   otherwise resolved through the normal evidence flow.

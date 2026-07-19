@@ -152,6 +152,7 @@ module HoneycombSecurityLint
     def approval_verdict(approval)
       {
         "status" => approval.fetch("decision"),
+        "authority" => approval.fetch("authority", "independent"),
         "release_sha256" => approval.fetch("release_sha256"),
         "head_sha" => approval.fetch("head_sha"), "reviewer" => approval.fetch("reviewer"),
         "reviewed_at" => approval.fetch("reviewed_at"), "review_url" => approval.fetch("review_url"),
