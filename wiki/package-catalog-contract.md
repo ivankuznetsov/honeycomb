@@ -58,10 +58,11 @@ indented canonical representation.
 Catalog `reviews_url` preserves the exact designated-maintainer approval URL.
 Nullable `community_reviews_url` is the default-branch external community-review
 directory only when records exist. Every designated review also remains in
-`listing_approval.reviews`; neither community content nor verdict counts affect
-eligibility.
+`listing_approval.reviews` with explicit independent or repository-owner
+authority; neither community content nor verdict counts affect eligibility.
 
-V2 adds nullable `community_reviews_url` without changing v1 `reviews_url`.
+V2 adds nullable `community_reviews_url` and explicit approval authority without
+changing v1 `reviews_url`.
 `schemas/catalog-v1.json` is retained unchanged as the strict historical
 contract; current producers emit v2 and consumers branch on the root schema.
 

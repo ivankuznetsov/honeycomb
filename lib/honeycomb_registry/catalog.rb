@@ -145,7 +145,9 @@ module HoneycombRegistry
           "approved_by" => approvals.map { |approval| approval.fetch("reviewer") },
           "approved_at" => approvals.max_by { |approval| Time.iso8601(approval.fetch("reviewed_at")) }.fetch("reviewed_at"),
           "reviews" => approvals.map do |approval|
-            approval.slice("reviewer", "reviewed_at", "review_url", "evidence_digest")
+            approval.slice("reviewer", "reviewed_at", "review_url", "evidence_digest").merge(
+              "authority" => approval.fetch("authority", "independent")
+            )
           end
         }
       }

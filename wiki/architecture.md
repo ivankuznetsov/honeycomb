@@ -110,7 +110,9 @@ history, and advisories remain independent catalog axes. Revoked entries remain
 auditable but exact resolution fails closed with their public advisories.
 Catalog `reviews_url` retains the designated approval audit meaning;
 `community_reviews_url` resolves to the mutable external namespace only when a
-community record exists.
+community record exists. Each `listing_approval.reviews` record carries the
+authority that made it eligible so downstream validators can enforce the same
+independent-versus-owner threshold without reconstructing protected evidence.
 
 ## Runtime Flow Status
 

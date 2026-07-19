@@ -102,9 +102,10 @@
               "items": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["reviewer", "reviewed_at", "review_url", "evidence_digest"],
+                "required": ["reviewer", "authority", "reviewed_at", "review_url", "evidence_digest"],
                 "properties": {
                   "reviewer": {"type": "string", "minLength": 1},
+                  "authority": {"enum": ["independent", "repository_owner"]},
                   "reviewed_at": {"type": "string", "format": "date-time"},
                   "review_url": {"type": "string", "format": "uri"},
                   "evidence_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
