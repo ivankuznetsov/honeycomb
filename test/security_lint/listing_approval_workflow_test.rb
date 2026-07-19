@@ -25,6 +25,7 @@ class SecurityLintListingApprovalWorkflowTest < Minitest::Test
     assert_includes workflow, "ruby script/honeycomb-listing-approval issue"
     assert_includes workflow, "options: [independent, repository_owner]"
     assert_includes workflow, HoneycombSecurityLint::ApprovalIssuer::OWNER_ACKNOWLEDGEMENT
+    assert_match(/review_id:\n(?:.*\n){0,4}\s+default: ""/, workflow)
     refute_match(/^\s*run:[^\n]*\$\{\{\s*(?:inputs|github\.event)/, workflow)
     uses = workflow.scan(/^\s*-?\s*uses:\s*([^\s]+)/).flatten
     refute_empty uses

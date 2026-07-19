@@ -13,6 +13,7 @@ module HoneycombSecurityLint
       pull_request head_sha lint_run_id name version release_sha256 evidence_digest
       review_id decision notes approved_suppressions publication_authority owner_acknowledgement
     ].freeze
+    OPTIONAL_INPUT_DEFAULTS = {"review_id" => "", "owner_acknowledgement" => ""}.freeze
 
     class Invalid < StandardError; end
 
@@ -90,9 +91,11 @@ module HoneycombSecurityLint
         raise Invalid, "workflow dispatch repository is invalid"
       end
       inputs = @event["inputs"]
-      unless inputs.is_a?(Hash) && (INPUT_KEYS - inputs.keys).empty?
+      unless inputs.is_a?(Hash)
         raise Invalid, "workflow dispatch inputs are incomplete"
       end
+      inputs = OPTIONAL_INPUT_DEFAULTS.merge(inputs)
+      raise Invalid, "workflow dispatch inputs are incomplete" unless (INPUT_KEYS - inputs.keys).empty?
       reviewer = @event.dig("sender", "login")
       unless reviewer.is_a?(String) && EvidenceStore::LOGIN_PATTERN.match?(reviewer)
         raise Invalid, "workflow dispatch sender is invalid"
