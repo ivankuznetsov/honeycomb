@@ -1,0 +1,20 @@
+{
+  "approvals": [
+    {
+      "approved_suppressions": [],
+      "authority": "repository_owner",
+      "decision": "approved",
+      "evidence_digest": "9978251dbe8cd2649dc7cb3a1eeacfd05dbaa9bf43f373f4fcdeab29e866bed2",
+      "head_sha": "ee1e681f9e82ce691923141444f0491120ad5f61",
+      "name": "seo-content",
+      "notes": "First-party SEO Content 1.0.1 publication accepted after exact-head security lint and release review",
+      "path": "packages/seo-content/1.0.1",
+      "release_sha256": "30226a0694e62f54177dc514c55bb8965098a0adae83439efa8045345ca7ce76",
+      "review_url": "https://github.com/ivankuznetsov/honeycomb/actions/runs/29683039233",
+      "reviewed_at": "2026-07-19T10:15:48Z",
+      "reviewer": "ivankuznetsov",
+      "version": "1.0.1"
+    }
+  ],
+  "schema": "honeycomb.listing-approval/v1"
+}
