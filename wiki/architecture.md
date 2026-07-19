@@ -23,8 +23,10 @@ catalog renderer.
   from the current tree or from untrusted pull-request objects at an exact SHA.
 - `.github/workflows/security-lint.yml` and `security-lint-report.yml` implement
   the read-only analyzer / metadata-write reporter split.
-- `.github/workflows/listing-approval.yml` verifies a maintainer's current
-  review and appends immutable lint/approval records to `honeycomb-evidence`.
+- `.github/workflows/listing-approval.yml` verifies either a maintainer's
+  independent review or a canonical first-party repository-owner publication
+  acknowledgement and appends immutable lint/approval records to
+  `honeycomb-evidence`.
 - `.github/workflows/community-reviews.yml` runs trusted base code against
   submitted Git objects without checking out or executing pull-request code.
 - `.github/workflows/catalog-check.yml` is a read-only publication gate that
@@ -84,13 +86,15 @@ The shared library has three main flows:
    complete changed-file set, newest same-head source run, protected paths,
    artifact ZIP/digests/schema/identity, then updates the
    `honeycomb/security-lint` commit status and one best-effort owned comment.
-6. The protected approval issuer re-verifies maintainer permission, review,
-   status, artifact, release, and head identities before appending records on a
-   separate evidence ref. It can finalize exact requested suppressions from
-   preliminary failure to a proven pass. Offline export explicitly selects lint
-   snapshots, requires prior normalized evidence, preserves durable lifecycle
-   state and unselected records, projects the latest decision per reviewer, and
-   adapts matching approvals to the catalog reader.
+6. The protected approval issuer re-verifies maintainer permission, approval
+   authority, status, artifact, release, and head identities before appending
+   records on a separate evidence ref. Independent review can finalize exact
+   requested suppressions from preliminary failure to a proven pass; the
+   repository-owner lane requires a clean pass and cannot suppress. Offline
+   export explicitly selects lint snapshots, requires prior normalized
+   evidence, preserves durable lifecycle state and unselected records, projects
+   the latest decision per reviewer, and adapts matching approvals to the
+   catalog reader.
 7. Community-review validation binds strict path/front matter and authenticated
    PR identity to canonical package, catalog, release, source, and review-head
    identities. It is informational and cannot mint listing approval.
@@ -118,7 +122,7 @@ APIs. Protected normalized evidence now projects the listed Community
 `bf67e8a6bc4a85e2d6663c57595d337e17ce9f73` with canonical SHA-256
 `2e6c27ed6ec22bc3e6afc5ff07244418d48a6e878c53a3e850326748d8d5c497`.
 The static site consumes that exact snapshot without reconstructing entries,
-and released Hive v0.5.2 installs it from the official registry with immutable
+and released Hive v0.6.0 installs it from the official registry with immutable
 catalog/digest task pins and task-local read-only runtime policy. Evidence
 branch/environment protection remains live; emergency lifecycle transitions
 and positive community-review identity cases remain rollout operations.

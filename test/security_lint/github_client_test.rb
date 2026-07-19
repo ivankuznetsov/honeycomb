@@ -74,4 +74,13 @@ class SecurityLintGitHubClientTest < Minitest::Test
       client.pull_files(42, expected_count: 2)
     end
   end
+
+  def test_fetches_one_workflow_run_by_its_numeric_identity
+    client = StubClient.new
+    client.responses = [response(Net::HTTPOK, body: JSON.generate({"id" => 88}))]
+
+    assert_equal({"id" => 88}, client.workflow_run(88))
+    assert_equal "https://api.github.test/repos/hive-sh/honeycomb/actions/runs/88",
+                 client.requests.first[1]
+  end
 end

@@ -9,8 +9,9 @@ definitions remain authoritative in the [package format](PACKAGE_FORMAT.md).
 A trust tier records evidence about one immutable honeycomb version. It is not
 a guarantee that the version is safe, an endorsement of its purpose, or a
 substitute for reading its requested permissions. A Verified honeycomb with
-`permission_risk: high` is still high risk and still needs the high-risk review
-gate.
+`permission_risk: high` is still high risk. Community publishers need the
+high-risk independent-review gate; a canonical first-party release may instead
+carry an explicit repository-owner publication decision.
 
 The catalog keeps these axes independent:
 
@@ -40,10 +41,15 @@ have:
 - the required eligible-maintainer approval records bound to those same
   identities and the reviewed lint `evidence_digest`.
 
-Low- and moderate-risk versions need at least one current eligible-maintainer
-approval in the v1 catalog gate. A `risk: high` version always needs two
-distinct eligible maintainers. A current denial makes the version ineligible.
-Signing is encouraged for Community versions but is optional.
+Under independent authority, low- and moderate-risk versions need at least one
+current eligible-maintainer approval and a `risk: high` version needs two
+distinct eligible maintainers. A canonical first-party release may instead use
+one protected `repository_owner` approval at any risk when the admin namespace
+owner authored the pull request, current lint passes without suppressions, and
+the exact responsibility acknowledgement is recorded at an immutable Actions
+audit URL. This records ownership accountability, not independent review or a
+safety claim. A current denial makes the version ineligible. Signing is
+encouraged for Community versions but is optional.
 
 ## Verified
 
@@ -61,8 +67,9 @@ following:
 3. No unresolved security or provenance report undermines the candidate.
 4. The immutable release has matching keyless signature and GitHub Actions
    artifact-attestation evidence.
-5. The candidate satisfies its current lint and maintainer-approval gate,
-   including two distinct maintainers when `permission_risk` is `high`.
+5. The candidate satisfies its current lint and independent maintainer-approval
+   gate, including two distinct maintainers when `permission_risk` is `high`;
+   repository-owner authority does not satisfy Verified promotion.
 6. A maintainer explicitly approves promotion of this exact version.
 
 A clean release is a listed release whose required lint and approvals remained

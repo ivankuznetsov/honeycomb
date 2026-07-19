@@ -109,10 +109,19 @@ and head.
 The trusted `.github/workflows/listing-approval.yml` workflow issues those
 records from a protected `honeycomb-listing-approval` environment. It runs only
 default-branch code and verifies the dispatching maintainer's repository
-permission, current pull-request review, exact open head, authoritative lint
-status, protected-path split, artifact digest, and honeycomb release identity.
-The selected review must bind the exact head and be that reviewer's latest
-decisive review. Authors cannot approve their own submissions.
+permission, exact open head, authoritative lint status, protected-path split,
+artifact digest, and honeycomb release identity. Independent authority requires
+a current non-author pull-request review; the selected review must bind the
+exact head and be that reviewer's latest decisive review.
+
+For a canonical first-party pull request, `repository_owner` authority replaces
+the impossible second-person review with an explicit publication decision. The
+issuer requires the admin namespace owner to be the pull-request author and
+workflow dispatcher, rejects fork heads and all suppressions, requires passing
+lint plus the exact responsibility acknowledgement and audit notes, and records
+the protected Actions run URL and timestamp. This authority is visible in
+protected normalized evidence and does not qualify as independent review or
+Verified promotion.
 
 Ordinary approvals still require a passing authoritative result. An exact
 suppression approval may start from the corresponding failing result: trusted

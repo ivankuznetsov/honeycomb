@@ -54,6 +54,12 @@ module HoneycombSecurityLint
                key: "workflow_runs")
     end
 
+    def workflow_run(run_id)
+      get_json(repo_path("actions/runs/#{Integer(run_id)}"))
+    rescue ArgumentError, TypeError
+      raise Error, "workflow run ID is invalid"
+    end
+
     def collaborator_permission(login)
       encoded = URI.encode_www_form_component(login.to_s)
       get_json(repo_path("collaborators/#{encoded}/permission")).fetch("permission")

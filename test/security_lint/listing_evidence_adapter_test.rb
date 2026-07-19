@@ -26,13 +26,14 @@ class SecurityLintListingEvidenceAdapterTest < Minitest::Test
     })
   end
 
-  def approval(digest:, suppressions: [], head_sha: SHA, release: RELEASE)
+  def approval(digest:, suppressions: [], head_sha: SHA, release: RELEASE, authority: "independent")
     {
       "name" => "example", "version" => "1.0.0", "path" => "packages/example/1.0.0",
       "release_sha256" => release, "head_sha" => head_sha, "reviewer" => "maintainer",
       "decision" => "approved", "reviewed_at" => "2026-07-16T11:00:00Z",
       "evidence_digest" => digest, "review_url" => "https://example.test/reviews/42",
-      "notes" => "reviewed", "approved_suppressions" => suppressions
+      "notes" => "reviewed", "approved_suppressions" => suppressions,
+      "authority" => authority
     }
   end
 
@@ -119,6 +120,23 @@ class SecurityLintListingEvidenceAdapterTest < Minitest::Test
     ).fetch("records").first
 
     assert_equal %w[maintainer second-maintainer], record.fetch("approvals").map { |entry| entry["reviewer"] }
+    assert HoneycombRegistry::ListingEvidence.eligible?(record)
+  end
+
+  def test_repository_owner_authority_satisfies_high_risk_gate_without_fake_independence
+    evidence = lint
+    evidence["packages"][0]["requested_permissions"]["risk"] = "high"
+    evidence = HoneycombSecurityLint::Evidence.finalize(evidence)
+    owner = approval(
+      digest: evidence.fetch("artifact_digest"), authority: "repository_owner"
+    )
+
+    record = HoneycombSecurityLint::ListingEvidenceAdapter.build(
+      lint_evidence: evidence, approvals: [owner],
+      checked_at: "2026-07-19T06:00:00Z", release_tier: "community"
+    ).fetch("records").first
+
+    assert_equal "repository_owner", record.dig("approvals", 0, "authority")
     assert HoneycombRegistry::ListingEvidence.eligible?(record)
   end
 

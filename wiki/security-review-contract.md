@@ -39,8 +39,10 @@ public advisories. Passing/approved verdicts carry:
 - RFC 3339 audit times;
 - each human reviewer, review URL, and reviewed evidence digest.
 
-Low/moderate risk requires one distinct current approval; high risk requires
-two, and a current denial blocks eligibility. Verified evidence binds the
+Independent low/moderate risk requires one distinct current approval and high
+risk requires two. A canonical first-party Community release may instead use
+one protected repository-owner approval at any risk; a current denial blocks
+eligibility. Verified evidence binds the
 immutable archive identity, GitHub OIDC signer, signature reference, Actions
 attestation/workflow, and verification time. Revocation requires a public
 advisory. Tier, risk, lifecycle, verification, and advisory meanings do not
@@ -59,13 +61,16 @@ lint execution, sticky PR evidence, invalidation, and
 approval records into the existing reader meaning without reimplementing
 catalog filtering.
 
-The protected listing-approval workflow owns issuance and immutable storage. It
-requires an eligible non-author maintainer, that maintainer's latest decisive
-GitHub review bound to the exact head, the exact authoritative status/run, the
-redacted artifact, and matching release/head identities. Ordinary approval
-requires a pass. Exact requested suppressions may begin from failure only when
-trusted code applies them and proves the final evidence passes before publishing
-success. It appends canonical records under `honeycomb-evidence`; renewed
+The protected listing-approval workflow owns issuance and immutable storage.
+Independent authority requires an eligible non-author maintainer and that
+maintainer's latest decisive GitHub review bound to the exact head.
+Repository-owner authority requires the admin namespace owner to author and
+dispatch a canonical-repository pull request, passing lint without suppressions,
+the exact responsibility acknowledgement, audit notes, and an Actions-run audit
+URL. Both require the exact authoritative status/run, redacted artifact, and
+matching release/head identities. Exact requested suppressions remain available
+only to independent reviewers. The issuer appends canonical records under
+`honeycomb-evidence`; renewed
 reviewer decisions use distinct immutable records, and export selects the latest
 decision per reviewer. The offline exporter still selects exact lint snapshots.
 

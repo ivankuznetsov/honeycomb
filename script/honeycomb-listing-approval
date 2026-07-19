@@ -54,7 +54,8 @@ module HoneycombSecurityLint
         client: client, base_branch: event.dig("repository", "default_branch")
       )
       approval = ApprovalIssuer.new(
-        event: event, client: client, store: store, repository: repository, root: root
+        event: event, client: client, store: store, repository: repository, root: root,
+        approval_run_id: env.fetch("GITHUB_RUN_ID")
       ).issue
       out.write(Contracts.canonical_json({"schema" => Contracts::APPROVAL_SCHEMA, "approvals" => [approval]}))
       0
