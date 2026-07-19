@@ -6,19 +6,23 @@ require "time"
 module HoneycombSecurityLint
   class ApprovalIssuer
     ELIGIBLE_PERMISSIONS = %w[admin maintain write].freeze
+    AUTHORITIES = %w[independent repository_owner].freeze
+    OWNER_ACKNOWLEDGEMENT = "I accept first-party publication responsibility".freeze
     DECISIONS = {"approved" => "APPROVED", "denied" => "CHANGES_REQUESTED"}.freeze
     INPUT_KEYS = %w[
       pull_request head_sha lint_run_id name version release_sha256 evidence_digest
-      review_id decision notes approved_suppressions
+      review_id decision notes approved_suppressions publication_authority owner_acknowledgement
     ].freeze
 
     class Invalid < StandardError; end
 
-    def initialize(event:, client:, store:, repository:, artifact_loader: nil, root: nil)
+    def initialize(event:, client:, store:, repository:, artifact_loader: nil, root: nil,
+                   approval_run_id: nil)
       @event = event
       @client = client
       @store = store
       @repository = repository
+      @approval_run_id = approval_run_id
       @renderer = Renderer.new(max_items: root ? policy_limits(root).fetch("max_rendered_items") : 50)
       @artifact_loader = artifact_loader || begin
         raise Invalid, "trusted repository root is required" unless root
@@ -31,17 +35,17 @@ module HoneycombSecurityLint
       inputs, reviewer = validate_event
       pull_number = positive_integer(inputs.fetch("pull_request"), "pull request")
       run_id = positive_integer(inputs.fetch("lint_run_id"), "lint run ID")
-      review_id = positive_integer(inputs.fetch("review_id"), "review ID")
+      authority = inputs.fetch("publication_authority")
+      raise Invalid, "publication authority is invalid" unless AUTHORITIES.include?(authority)
       validate_sha!(inputs.fetch("head_sha"), "head SHA")
       validate_sha256!(inputs.fetch("release_sha256"), "release fingerprint")
       validate_sha256!(inputs.fetch("evidence_digest"), "evidence digest")
 
       pull = @client.pull(pull_number)
-      validate_reviewer!(reviewer, pull)
+      validate_reviewer!(reviewer, pull, authority)
       validate_pull!(pull, inputs.fetch("head_sha"))
       validate_protected_paths!(pull_number, pull)
       status = validate_status!(inputs.fetch("head_sha"), run_id)
-      review = validate_review!(pull_number, review_id, reviewer, inputs.fetch("decision"), inputs.fetch("head_sha"))
 
       evidence = @artifact_loader.call(run_id)
       package = validate_evidence!(evidence, inputs, pull_number, run_id)
@@ -49,6 +53,9 @@ module HoneycombSecurityLint
       if inputs.fetch("decision") == "denied" && !suppressions.empty?
         raise Invalid, "a denied review cannot approve suppressions"
       end
+      review = approval_audit!(
+        pull_number, reviewer, inputs, authority, suppressions
+      )
 
       approval = {
         "name" => package.dig("identity", "name"),
@@ -57,6 +64,7 @@ module HoneycombSecurityLint
         "release_sha256" => package.dig("identity", "release_sha256"),
         "head_sha" => evidence.fetch("head_sha"),
         "reviewer" => reviewer,
+        "authority" => authority,
         "decision" => inputs.fetch("decision"),
         "reviewed_at" => review.fetch("submitted_at"),
         "evidence_digest" => evidence.fetch("artifact_digest"),
@@ -92,11 +100,20 @@ module HoneycombSecurityLint
       [inputs, reviewer]
     end
 
-    def validate_reviewer!(reviewer, pull)
+    def validate_reviewer!(reviewer, pull, authority)
       permission = @client.collaborator_permission(reviewer)
       raise Invalid, "reviewer is not an eligible maintainer" unless ELIGIBLE_PERMISSIONS.include?(permission)
-      if pull.dig("user", "login").to_s.casecmp?(reviewer)
+
+      if authority == "independent" && pull.dig("user", "login").to_s.casecmp?(reviewer)
         raise Invalid, "a pull-request submitter cannot approve their own submission"
+      end
+      return if authority == "independent"
+
+      owner = @repository.split("/", 2).first
+      unless permission == "admin" && owner.casecmp?(reviewer) &&
+             pull.dig("user", "login").to_s.casecmp?(reviewer) &&
+             pull.dig("head", "repo", "full_name") == @repository
+        raise Invalid, "repository-owner publication requires the admin owner, their own pull request, and the canonical repository"
       end
     end
 
@@ -148,6 +165,43 @@ module HoneycombSecurityLint
       review
     rescue ArgumentError, TypeError
       raise Invalid, "pull-request review history is malformed"
+    end
+
+    def approval_audit!(pull_number, reviewer, inputs, authority, suppressions)
+      if authority == "independent"
+        unless inputs.fetch("owner_acknowledgement").to_s.empty?
+          raise Invalid, "independent review cannot include repository-owner acknowledgement"
+        end
+        review_id = positive_integer(inputs.fetch("review_id"), "review ID")
+        return validate_review!(
+          pull_number, review_id, reviewer, inputs.fetch("decision"), inputs.fetch("head_sha")
+        )
+      end
+
+      unless inputs.fetch("review_id").to_s.empty? &&
+             inputs.fetch("decision") == "approved" &&
+             inputs.fetch("owner_acknowledgement") == OWNER_ACKNOWLEDGEMENT &&
+             !inputs.fetch("notes").to_s.strip.empty? && suppressions.empty?
+        raise Invalid, "repository-owner publication requires an approval acknowledgement, audit notes, and no suppressions"
+      end
+      validate_owner_audit!(reviewer)
+    end
+
+    def validate_owner_audit!(reviewer)
+      run_id = positive_integer(@approval_run_id, "approval workflow run ID")
+      run = @client.workflow_run(run_id)
+      expected_url = "https://github.com/#{@repository}/actions/runs/#{run_id}"
+      unless run.is_a?(Hash) && run["id"] == run_id && run["event"] == "workflow_dispatch" &&
+             run["path"] == ".github/workflows/listing-approval.yml" &&
+             run.dig("repository", "full_name") == @repository &&
+             run.dig("actor", "login").to_s.casecmp?(reviewer) &&
+             run["html_url"] == expected_url
+        raise Invalid, "repository-owner publication workflow audit is invalid"
+      end
+      submitted_at = Time.iso8601(run.fetch("created_at")).utc.iso8601
+      {"submitted_at" => submitted_at, "html_url" => run.fetch("html_url")}
+    rescue ArgumentError, TypeError
+      raise Invalid, "repository-owner publication audit timestamp is invalid"
     end
 
     def validate_evidence!(evidence, inputs, pull_number, run_id)

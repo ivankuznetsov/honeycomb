@@ -300,6 +300,7 @@ public shape:
           "release_sha256": "<same release>",
           "head_sha": "<same head>",
           "reviewer": "registry-reviewer",
+          "authority": "independent",
           "reviewed_at": "2026-07-16T11:00:00Z",
           "review_url": "https://example.test/reviews/example-1.0.0",
           "evidence_digest": "<64 lowercase hex>"
@@ -318,12 +319,15 @@ strict; JSON duplicate keys and non-canonical record/reviewer/history/advisory
 ordering are rejected. Lint statuses are `pass`, `pending`, and `fail`.
 Approvals are current designated-maintainer decisions (`approved` or `denied`);
 an empty array represents no approval. Every decision binds the exact release,
-head, reviewed evidence digest, reviewer, timestamp, and pull-request
-`review_url`. Catalog `reviews_url` preserves the first exact designated
-maintainer audit URL; the separate nullable `community_reviews_url` discovers
-the external community-review namespace. A low or moderate risk honeycomb needs
-one distinct current approval. `risk: high` needs two; any current denial leaves
-it ineligible.
+head, reviewed evidence digest, reviewer, timestamp, and pull-request or
+protected-workflow `review_url`. Optional `authority` is `independent` or
+`repository_owner`; its absence on historical evidence means `independent`.
+Catalog `reviews_url` preserves the first exact designated maintainer audit URL;
+the separate nullable `community_reviews_url` discovers the external
+community-review namespace. Independent low/moderate releases need one current
+approval and `risk: high` needs two. One protected repository-owner approval
+may list a canonical first-party Community release at any risk; any current
+denial leaves it ineligible.
 
 Trust and lifecycle are independent:
 
@@ -380,7 +384,7 @@ Entries carry these projections:
 | `verification`, `history`, `advisories` | Strict listing evidence copied without reinterpretation. |
 | `install_command` | Fixed `hive workflow install honeycomb/<name>`. |
 | `package_url` | Registry default-branch URL for the immutable exact-version path. The evidence head remains an audit identity and may not survive a squash merge; installers read package bytes from their verified catalog commit instead. |
-| `reviews_url` | Exact designated-maintainer pull-request approval URL retained for v1 compatibility. |
+| `reviews_url` | Exact designated-maintainer approval audit URL retained for v1 compatibility. |
 | `community_reviews_url` | External `reviews/<name>/<version>/` namespace on the default branch, or `null` when no review exists. |
 | `source_sha` | Manifest `source.revision`. |
 | `listing_approval` | Release/head/lint identity plus every qualifying reviewer audit record. |
@@ -392,7 +396,7 @@ public advisories. The catalog contains no full manifest, package file map,
 generation timestamp, or caller-supplied shell projection.
 
 `listing_approval.reviews[*].review_url` retains every immutable designated
-maintainer pull-request review, while catalog `reviews_url` preserves the first
+maintainer approval audit URL, while catalog `reviews_url` preserves the first
 such URL. `community_reviews_url` is the optional mutable external review
 directory. Community review content and verdict counts never participate in
 catalog eligibility.

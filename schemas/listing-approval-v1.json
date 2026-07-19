@@ -24,6 +24,7 @@
           "release_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
           "head_sha": {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
           "reviewer": {"type": "string", "minLength": 1},
+          "authority": {"enum": ["independent", "repository_owner"]},
           "decision": {"enum": ["approved", "denied"]},
           "reviewed_at": {"type": "string", "format": "date-time"},
           "evidence_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},

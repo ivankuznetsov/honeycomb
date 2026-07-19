@@ -56,6 +56,20 @@ class ListingEvidenceTest < Minitest::Test
     refute HoneycombRegistry::ListingEvidence.eligible?(denied)
   end
 
+  def test_repository_owner_authority_can_list_a_high_risk_first_party_release
+    record = JSON.parse(File.read(fixture_path("listing-evidence", "passing.json"))).fetch("records").first
+    record["permission_risk"] = "high"
+    record["approvals"][0]["authority"] = "independent"
+    refute HoneycombRegistry::ListingEvidence.eligible?(record)
+
+    record["approvals"][0]["authority"] = "repository_owner"
+    assert HoneycombRegistry::ListingEvidence.eligible?(record)
+
+    record["release_tier"] = "verified"
+    record["current_tier"] = "verified"
+    refute HoneycombRegistry::ListingEvidence.eligible?(record)
+  end
+
   def test_rejects_malformed_identity_timestamp_and_url_fields
     base = JSON.parse(File.read(fixture_path("listing-evidence", "passing.json")))
     mutations = [

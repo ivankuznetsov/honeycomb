@@ -32,8 +32,18 @@ on:
         required: true
         type: string
       review_id:
-        description: Current pull-request review ID from the dispatching maintainer
+        description: Current PR review ID for independent authority; leave empty for repository owner
+        required: false
+        type: string
+      publication_authority:
+        description: Independent review or explicit first-party repository-owner publication
         required: true
+        type: choice
+        options: [independent, repository_owner]
+      owner_acknowledgement:
+        description: For repository_owner, enter exactly: I accept first-party publication responsibility
+        required: false
+        default: ""
         type: string
       decision:
         description: Listing decision

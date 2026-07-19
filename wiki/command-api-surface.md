@@ -56,9 +56,11 @@ network access and requires one or more explicit immutable lint paths under a
 checked-out `honeycomb-evidence` snapshot plus `--previous` normalized evidence.
 It retains unselected records and carries durable tier, lifecycle, verification,
 history, and advisory decisions forward. `issue` accepts an exact requested
-suppression against failing preliminary evidence only when trusted finalization
-produces a complete passing result; ordinary affirmative approvals require an
-already-passing result.
+suppression against failing preliminary evidence only under independent
+authority when trusted finalization produces a complete passing result. The
+repository-owner authority is limited to a canonical first-party pull request,
+requires an already-passing result and explicit responsibility acknowledgement,
+and rejects every suppression.
 
 Local Hive absence is a warning; `--require-hive` makes absence an error. Strict
 mode is explicit and never inferred from environment variables.

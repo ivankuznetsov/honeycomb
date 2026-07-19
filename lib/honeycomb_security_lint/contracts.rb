@@ -35,8 +35,9 @@ module HoneycombSecurityLint
     APPROVAL_ROOT_KEYS = %w[schema approvals].freeze
     APPROVAL_KEYS = %w[
       name version path release_sha256 head_sha reviewer decision reviewed_at evidence_digest
-      review_url notes approved_suppressions
+      review_url notes approved_suppressions authority
     ].freeze
+    APPROVAL_REQUIRED_KEYS = (APPROVAL_KEYS - ["authority"]).freeze
 
     class Invalid < StandardError
       attr_reader :errors
@@ -249,7 +250,7 @@ module HoneycombSecurityLint
       errors << "$.schema must be #{APPROVAL_SCHEMA.inspect}" unless data["schema"] == APPROVAL_SCHEMA
       seen = {}
       array(data["approvals"], "$.approvals", errors) do |entry, path|
-        object(entry, path, APPROVAL_KEYS, APPROVAL_KEYS, errors)
+        object(entry, path, APPROVAL_REQUIRED_KEYS, APPROVAL_KEYS, errors)
         next unless entry.is_a?(Hash)
 
         errors << "#{path}.name is invalid" unless entry["name"].is_a?(String) && NAME_PATTERN.match?(entry["name"])
@@ -261,6 +262,7 @@ module HoneycombSecurityLint
         sha(entry["head_sha"], "#{path}.head_sha", errors)
         nonempty(entry["reviewer"], "#{path}.reviewer", errors)
         enum(entry["decision"], "#{path}.decision", %w[approved denied], errors)
+        enum(entry["authority"], "#{path}.authority", %w[independent repository_owner], errors) if entry.key?("authority")
         timestamp(entry["reviewed_at"], "#{path}.reviewed_at", errors)
         sha256(entry["evidence_digest"], "#{path}.evidence_digest", errors)
         safe_url(entry["review_url"], "#{path}.review_url", errors)
