@@ -9,7 +9,7 @@ Return `research.md` with:
 1. `## Framing` — audience, angle, single takeaway, tone, and freshness date.
 2. `## Source ledger` — stable source URL or repository `path:line`, title,
    publisher/author, publication date when available, access date, and why the
-   source is credible or limited.
+   credibility or limitations of the source.
 3. `## Source-to-claim map` — one proposed material claim per row, its exact
    supporting sources, and status `supported`, `qualified`, `disputed`, or
    `unsupported`.

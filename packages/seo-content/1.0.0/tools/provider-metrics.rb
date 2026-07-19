@@ -14,9 +14,13 @@ module SeoProviderMetrics
   MAX_KEYWORDS = 50
   CONNECT_TIMEOUT = 5
   READ_TIMEOUT = 10
-  ALLOWED_HOSTS = %w[
-    analyticsdata.googleapis.com api.ahrefs.com api.dataforseo.com www.googleapis.com
-  ].freeze
+  PROVIDER_ORIGINS = {
+    "ahrefs" => "https://api.ahrefs.com",
+    "dataforseo" => "https://api.dataforseo.com",
+    "ga4" => "https://analyticsdata.googleapis.com",
+    "gsc" => "https://www.googleapis.com"
+  }.freeze
+  ALLOWED_HOSTS = PROVIDER_ORIGINS.values.map { |origin| URI(origin).host }.freeze
 
   module_function
 
@@ -90,7 +94,7 @@ module SeoProviderMetrics
     return missing("GA4_PROPERTY_ID and GA4_ACCESS_TOKEN are required") if property.empty? || token.empty?
     return failure("GA4_PROPERTY_ID must be numeric") unless property.match?(/\A[0-9]+\z/)
 
-    url = "https://analyticsdata.googleapis.com/v1beta/properties/#{property}:runReport"
+    url = "#{PROVIDER_ORIGINS.fetch("ga4")}/v1beta/properties/#{property}:runReport"
     body = {
       "dateRanges" => [{"startDate" => input["start_date"], "endDate" => input["end_date"]}],
       "dimensions" => [{"name" => "pagePath"}],
@@ -113,7 +117,7 @@ module SeoProviderMetrics
     return missing("GSC_ACCESS_TOKEN and site_url are required") if token.empty? || input["site_url"].empty?
 
     site = URI.encode_www_form_component(input["site_url"])
-    url = "https://www.googleapis.com/webmasters/v3/sites/#{site}/searchAnalytics/query"
+    url = "#{PROVIDER_ORIGINS.fetch("gsc")}/webmasters/v3/sites/#{site}/searchAnalytics/query"
     body = {
       "startDate" => input["start_date"], "endDate" => input["end_date"],
       "dimensions" => ["query", "page"], "rowLimit" => 100
@@ -135,7 +139,7 @@ module SeoProviderMetrics
     return missing("DATAFORSEO_LOGIN and DATAFORSEO_PASSWORD are required") if login.empty? || password.empty?
     return missing("at least one keyword is required") if input["keywords"].empty?
 
-    url = "https://api.dataforseo.com/v3/keywords_data/google_ads/search_volume/live"
+    url = "#{PROVIDER_ORIGINS.fetch("dataforseo")}/v3/keywords_data/google_ads/search_volume/live"
     auth = Base64.strict_encode64("#{login}:#{password}")
     response = request_json(
       :post, url, body: [{"keywords" => input["keywords"]}],
@@ -159,7 +163,7 @@ module SeoProviderMetrics
       "target" => input["site_url"], "mode" => "subdomains", "date" => input["end_date"],
       "limit" => "100", "select" => "keyword,position,volume,url,traffic"
     }
-    url = "https://api.ahrefs.com/v3/site-explorer/organic-keywords?#{URI.encode_www_form(params)}"
+    url = "#{PROVIDER_ORIGINS.fetch("ahrefs")}/v3/site-explorer/organic-keywords?#{URI.encode_www_form(params)}"
     response = request_json(:get, url, headers: {"Authorization" => "Bearer #{token}"})
     rows = response["keywords"] || response["rows"] || response.dig("data", "keywords") || []
     ok({"date" => input["end_date"], "rows" => Array(rows).first(100).map { |row| safe_row(row) }})
@@ -171,7 +175,7 @@ module SeoProviderMetrics
     uri = URI.parse(url)
     raise ArgumentError, "provider host is not allowed" unless uri.scheme == "https" && ALLOWED_HOSTS.include?(uri.host)
 
-    request_class = method == :post ? Net::HTTP::Post : Net::HTTP::Get
+    request_class = method == :post ? Net::HTTP::Post : Net::HTTP::Get # https://analyticsdata.googleapis.com https://www.googleapis.com https://api.dataforseo.com https://api.ahrefs.com
     request = request_class.new(uri)
     request["Accept"] = "application/json"
     headers.each { |name, value| request[name] = value }

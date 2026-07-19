@@ -2,6 +2,7 @@
 
 require_relative "test_helper"
 require "json"
+require "honeycomb_security_lint"
 require "psych"
 
 class FlagshipPackagesTest < Minitest::Test
@@ -126,6 +127,27 @@ class FlagshipPackagesTest < Minitest::Test
     assert_equal "prompt-only", report.fetch("mode")
     assert report.fetch("providers").values.all? { |provider| provider.fetch("status") == "missing" }
     refute_match(/Bearer|Basic/i, stdout)
+  end
+
+  def test_provider_adapter_exposes_only_fixed_reviewable_network_origins
+    version_root = "packages/seo-content/1.0.0"
+    policy = HoneycombSecurityLint::Policy.load(File.join(ROOT, "policy", "security-lint.yml"))
+    files = HoneycombSecurityLint::TextFiles.new(root: ROOT, limits: policy.limits)
+                                               .collect(version_root).files
+    tool_path = "#{version_root}/tools/provider-metrics.rb"
+    tool_files = files.select { |file| file.path == tool_path }
+    commands = HoneycombSecurityLint::CommandExtractor.new.extract(
+      tool_files,
+      version_root: version_root,
+      behavior_paths: [tool_path],
+      executable_paths: [tool_path]
+    )
+    observations = HoneycombSecurityLint::NetworkExtractor.new.extract(commands)
+
+    refute observations.any?(&:dynamic)
+    assert_equal %w[
+      analyticsdata.googleapis.com api.ahrefs.com api.dataforseo.com www.googleapis.com
+    ].sort, observations.map(&:host).uniq.sort
   end
 
   def test_adapted_packages_pin_upstream_provenance_and_attribution
