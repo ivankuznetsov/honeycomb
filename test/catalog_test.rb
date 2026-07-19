@@ -23,7 +23,7 @@ class CatalogTest < Minitest::Test
 
   def evidence_record(package, lint: "pass", approval: "approved", head: "d" * 40,
                       release_tier: "community", current_tier: release_tier,
-                      state: "listed", approval_count: 1, verification: nil,
+                      state: "listed", approval_count: 1, approval_authority: nil, verification: nil,
                       history: [], advisories: [])
     manifest = HoneycombRegistry::SafeYAML.load_file(package.manifest_path)
     release = manifest.fetch("release_sha256")
@@ -31,7 +31,7 @@ class CatalogTest < Minitest::Test
                   []
                 else
                   Array.new(approval_count) do |index|
-                    {
+                    approval_record = {
                       "status" => approval,
                       "release_sha256" => release,
                       "head_sha" => head,
@@ -40,6 +40,8 @@ class CatalogTest < Minitest::Test
                       "review_url" => "https://example.test/reviews/#{package.name}-#{package.version}-#{index + 1}",
                       "evidence_digest" => ("#{index + 1}" * 64)[0, 64]
                     }
+                    approval_record["authority"] = approval_authority if approval_authority
+                    approval_record
                   end
                 end
     {
@@ -140,6 +142,7 @@ class CatalogTest < Minitest::Test
       assert_equal "a" * 40, entry["source_sha"]
       assert_equal "d" * 40, entry.dig("listing_approval", "head_sha")
       assert_equal ["registry-reviewer-1"], entry.dig("listing_approval", "approved_by")
+      assert_equal "independent", entry.dig("listing_approval", "reviews", 0, "authority")
       assert_equal "community", entry["release_tier"]
       assert_equal "community", entry["current_tier"]
       assert_equal "listed", entry["state"]
@@ -259,7 +262,7 @@ class CatalogTest < Minitest::Test
     end
   end
 
-  def test_high_risk_requires_two_distinct_current_maintainer_approvals
+  def test_high_risk_independent_authority_requires_two_approvals_and_owner_authority_is_explicit
     in_tmpdir do |root|
       package = canonical_package(root)
       workflow = File.join(package.path, "workflow.yml")
@@ -281,6 +284,16 @@ class CatalogTest < Minitest::Test
       refute result.findings.errors?, result.findings.to_h.inspect
       assert_equal %w[registry-reviewer-1 registry-reviewer-2],
                    result.document.dig("entries", 0, "listing_approval", "approved_by")
+      assert_equal %w[independent independent],
+                   result.document.dig("entries", 0, "listing_approval", "reviews").map { |review| review.fetch("authority") }
+
+      owner = evidence_record(package, approval_count: 1, approval_authority: "repository_owner")
+      result = HoneycombRegistry::Catalog.build(
+        root: root, evidence_path: write_evidence(root, [owner])
+      )
+      refute result.findings.errors?, result.findings.to_h.inspect
+      assert_equal "repository_owner",
+                   result.document.dig("entries", 0, "listing_approval", "reviews", 0, "authority")
     end
   end
 

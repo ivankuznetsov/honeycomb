@@ -387,7 +387,7 @@ Entries carry these projections:
 | `reviews_url` | Exact designated-maintainer approval audit URL retained for v1 compatibility. |
 | `community_reviews_url` | External `reviews/<name>/<version>/` namespace on the default branch, or `null` when no review exists. |
 | `source_sha` | Manifest `source.revision`. |
-| `listing_approval` | Release/head/lint identity plus every qualifying reviewer audit record. |
+| `listing_approval` | Release/head/lint identity plus every qualifying reviewer audit record and its explicit `independent` or `repository_owner` authority. |
 
 Entries sort by name then SemVer. Discovery and implicit latest selection use
 only `listed` entries. Exact resolution remains allowed for `soft_hidden` and
@@ -395,14 +395,15 @@ only `listed` entries. Exact resolution remains allowed for `soft_hidden` and
 public advisories. The catalog contains no full manifest, package file map,
 generation timestamp, or caller-supplied shell projection.
 
-`listing_approval.reviews[*].review_url` retains every immutable designated
-maintainer approval audit URL, while catalog `reviews_url` preserves the first
-such URL. `community_reviews_url` is the optional mutable external review
-directory. Community review content and verdict counts never participate in
-catalog eligibility.
+`listing_approval.reviews[*]` retains every immutable designated maintainer
+approval audit URL and the authority used to satisfy the listing gate, while
+catalog `reviews_url` preserves the first such URL. Historical evidence without
+an authority projects as `independent`. `community_reviews_url` is the optional
+mutable external review directory. Community review content and verdict counts
+never participate in catalog eligibility.
 
-Version 2 adds only `community_reviews_url`; it does not repurpose the v1
-`reviews_url` approval-audit field. The strict historical
+Version 2 adds `community_reviews_url` and explicit designated-review authority;
+it does not repurpose the v1 `reviews_url` approval-audit field. The strict historical
 `schemas/catalog-v1.json` remains unchanged for consumers that explicitly
 support v1. Producers emit v2, and consumers must select behavior from the exact
 root `schema` instead of accepting unknown fields under a v1 parser.
