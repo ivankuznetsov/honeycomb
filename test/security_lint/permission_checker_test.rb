@@ -55,6 +55,28 @@ class SecurityLintPermissionCheckerTest < Minitest::Test
     assert_equal "Public metadata", hosts.first.fetch("reason")
   end
 
+  def test_wildcard_requires_an_exact_reason_to_narrow_observed_hosts
+    commands = [command("curl https://api.example.test/data")]
+    observations = HoneycombSecurityLint::NetworkExtractor.new.extract(commands)
+    findings, hosts = @checker.check(
+      commands: commands, observations: observations,
+      permissions: permissions("capabilities" => ["network", "shell"], "network_hosts" => ["*"]),
+      security_extension: {"network_host_reasons" => {"api.example.test" => "Public metadata"}, "suppressions" => []}
+    )
+
+    refute findings.any? { |finding| finding["disposition"] == "hard" }
+    assert_equal true, hosts.first.fetch("declared")
+    assert_equal "Public metadata", hosts.first.fetch("reason")
+    assert_includes findings.map { |finding| finding["rule_id"] }, "permission.broad-declaration"
+
+    blocked, = @checker.check(
+      commands: commands, observations: observations,
+      permissions: permissions("capabilities" => ["network", "shell"], "network_hosts" => ["*"]),
+      security_extension: {"network_host_reasons" => {}, "suppressions" => []}
+    )
+    assert_includes blocked.map { |finding| finding["rule_id"] }, "network.undeclared-host"
+  end
+
   def test_host_mismatch_missing_reason_ip_and_broad_permissions_fail_or_remain_visible
     cases = [
       ["curl https://other.example.test", ["api.example.test"], "network.undeclared-host"],

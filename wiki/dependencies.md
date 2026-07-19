@@ -45,6 +45,11 @@ the complete registry test suite. Only then does it compare root
 `honeycomb-evidence` branch. It receives no secret or write permission and does
 not publish any checkout.
 
+The unprivileged security analyzer uses the same exact Hive v0.6.0 commit for
+production descriptor validation on maintainer-authorized package heads. It is
+checked out separately from submitted content, exposed only through `RUBYLIB`,
+and never receives credentials or write permission.
+
 The approval workflow additionally depends on a protected
 `honeycomb-listing-approval` environment and an append-only
 `honeycomb-evidence` branch. Those GitHub repository settings are rollout

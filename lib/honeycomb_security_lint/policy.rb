@@ -65,7 +65,9 @@ module HoneycombSecurityLint
       reasons.each do |host, reason|
         normalized = normalize_host(host)
         errors << "manifest.x-security host #{host.inspect} is invalid" unless normalized == host && valid_host?(host)
-        errors << "manifest.x-security cannot grant undeclared host #{host.inspect}" unless permission_hosts.include?(host)
+        unless permission_hosts.include?(host) || permission_hosts.include?("*")
+          errors << "manifest.x-security cannot grant undeclared host #{host.inspect}"
+        end
         errors << "manifest.x-security host #{host.inspect} requires a reason" unless reason.is_a?(String) && !reason.strip.empty?
       end
       suppressions = extension["suppressions"]

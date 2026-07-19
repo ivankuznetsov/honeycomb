@@ -45,6 +45,15 @@ jobs:
           git fetch --no-tags "https://github.com/${BASE_REPOSITORY}.git" "$BASE_SHA"
           git cat-file -e "${BASE_SHA}^{commit}"
 
+      - name: Check out compatible Hive source for analysis
+        if: github.event.action == 'labeled' && github.event.label.name == 'safe-to-validate'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: ivankuznetsov/hive
+          ref: edaa7131493446f8bb40092fe7801afbaf2f2c04
+          path: .hive-runtime
+          persist-credentials: false
+
       - name: Emit awaiting-maintainer evidence
         if: github.event.action == 'opened'
         continue-on-error: true
@@ -90,6 +99,7 @@ jobs:
           RUN_ID: ${{ github.run_id }}
           RUN_ATTEMPT: ${{ github.run_attempt }}
           ORIGIN_REPOSITORY: ${{ github.repository }}
+          RUBYLIB: ${{ github.workspace }}/.hive-runtime/lib
         run: >-
           ruby script/honeycomb-security-lint
           --base "$BASE_SHA" --head "$HEAD_SHA" --pr "$PR_NUMBER"

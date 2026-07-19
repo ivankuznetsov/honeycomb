@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "../test_helper"
+require "psych"
 
 class SecurityLintWorkflowContractTest < Minitest::Test
   ANALYZER = File.join(ROOT, ".github", "workflows", "security-lint.yml")
@@ -29,6 +30,16 @@ class SecurityLintWorkflowContractTest < Minitest::Test
     assert_includes @analyzer, "fetch-depth: 0"
     assert_includes @analyzer, "git fetch --no-tags"
     assert_includes @analyzer, "github.event.pull_request.base.sha"
+
+    workflow = Psych.safe_load(@analyzer, permitted_classes: [], permitted_symbols: [], aliases: false)
+    steps = workflow.dig("jobs", "analyze", "steps")
+    hive_checkout = steps.find { |step| step["name"] == "Check out compatible Hive source for analysis" }
+    analysis = steps.find { |step| step["name"] == "Analyze the submitted honeycomb" }
+    assert_equal "ivankuznetsov/hive", hive_checkout.dig("with", "repository")
+    assert_equal "edaa7131493446f8bb40092fe7801afbaf2f2c04", hive_checkout.dig("with", "ref")
+    assert_equal ".hive-runtime", hive_checkout.dig("with", "path")
+    assert_equal false, hive_checkout.dig("with", "persist-credentials")
+    assert_equal "${{ github.workspace }}/.hive-runtime/lib", analysis.dig("env", "RUBYLIB")
   end
 
   def test_reporter_checks_out_only_default_branch_with_metadata_permissions
