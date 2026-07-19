@@ -34,7 +34,7 @@ catalog renderer.
 - `packages/<name>/<semver>/` is the immutable release store. The historical
   `bench/0.1.0`, `docs-sync/0.1.0`, and production canary
   `task-inspect/0.1.0` are present, alongside canonical but not-yet-listed
-  Architecture, Writing, and SEO Content 1.0.0 packages.
+  Architecture, Writing, and SEO Content 1.0.1 packages.
 - `reviews/<name>/<version>/<github-user>.md` is the mutable, external
   community-review namespace; checked documentation fixtures demonstrate its
   strict record shape without creating production reviews.
@@ -118,14 +118,13 @@ APIs. Protected normalized evidence now projects the listed Community
 `bf67e8a6bc4a85e2d6663c57595d337e17ce9f73` with canonical SHA-256
 `2e6c27ed6ec22bc3e6afc5ff07244418d48a6e878c53a3e850326748d8d5c497`.
 The static site consumes that exact snapshot without reconstructing entries,
-and released Hive v0.5.2 installs it from the official registry with immutable
+and released Hive v0.6.0 installs it from the official registry with immutable
 catalog/digest task pins and task-local read-only runtime policy. Evidence
 branch/environment protection remains live; emergency lifecycle transitions
 and positive community-review identity cases remain rollout operations.
 
-The flagship packages are ahead of that released runtime: their per-slot agent
+The flagship packages target that released runtime: their per-slot agent
 mapping, configuration digest, exact actor policy, optional input, prompt-asset,
-and package-root contracts require the compatible Hive prerequisite release.
-Local cross-repository proof does not make those versions public. Protected
-reviews, catalog projection, site publication, and live provider evidence
-remain ordered gates.
+and package-root contracts require Hive 0.6.0. Local cross-repository proof does
+not make those versions public. Protected reviews, catalog projection, site
+publication, and live provider evidence remain ordered gates.

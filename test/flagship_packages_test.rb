@@ -7,6 +7,7 @@ require "psych"
 
 class FlagshipPackagesTest < Minitest::Test
   FLAGSHIPS = %w[architecture writing seo-content].freeze
+  FLAGSHIP_VERSION = "1.0.1"
   IDENTITY_KEYS = %w[agent model effort].freeze
   AGENT_PLUGINS_REVISION = "e2caed2878ff1996f235ad0122bf7fea2eea3a27"
 
@@ -130,7 +131,7 @@ class FlagshipPackagesTest < Minitest::Test
   end
 
   def test_provider_adapter_exposes_only_fixed_reviewable_network_origins
-    version_root = "packages/seo-content/1.0.0"
+    version_root = "packages/seo-content/#{FLAGSHIP_VERSION}"
     policy = HoneycombSecurityLint::Policy.load(File.join(ROOT, "policy", "security-lint.yml"))
     files = HoneycombSecurityLint::TextFiles.new(root: ROOT, limits: policy.limits)
                                                .collect(version_root).files
@@ -180,7 +181,7 @@ class FlagshipPackagesTest < Minitest::Test
   private
 
   def package_path(name, *parts)
-    File.join(ROOT, "packages", name, "1.0.0", *parts)
+    File.join(ROOT, "packages", name, FLAGSHIP_VERSION, *parts)
   end
 
   def load_workflow(name)

@@ -33,7 +33,7 @@ link to policy rather than restating it.
 
 ## Flagship Package Status
 
-Architecture, Writing, and SEO Content 1.0.0 packages and canonical manifests
+Architecture, Writing, and SEO Content 1.0.1 packages and canonical manifests
 are present under `packages/` with a Hive 0.6.0 minimum. They are agent-agnostic
 and are exercised through Hive's real registry install, configuration-pin,
 task-creation, Agent, Council, and package-root paths using deterministic test
