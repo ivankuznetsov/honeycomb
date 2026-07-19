@@ -95,8 +95,20 @@ module HoneycombSecurityLint
 
       commands = []
       begin
+        executable_paths = Array(manifest&.dig("x-hive", "tools")).filter_map do |tool|
+          path = tool["path"] if tool.is_a?(Hash)
+          "#{version_root}/#{path}" if path.is_a?(String)
+        end
+        prompt_asset_paths = Array(manifest&.dig("x-hive", "prompt_assets")).filter_map do |asset|
+          path = asset["path"] if asset.is_a?(Hash)
+          "#{version_root}/#{path}" if path.is_a?(String)
+        end
+        behavior_paths = executable_paths + prompt_asset_paths
         commands = CommandExtractor.new(max_commands: @policy.limits.fetch("max_commands"))
-                                   .extract(files, version_root: version_root)
+                                   .extract(
+                                     files, version_root: version_root, behavior_paths: behavior_paths,
+                                     executable_paths: executable_paths
+                                   )
       rescue CommandExtractor::LimitExceeded
         operational = true
         findings << generic_finding("operational.command-limit", "operational", version_root,

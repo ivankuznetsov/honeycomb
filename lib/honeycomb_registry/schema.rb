@@ -22,6 +22,21 @@ module HoneycombRegistry
     PERMISSION_KEYS = %w[
       risk capabilities network_hosts filesystem_read filesystem_write secrets
     ].freeze
+    HIVE_EXTENSION_KEYS = %w[tools prompt_assets optional_inputs].freeze
+    HIVE_TOOL_KEYS = %w[path].freeze
+    HIVE_PROMPT_ASSET_KEYS = %w[path].freeze
+    HIVE_INPUT_KEYS = %w[name authorized_slots].freeze
+    HIVE_INPUT_NAME_PATTERN = /\A[A-Z][A-Z0-9_]*\z/
+    HIVE_RESERVED_INPUT_NAMES = %w[
+      BUNDLE_GEMFILE BUNDLE_PATH BUNDLE_WITH BUNDLE_WITHOUT
+      CDPATH ENV GEM_HOME GEM_PATH HOME IFS LANG LD_LIBRARY_PATH LD_PRELOAD
+      NODE_OPTIONS PATH PERL5LIB PROMPT_COMMAND PS4 PYTHONHOME PYTHONPATH
+      RUBYLIB RUBYOPT SHELL TMP TMPDIR
+    ].freeze
+    HIVE_RESERVED_INPUT_PREFIXES = %w[
+      BASH_ BUNDLE_ CLAUDE_ CODEX_ DYLD_ GEM_ GIT_ HIVE_ LC_ OPENAI_ SSH_
+    ].freeze
+    HIVE_SLOT_PATTERN = /\Astages\.[a-z0-9][a-z0-9_-]*(?:\.reviewers\.[a-z0-9][a-z0-9_-]*|\.revise)?\z/
 
     module_function
 
@@ -57,6 +72,7 @@ module HoneycombRegistry
       data.each do |key, value|
         validate_json_value(value, "#{path}.#{key}", findings) if key.is_a?(String) && key.start_with?("x-")
       end
+      validate_hive_extension(data["x-hive"], "#{path}.x-hive", findings) if data.key?("x-hive")
       findings
     end
 
@@ -163,6 +179,114 @@ module HoneycombRegistry
         validate_file_path(file_path, path, name, version, findings)
         validate_sha256(digest, "#{path}[#{file_path.inspect}]", findings)
       end
+    end
+
+    def validate_hive_extension(value, path, findings)
+      return unless validate_keys(value, path, %w[tools optional_inputs], HIVE_EXTENSION_KEYS, findings)
+
+      validate_hive_tools(value["tools"], "#{path}.tools", findings)
+      validate_hive_prompt_assets(value.fetch("prompt_assets", []), "#{path}.prompt_assets", findings)
+      validate_hive_inputs(value["optional_inputs"], "#{path}.optional_inputs", findings)
+    end
+
+    def validate_hive_prompt_assets(value, path, findings)
+      validate_hive_path_declarations(
+        value, path, findings, label: "prompt_assets", keys: HIVE_PROMPT_ASSET_KEYS,
+        invalid_code: "schema.invalid_hive_prompt_asset_path",
+        noncanonical_code: "schema.noncanonical_hive_prompt_assets"
+      )
+    end
+
+    def validate_hive_tools(value, path, findings)
+      return invalid_type(findings, path, "tools", value, Array) unless value.is_a?(Array)
+
+      paths = []
+      value.each_with_index do |tool, index|
+        tool_path = "#{path}[#{index}]"
+        next unless validate_keys(tool, tool_path, HIVE_TOOL_KEYS, HIVE_TOOL_KEYS, findings)
+
+        candidate = tool["path"]
+        valid_path = valid_package_relative_path?(candidate)
+        paths << candidate if valid_path
+        unless valid_path
+          findings.add("#{tool_path}.path", "schema.invalid_hive_tool_path",
+                       "tool path must be a normalized package-relative path")
+        end
+      end
+      if paths.length != value.length || paths != paths.uniq.sort
+        findings.add(path, "schema.noncanonical_hive_tools",
+                     "tools must have unique paths sorted lexicographically")
+      end
+    end
+
+    def validate_hive_inputs(value, path, findings)
+      return invalid_type(findings, path, "optional_inputs", value, Array) unless value.is_a?(Array)
+
+      names = []
+      value.each_with_index do |input, index|
+        input_path = "#{path}[#{index}]"
+        next unless validate_keys(input, input_path, HIVE_INPUT_KEYS, HIVE_INPUT_KEYS, findings)
+
+        name = input["name"]
+        if valid_hive_input_name?(name)
+          names << name
+        else
+          findings.add("#{input_path}.name", "schema.invalid_hive_input_name",
+                       "input name must be a portable uppercase environment variable name")
+        end
+        slots = input["authorized_slots"]
+        unless slots.is_a?(Array) && !slots.empty? &&
+               slots.all? { |slot| slot.is_a?(String) && HIVE_SLOT_PATTERN.match?(slot) }
+          findings.add("#{input_path}.authorized_slots", "schema.invalid_hive_input_slots",
+                       "authorized_slots must be a non-empty array of stable slot IDs")
+          next
+        end
+        if slots != slots.uniq.sort
+          findings.add("#{input_path}.authorized_slots", "schema.noncanonical_hive_input_slots",
+                       "authorized_slots must be unique and lexicographically sorted")
+        end
+      end
+      if names.length != value.length || names != names.uniq.sort
+        findings.add(path, "schema.noncanonical_hive_inputs",
+                     "optional_inputs must have unique names sorted lexicographically")
+      end
+    end
+
+    def valid_hive_input_name?(value)
+      return false unless value.is_a?(String) && HIVE_INPUT_NAME_PATTERN.match?(value)
+      return false if HIVE_RESERVED_INPUT_NAMES.include?(value)
+
+      HIVE_RESERVED_INPUT_PREFIXES.none? { |prefix| value.start_with?(prefix) }
+    end
+
+    def validate_hive_path_declarations(value, path, findings, label:, keys:, invalid_code:, noncanonical_code:)
+      return invalid_type(findings, path, label, value, Array) unless value.is_a?(Array)
+
+      paths = []
+      value.each_with_index do |entry, index|
+        entry_path = "#{path}[#{index}]"
+        next unless validate_keys(entry, entry_path, keys, keys, findings)
+
+        candidate = entry["path"]
+        paths << candidate if valid_package_relative_path?(candidate)
+        unless valid_package_relative_path?(candidate)
+          findings.add("#{entry_path}.path", invalid_code,
+                       "#{label} path must be a normalized package-relative path")
+        end
+      end
+      if paths.length != value.length || paths != paths.uniq.sort
+        findings.add(path, noncanonical_code,
+                     "#{label} must have unique paths sorted lexicographically")
+      end
+    end
+
+    def valid_package_relative_path?(value)
+      return false unless value.is_a?(String) && !value.empty? && value == value.strip
+      return false if value.include?("\\") || value.include?("\0") || Pathname.new(value).absolute?
+
+      segments = value.split("/")
+      segments.none? { |segment| segment.empty? || segment == "." || segment == ".." } &&
+        Pathname.new(value).cleanpath.to_s == value
     end
 
     def validate_file_path(value, path, name, version, findings)

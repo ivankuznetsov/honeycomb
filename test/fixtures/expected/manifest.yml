@@ -6,7 +6,7 @@ author:
   name: "Example Author"
   url: "https://example.test/authors/example"
 license: "MIT"
-hive_min_version: "0.1.0"
+hive_min_version: "0.6.0"
 source:
   url: "https://example.test/honeycombs/example"
   revision: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -25,7 +25,10 @@ files:
   "packages/example/1.0.0/README.md": "a850ce238a952f37e6bbdd6b9ef6651d99c0911db8fee0b95ce31c98d7e5034b"
   "packages/example/1.0.0/instructions/build.md": "abf25213519cfb1dc60e297b31e0685cb20931d1f1d6614d3c29357b1948ad1b"
   "packages/example/1.0.0/instructions/nested/context.txt": "bc4958f77037e9e7357d96a28079809d42d897cd3981af74a92a7664b5c37642"
-  "packages/example/1.0.0/workflow.yml": "46f9bac069476de94b1684cf6a8b7f85c92a467eb6961ea57216e30f13d31709"
-release_sha256: "2260a4a9f7db0df2f6993ee240cfe83d9fb30d72fd09ab4e31e068c8cd73c14f"
+  "packages/example/1.0.0/workflow.yml": "54fd7395c9d7c10e9b1876d18cda3b1e7fbd3e6d6d3c84ab6b1c9de1f3504eb5"
+release_sha256: "6da3d397e4ce3202df9f6c3e2737d2424476e12038ed1d00588aa452b6d30ac5"
 x-fixture:
   purpose: "end-to-end"
+x-hive:
+  tools: []
+  optional_inputs: []

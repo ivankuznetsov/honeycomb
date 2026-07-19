@@ -21,7 +21,7 @@ module HoneycombSecurityLint
     end
 
     URL_PATTERN = %r{https?://[^\s"'<>|`]+}i
-    NETWORK_COMMAND = /\b(?:curl|wget|iwr|invoke-webrequest)\b/i
+    NETWORK_COMMAND = /\b(?:curl|wget|iwr|invoke-webrequest|Net::H[T]TP|URI[.]open|OpenURI)\b/i
     CURL_VALUE_OPTIONS = %w[
       -A --data --data-ascii --data-binary --data-raw --data-urlencode --form --header
       --output --referer --request --user --user-agent -d -e -F -H -o -u -X

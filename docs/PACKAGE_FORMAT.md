@@ -128,6 +128,64 @@ to that path at `source.revision`. A changed behavior source therefore requires
 a new source commit and package version. This preserves the existing commit-ID
 schema while making provenance independently inspectable.
 
+## Managed runtime contract
+
+Every newly published package is agent-agnostic. Each executable `agent` or
+`council` stage, every council reviewer, and the council reviser declares:
+
+```yaml
+mapping_role: development
+mapping_contract: v1
+permissions: read-only
+```
+
+`mapping_role` is exactly `planning`, `development`, or `reviewer`. A reviewer
+must use `reviewer`; a reviser uses `planning` or `development`.
+`mapping_contract` is a lowercase revision token matching
+`[a-z0-9][a-z0-9._-]{0,63}`. Every executable actor must declare permissions;
+unbounded access is written explicitly as `permissions: yolo`. The package
+must not carry `agent`, `model`, or `effort` at any executable actor. Hive asks
+the installer to map each slot to an execution profile instead.
+
+Stable slot IDs are derived, never authored separately:
+
+- stage: `stages.<stage-name>`;
+- reviewer: `stages.<stage-name>.reviewers.<reviewer-name>`;
+- reviser: `stages.<stage-name>.revise`.
+
+New packages also declare the closed `x-hive` extension. Both arrays are
+required even when empty:
+
+```yaml
+x-hive:
+  tools:
+    - path: tools/analyze.rb
+  optional_inputs:
+    - name: SEO_API_TOKEN
+      authorized_slots:
+        - stages.research
+        - stages.verify
+```
+
+Tool entries contain only `path`, use unique lexicographically sorted,
+normalized package-relative paths, name a regular manifest-hashed payload file,
+and have exact Git/working-tree mode `100755`. Any executable package file not
+declared as a tool is rejected. This makes the immutable package inventory the
+only executable-tool authority.
+
+Optional input entries contain only `name` and `authorized_slots`. Names are
+portable uppercase environment names and entries sort uniquely by name. Slot
+arrays are non-empty, sorted, unique, and may reference executable slots only;
+terminal or unknown slots fail validation. The name is only a default binding
+suggestion. Hive stores an environment-variable reference in installation
+configuration and resolves its current value only for an authorized executing
+slot; packages and manifests never store the value.
+
+The exact immutable releases `bench/0.1.0`, `docs-sync/0.1.0`, and
+`task-inspect/0.1.0` predate this contract and receive an attributed legacy
+compatibility finding. The exception is identity-and-version exact: no later
+version inherits it.
+
 ## Permission projection
 
 The generator visits active stages, council reviewers, and council revise

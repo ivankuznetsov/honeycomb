@@ -4,4 +4,6 @@ stages:
     kind: agent
     state_file: work.md
     instruction: instructions/build.md
+    mapping_role: development
+    mapping_contract: v1
     permissions: read-only

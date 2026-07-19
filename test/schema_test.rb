@@ -23,7 +23,8 @@ class SchemaTest < Minitest::Test
       },
       "files" => {"packages/example/1.0.0/README.md" => "b" * 64},
       "release_sha256" => "c" * 64,
-      "x-registry-note" => {"enabled" => true}
+      "x-registry-note" => {"enabled" => true},
+      "x-hive" => {"tools" => [], "optional_inputs" => []}
     }
   end
 
@@ -69,6 +70,60 @@ class SchemaTest < Minitest::Test
     end
 
     refute HoneycombRegistry::Schema.validate_metadata(metadata).errors?
+  end
+
+  def test_x_hive_is_closed_canonical_and_uses_portable_names_and_paths
+    manifest = valid_manifest
+    manifest["x-hive"] = {
+      "tools" => [{"path" => "tools/analyze.rb", "future" => true}],
+      "optional_inputs" => [
+        {"name" => "lowercase", "authorized_slots" => ["stages.done"]},
+        {"name" => "SEO_TOKEN", "authorized_slots" => ["stages.draft", "stages.draft"]}
+      ],
+      "future" => true
+    }
+
+    findings = HoneycombRegistry::Schema.validate_manifest(manifest)
+
+    assert_includes findings.codes, "schema.unknown_key"
+    assert_includes findings.codes, "schema.invalid_hive_input_name"
+    assert_includes findings.codes, "schema.noncanonical_hive_input_slots"
+    assert_includes findings.codes, "schema.noncanonical_hive_inputs"
+  end
+
+  def test_x_hive_rejects_traversal_and_requires_sorted_unique_declarations
+    manifest = valid_manifest
+    manifest["x-hive"] = {
+      "tools" => [{"path" => "tools/z.rb"}, {"path" => "../escape.rb"}, {"path" => "tools/z.rb"}],
+      "optional_inputs" => [
+        {"name" => "Z_TOKEN", "authorized_slots" => ["stages.research"]},
+        {"name" => "A_TOKEN", "authorized_slots" => ["not-a-slot"]}
+      ]
+    }
+
+    findings = HoneycombRegistry::Schema.validate_manifest(manifest)
+
+    assert_includes findings.codes, "schema.invalid_hive_tool_path"
+    assert_includes findings.codes, "schema.noncanonical_hive_tools"
+    assert_includes findings.codes, "schema.invalid_hive_input_slots"
+    assert_includes findings.codes, "schema.noncanonical_hive_inputs"
+  end
+
+  def test_x_hive_rejects_process_control_input_names_and_validates_prompt_assets
+    manifest = valid_manifest
+    manifest["x-hive"] = {
+      "tools" => [],
+      "prompt_assets" => [{"path" => "assets/rubric.md"}, {"path" => "../escape.md"}],
+      "optional_inputs" => [{"name" => "RUBYOPT", "authorized_slots" => ["stages.research"]}]
+    }
+
+    findings = HoneycombRegistry::Schema.validate_manifest(manifest)
+    assert_includes findings.codes, "schema.invalid_hive_input_name"
+    assert_includes findings.codes, "schema.invalid_hive_prompt_asset_path"
+    %w[PATH LD_PRELOAD NODE_OPTIONS HIVE_HOME CLAUDE_CONFIG_DIR].each do |name|
+      refute HoneycombRegistry::Schema.valid_hive_input_name?(name), name
+    end
+    assert HoneycombRegistry::Schema.valid_hive_input_name?("GSC_ACCESS_TOKEN")
   end
 
   def test_enforces_name_boundaries

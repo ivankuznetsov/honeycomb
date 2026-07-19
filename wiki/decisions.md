@@ -10,8 +10,8 @@ for publishable Hive workflows. The Hive inbox task notes also carry the same
 naming guidance.
 
 Decision: call each published workflow package a "honeycomb" in user-facing
-surfaces. The public catalog URL is `hivecli.sh/honeycombs`, and the documented
-future install form is `hive workflow install honeycomb/<name>`.
+surfaces. The public catalog URL is `hivecli.sh/honeycombs`, and the install form
+is `hive workflow install honeycomb/<name>`.
 
 Consequence: future manifest docs, CLI output, CI comments, README catalog
 sections, and review copy should use "honeycomb" for listed workflow packages.

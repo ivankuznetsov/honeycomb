@@ -94,6 +94,11 @@ Instruction analysis covers README/workflow surfaces plus every UTF-8 file under
 `instructions/`, including unfenced command-like lines and non-Markdown
 extensions. Commands, network observations, and findings have policy budgets;
 budget exhaustion is an operational error rather than truncated evidence.
+Each exact tool path declared by `x-hive.tools` joins this behavior-bearing
+scope even when it lives outside `instructions/`, so its shell commands,
+network destinations, secret references, and deny patterns remain attributable
+to the tool file. Security lint reads these files as inert bytes and never
+executes them.
 
 Workflow `permissions.tools` and `permissions.dirs` values are descriptor data,
 not executable YAML instruction strings. Other YAML scalars enter command
