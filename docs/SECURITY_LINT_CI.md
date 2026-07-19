@@ -11,8 +11,9 @@ trusted base and emit gate-only evidence without reading submitted content. A
 `labeled` event checks out the exact fork head only when a maintainer has just
 applied `safe-to-validate`, then fetches the exact trusted base SHA so the
 three-dot package diff has both identities and their merge base. The analyzer
-invokes the production validator and deterministic Ruby scanners; it never
-executes submitted commands, instructions, hooks, or network requests.
+checks out the exact compatible released Hive source under a separate immutable
+pin, then invokes the production validator and deterministic Ruby scanners. It
+never executes submitted commands, instructions, hooks, or network requests.
 
 `.github/workflows/security-lint-report.yml` runs later on `workflow_run`. It
 checks out only the default branch and has the narrow metadata permissions
@@ -67,6 +68,12 @@ The sticky comment and job summary render the same already-redacted model. Human
 sections are capped with explicit omission counts; the bounded JSON artifact is
 the machine-readable record. Raw detected secrets and high-confidence personal
 identifiers never enter the serializable model.
+
+A package whose derived disclosure contains a network wildcard may document
+the concrete observed destinations under `x-security.network_host_reasons`.
+That mapping narrows already-declared access for evidence review; it cannot add
+network capability, dynamic destinations still fail, and every concrete host
+still needs an exact reason.
 
 ## Protected tooling
 
