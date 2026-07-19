@@ -73,6 +73,8 @@ only to independent reviewers. The issuer appends canonical records under
 `honeycomb-evidence`; renewed
 reviewer decisions use distinct immutable records, and export selects the latest
 decision per reviewer. The offline exporter still selects exact lint snapshots.
+Workflow contract coverage parses the listing-approval YAML before asserting
+its protected trigger, permissions, and pinned-action invariants.
 
 Task 1850's public policy is shipped in [contributing
 honeycombs](../CONTRIBUTING.md), the [security policy](../SECURITY.md), the
