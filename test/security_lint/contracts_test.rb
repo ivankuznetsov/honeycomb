@@ -52,6 +52,22 @@ class SecurityLintContractsTest < Minitest::Test
     assert_equal Hash, JSON.parse(File.read(File.join(ROOT, "schemas", "listing-approval-v1.json"))).class
   end
 
+  def test_accepts_ruby_executable_evidence_kind_and_public_schema_matches
+    document = evidence
+    document["packages"][0]["commands"] << {
+      "path" => "packages/example/1.0.0/tools/provider.rb",
+      "line" => 7,
+      "column" => 3,
+      "kind" => "ruby",
+      "redacted" => "Net::HTTP.get(uri)"
+    }
+
+    assert_equal document, HoneycombSecurityLint::Contracts.validate_evidence(document)
+
+    schema = JSON.parse(File.read(File.join(ROOT, "schemas", "security-lint-evidence-v1.json")))
+    assert_includes schema.dig("$defs", "command", "properties", "kind", "enum"), "ruby"
+  end
+
   def test_canonical_json_has_runtime_independent_empty_containers_and_escaping
     value = {
       "z" => [],

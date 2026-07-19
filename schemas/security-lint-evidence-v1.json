@@ -114,7 +114,7 @@
         "path": {"type": "string", "minLength": 1},
         "line": {"type": "integer", "minimum": 1},
         "column": {"type": "integer", "minimum": 1},
-        "kind": {"enum": ["fenced", "inline", "plain", "yaml-string"]},
+        "kind": {"enum": ["fenced", "inline", "plain", "ruby", "yaml-string"]},
         "redacted": {"type": "string", "minLength": 1}
       }
     },

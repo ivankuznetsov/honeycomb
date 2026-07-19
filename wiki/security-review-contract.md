@@ -98,7 +98,9 @@ Each exact tool path declared by `x-hive.tools` joins this behavior-bearing
 scope even when it lives outside `instructions/`, so its shell commands,
 network destinations, secret references, and deny patterns remain attributable
 to the tool file. Security lint reads these files as inert bytes and never
-executes them.
+executes them. Evidence records statically extracted Ruby tool sinks with the
+`ruby` command kind, distinct from fenced, inline, plain, and YAML instruction
+origins.
 
 Workflow `permissions.tools` and `permissions.dirs` values are descriptor data,
 not executable YAML instruction strings. Other YAML scalars enter command
