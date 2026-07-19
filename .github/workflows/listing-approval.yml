@@ -41,7 +41,7 @@ on:
         type: choice
         options: [independent, repository_owner]
       owner_acknowledgement:
-        description: For repository_owner, enter exactly: I accept first-party publication responsibility
+        description: "For repository_owner, enter exactly: I accept first-party publication responsibility"
         required: false
         default: ""
         type: string
