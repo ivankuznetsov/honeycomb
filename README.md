@@ -20,7 +20,7 @@ public advisories independent; only listed versions participate in discovery.
 Strict community-review validation runs as trusted base code and binds review
 identity to the canonical package and catalog without executing submitted code.
 
-The repository also contains the behavior sources for three flagship 1.0.0
+The repository also contains the behavior sources for three flagship 1.0.1
 packages:
 
 - `architecture` — repository research, proposal, council review, revision,
@@ -31,9 +31,9 @@ packages:
   and optimization, including an immutable package-local analyzer.
 
 Package presence is not catalog listing. The three immutable manifests require
-Hive 0.6.0; until that runtime is released and each package has protected lint
-evidence plus the required independent approvals, it is not discoverable or
-publicly installable from `honeycomb/<name>`.
+the released Hive 0.6.0 runtime; until each package has protected lint evidence
+plus the required independent approvals, it is not discoverable or publicly
+installable from `honeycomb/<name>`.
 
 ```sh
 ruby script/honeycomb-manifest --check --all

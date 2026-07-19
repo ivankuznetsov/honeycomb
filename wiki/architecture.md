@@ -36,7 +36,7 @@ catalog renderer.
 - `packages/<name>/<semver>/` is the immutable release store. The historical
   `bench/0.1.0`, `docs-sync/0.1.0`, and production canary
   `task-inspect/0.1.0` are present, alongside canonical but not-yet-listed
-  Architecture, Writing, and SEO Content 1.0.0 packages.
+  Architecture, Writing, and SEO Content 1.0.1 packages.
 - `reviews/<name>/<version>/<github-user>.md` is the mutable, external
   community-review namespace; checked documentation fixtures demonstrate its
   strict record shape without creating production reviews.
@@ -127,9 +127,8 @@ catalog/digest task pins and task-local read-only runtime policy. Evidence
 branch/environment protection remains live; emergency lifecycle transitions
 and positive community-review identity cases remain rollout operations.
 
-The flagship packages are ahead of that released runtime: their per-slot agent
+The flagship packages target that released runtime: their per-slot agent
 mapping, configuration digest, exact actor policy, optional input, prompt-asset,
-and package-root contracts require the compatible Hive prerequisite release.
-Local cross-repository proof does not make those versions public. Protected
-reviews, catalog projection, site publication, and live provider evidence
-remain ordered gates.
+and package-root contracts require Hive 0.6.0. Local cross-repository proof does
+not make those versions public. Protected reviews, catalog projection, site
+publication, and live provider evidence remain ordered gates.

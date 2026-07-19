@@ -23,6 +23,7 @@ end
 
 class FlagshipHiveExecutionTest < Minitest::Test
   FLAGSHIPS = %w[architecture writing seo-content].freeze
+  FLAGSHIP_VERSION = "1.0.1"
   OPTIONAL_SEO_INPUTS = %w[
     AHREFS_API_KEY
     DATAFORSEO_LOGIN
@@ -58,7 +59,7 @@ class FlagshipHiveExecutionTest < Minitest::Test
                              []
                            end
           installed[name] = Hive::Commands::Workflow::Install.new(
-            "honeycomb/#{name}@1.0.0", project_root: project, json: true, yes: true,
+            "honeycomb/#{name}@#{FLAGSHIP_VERSION}", project_root: project, json: true, yes: true,
             allow_escalation: true, mapping_overrides: mapping_overrides,
             input_bindings: input_bindings, stdout: StringIO.new,
             registry_client: client, committer: ->(*) { }
@@ -151,7 +152,7 @@ class FlagshipHiveExecutionTest < Minitest::Test
         task_paths = {}
         FLAGSHIPS.each do |name|
           Hive::Commands::Workflow::Install.new(
-            "honeycomb/#{name}@1.0.0", project_root: project, json: true, yes: true,
+            "honeycomb/#{name}@#{FLAGSHIP_VERSION}", project_root: project, json: true, yes: true,
             allow_escalation: true, mapping_overrides: [], input_bindings: [],
             stdout: StringIO.new, registry_client: client, committer: ->(*) { }
           ).call!
@@ -287,16 +288,16 @@ class FlagshipHiveExecutionTest < Minitest::Test
     git!(path, "config", "user.email", "flagship@example.test")
     git!(path, "config", "user.name", "Flagship fixture")
     FLAGSHIPS.each do |name|
-      destination = File.join(path, "packages", name, "1.0.0")
+      destination = File.join(path, "packages", name, FLAGSHIP_VERSION)
       FileUtils.mkdir_p(File.dirname(destination))
-      FileUtils.cp_r(File.join(ROOT, "packages", name, "1.0.0"), destination)
+      FileUtils.cp_r(File.join(ROOT, "packages", name, FLAGSHIP_VERSION), destination)
     end
     git!(path, "add", "packages")
     git!(path, "commit", "-m", "fixture behavior source")
     source_revision = git!(path, "rev-parse", "HEAD").strip
 
     manifests = FLAGSHIPS.to_h do |name|
-      package_path = File.join(path, "packages", name, "1.0.0")
+      package_path = File.join(path, "packages", name, FLAGSHIP_VERSION)
       File.write(File.join(package_path, "manifest.yml"), YAML.dump(
         manifest_metadata(name, source_revision)
       ))
@@ -326,7 +327,7 @@ class FlagshipHiveExecutionTest < Minitest::Test
     metadata = {
       "schema" => "honeycomb-manifest/v1",
       "name" => name,
-      "version" => "1.0.0",
+      "version" => FLAGSHIP_VERSION,
       "description" => "Deterministic #{name} flagship fixture",
       "author" => { "name" => "Honeycomb maintainers", "url" => "https://example.test/honeycomb" },
       "license" => "MIT",
@@ -353,8 +354,8 @@ class FlagshipHiveExecutionTest < Minitest::Test
     permissions = manifest.fetch("permissions")
     {
       "name" => name,
-      "version" => "1.0.0",
-      "latest_version" => "1.0.0",
+      "version" => FLAGSHIP_VERSION,
+      "latest_version" => FLAGSHIP_VERSION,
       "description" => manifest.fetch("description"),
       "release_tier" => "community",
       "current_tier" => "community",
@@ -370,8 +371,8 @@ class FlagshipHiveExecutionTest < Minitest::Test
       "hive_min_version" => manifest.fetch("hive_min_version"),
       "permissions" => permissions,
       "install_command" => "hive workflow install honeycomb/#{name}",
-      "package_url" => "https://example.test/packages/#{name}/1.0.0",
-      "reviews_url" => "https://example.test/reviews/#{name}/1.0.0",
+      "package_url" => "https://example.test/packages/#{name}/#{FLAGSHIP_VERSION}",
+      "reviews_url" => "https://example.test/reviews/#{name}/#{FLAGSHIP_VERSION}",
       "community_reviews_url" => nil,
       "source_sha" => source_revision,
       "listing_approval" => {

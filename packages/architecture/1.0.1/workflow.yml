@@ -1,0 +1,108 @@
+id: architecture
+stages:
+  - name: inbox
+    kind: terminal
+    state_file: brief.md
+  - name: research
+    kind: agent
+    state_file: research.md
+    instruction: instructions/research.md
+    mapping_role: planning
+    mapping_contract: architecture-research-v1
+    permissions:
+      preset: scoped
+      tools:
+        - Read
+        - LS
+        - Grep
+        - Glob
+        - Edit(./research.md)
+      dirs:
+        - ../../../..
+  - name: draft
+    kind: agent
+    state_file: draft.md
+    instruction: instructions/draft.md
+    mapping_role: planning
+    mapping_contract: architecture-draft-v1
+    permissions:
+      preset: scoped
+      tools:
+        - Read
+        - LS
+        - Grep
+        - Glob
+        - Edit(./draft.md)
+  - name: review
+    kind: council
+    state_file: review.md
+    input: draft.md
+    mapping_role: planning
+    mapping_contract: architecture-council-v1
+    permissions: read-only
+    council:
+      quorum: 2
+      max_rounds: 3
+      exit_rule: consensus
+      triage_output: reviews/triage.md
+      revise:
+        instruction: instructions/revise.md
+        mapping_role: planning
+        mapping_contract: architecture-revise-v1
+        permissions:
+          preset: scoped
+          tools:
+            - Read
+            - LS
+            - Grep
+            - Glob
+            - Edit(./draft.md)
+    reviewers:
+      - name: constraints
+        prompt: >-
+          Review the draft against the brief and research. Find unsupported
+          assumptions, missing repository evidence, unclear constraints,
+          ignored alternatives, and weak tradeoff decisions. Require a concrete
+          edit for every blocking finding.
+        output_basename: constraints
+        mapping_role: reviewer
+        mapping_contract: architecture-review-v1
+        permissions:
+          preset: scoped
+          tools:
+            - Read
+            - LS
+            - Grep
+            - Glob
+            - Edit(./reviews/**)
+      - name: operations
+        prompt: >-
+          Review component boundaries, interfaces, data and control flow,
+          failure modes, security, migration, observability, and testability.
+          Find implementation risks and require actionable corrections.
+        output_basename: operations
+        mapping_role: reviewer
+        mapping_contract: architecture-review-v1
+        permissions:
+          preset: scoped
+          tools:
+            - Read
+            - LS
+            - Grep
+            - Glob
+            - Edit(./reviews/**)
+  - name: architecture
+    kind: agent
+    state_file: architecture.md
+    deliverable: architecture.md
+    instruction: instructions/architecture.md
+    mapping_role: planning
+    mapping_contract: architecture-delivery-v1
+    permissions:
+      preset: scoped
+      tools:
+        - Read
+        - LS
+        - Grep
+        - Glob
+        - Edit(./architecture.md)
