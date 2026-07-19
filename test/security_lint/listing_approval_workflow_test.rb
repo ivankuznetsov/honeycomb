@@ -2,12 +2,14 @@
 
 require_relative "../test_helper"
 require "honeycomb_security_lint"
+require "yaml"
 
 class SecurityLintListingApprovalWorkflowTest < Minitest::Test
   WORKFLOW = File.join(ROOT, ".github", "workflows", "listing-approval.yml")
 
   def test_dispatch_runs_only_trusted_code_with_confined_write_permissions
     workflow = File.read(WORKFLOW)
+    YAML.safe_load(workflow, aliases: true)
 
     assert_includes workflow, "workflow_dispatch:"
     assert_includes workflow, "environment: honeycomb-listing-approval"
