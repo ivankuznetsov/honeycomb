@@ -244,6 +244,16 @@ class SecurityLintApprovalIssuerTest < Minitest::Test
     assert_equal first, second
   end
 
+  def test_missing_optional_dispatch_inputs_normalize_to_empty_strings
+    owner_input = owner_event
+    owner_input.fetch("inputs").delete("review_id")
+    assert_equal "repository_owner", owner_issuer(event_data: owner_input).issue.fetch("authority")
+
+    independent_input = event
+    independent_input.fetch("inputs").delete("owner_acknowledgement")
+    assert_equal "independent", issuer(event_data: independent_input).issue.fetch("authority")
+  end
+
   def test_repository_owner_publication_cannot_approve_requested_suppressions
     record, fingerprint = evidence_with_requested_suppression
     client = owner_client
