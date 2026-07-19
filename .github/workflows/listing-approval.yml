@@ -34,6 +34,7 @@ on:
       review_id:
         description: Current PR review ID for independent authority; leave empty for repository owner
         required: false
+        default: ""
         type: string
       publication_authority:
         description: Independent review or explicit first-party repository-owner publication

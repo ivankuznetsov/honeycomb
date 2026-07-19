@@ -75,6 +75,8 @@ reviewer decisions use distinct immutable records, and export selects the latest
 decision per reviewer. The offline exporter still selects exact lint snapshots.
 Workflow contract coverage parses the listing-approval YAML before asserting
 its protected trigger, permissions, and pinned-action invariants.
+The issuer normalizes omitted optional dispatch fields to empty strings before
+applying authority-specific validation, matching GitHub's event payload shape.
 
 Task 1850's public policy is shipped in [contributing
 honeycombs](../CONTRIBUTING.md), the [security policy](../SECURITY.md), the
