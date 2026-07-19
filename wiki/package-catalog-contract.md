@@ -25,11 +25,13 @@ permission block; embedded `agent`, `model`, and `effort` are rejected. The
 manifest permission union remains deterministic disclosure/catalog data, not an
 actor execution policy.
 
-The strict `x-hive` extension has only `tools` and `optional_inputs`. Tool paths
-must be normalized, manifest-inventoried regular files with exact mode `100755`;
-undeclared executable payload files fail. Optional input names authorize an
-explicit sorted set of derived executable slot IDs, never terminal or unknown
-slots. Secret values are not package content.
+The strict `x-hive` extension has only `tools`, `prompt_assets`, and
+`optional_inputs`. Tool paths must be normalized, manifest-inventoried regular
+files with Git's trusted executable bit; undeclared executable payload files
+fail. Prompt assets are normalized manifest-inventoried regular files exposed
+from the pinned package root as inert context. Optional input names authorize
+an explicit sorted set of derived executable slot IDs, never terminal or
+unknown slots. Secret values are not package content.
 
 Historical immutable releases `bench/0.1.0`, `docs-sync/0.1.0`, and
 `task-inspect/0.1.0` alone retain the pre-contract parser path. The allowlist is
