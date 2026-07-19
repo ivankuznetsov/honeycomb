@@ -1,0 +1,141 @@
+id: writing
+stages:
+  - name: inbox
+    kind: terminal
+    state_file: brief.md
+  - name: repo-research
+    kind: agent
+    state_file: repo-research.md
+    instruction: instructions/repo-research.md
+    mapping_role: planning
+    mapping_contract: writing-repo-research-v1
+    permissions:
+      preset: scoped
+      tools:
+        - Read
+        - LS
+        - Grep
+        - Glob
+        - Edit(./repo-research.md)
+      dirs:
+        - ../../../..
+  - name: web-research
+    kind: agent
+    state_file: web-research.md
+    instruction: instructions/web-research.md
+    mapping_role: planning
+    mapping_contract: writing-web-research-v1
+    permissions:
+      preset: scoped
+      tools:
+        - Read
+        - LS
+        - WebSearch
+        - WebFetch
+        - Edit(./web-research.md)
+  - name: research
+    kind: agent
+    state_file: research.md
+    instruction: instructions/research.md
+    mapping_role: planning
+    mapping_contract: writing-synthesis-v1
+    permissions:
+      preset: scoped
+      tools:
+        - Read
+        - LS
+        - Grep
+        - Glob
+        - Edit(./research.md)
+  - name: draft
+    kind: agent
+    state_file: draft.md
+    instruction: instructions/draft.md
+    mapping_role: development
+    mapping_contract: writing-writer-v1
+    permissions:
+      preset: scoped
+      tools:
+        - Read
+        - LS
+        - Grep
+        - Glob
+        - Edit(./draft.md)
+  - name: editorial
+    kind: council
+    state_file: editorial.md
+    input: draft.md
+    mapping_role: development
+    mapping_contract: writing-council-v1
+    permissions: read-only
+    council:
+      quorum: 2
+      max_rounds: 5
+      exit_rule: consensus
+      on_max_rounds: complete
+      triage_output: reviews/triage.md
+      revise:
+        instruction: instructions/revise.md
+        mapping_role: development
+        mapping_contract: writing-writer-v1
+        permissions:
+          preset: scoped
+          tools:
+            - Read
+            - LS
+            - Grep
+            - Glob
+            - Edit(./draft.md)
+    reviewers:
+      - name: grounding-editor
+        prompt: >-
+          Audit every material factual claim against research.md. Require a
+          source-to-claim link, correction, qualification, or removal for each
+          unsupported claim. Return ready only when the piece is grounded. If
+          its premise cannot be repaired, return changes_requested with a
+          required edit beginning START OVER and explain why.
+        output_basename: grounding-editor
+        mapping_role: reviewer
+        mapping_contract: writing-editor-v1
+        permissions:
+          preset: scoped
+          tools:
+            - Read
+            - LS
+            - Grep
+            - Glob
+            - Edit(./reviews/**)
+      - name: adversarial-editor
+        prompt: >-
+          Edit adversarially for audience fit, argument, structure, voice,
+          precision, and usefulness. Compare the current draft with prior
+          rounds and require material revision deltas. Return ready only when
+          publishable; use changes_requested and concrete required edits
+          otherwise.
+        output_basename: adversarial-editor
+        mapping_role: reviewer
+        mapping_contract: writing-editor-v1
+        permissions:
+          preset: scoped
+          tools:
+            - Read
+            - LS
+            - Grep
+            - Glob
+            - Edit(./reviews/**)
+  - name: deliver
+    kind: agent
+    state_file: article.md
+    deliverable: article.md
+    instruction: instructions/deliver.md
+    mapping_role: development
+    mapping_contract: writing-delivery-v1
+    permissions:
+      preset: scoped
+      tools:
+        - Read
+        - LS
+        - Grep
+        - Glob
+        - Edit(./article.md)
+        - Edit(./verification.md)

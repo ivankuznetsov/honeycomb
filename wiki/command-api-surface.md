@@ -1,6 +1,6 @@
 # Command and API Surface
 
-This page tracks shipped registry commands plus documented future consumer
+This page tracks shipped registry commands plus the external Hive consumer
 surfaces. Full field and safety details live in `docs/PACKAGE_FORMAT.md`.
 
 ## Public Terms
@@ -9,15 +9,19 @@ surfaces. Full field and safety details live in `docs/PACKAGE_FORMAT.md`.
 - The public catalog is named `hivecli.sh/honeycombs`.
 - User-facing surfaces should use "honeycomb" for published workflow packages.
 
-## Documented Install Command
+## Hive Install Command
 
-The README documents the future Hive install form:
+Hive owns the install form:
 
 ```sh
 hive workflow install honeycomb/<name>
 ```
 
-Install verbs remain outside this repository with Hive tasks 1852/1853.
+Released Hive can install eligible catalog releases. The flagship sources use a
+newer contract in which installation maps every executable slot to an agent,
+stores an immutable configuration digest beside the package generation, and
+pins both identities into created tasks. Those flagships must not declare
+public compatibility until that Hive prerequisite is released.
 
 ## Shipped Registry Commands
 
@@ -73,8 +77,10 @@ Root `catalog.json` is a shipped deterministic `honeycomb-catalog/v2` artifact.
 It carries independent release/current tier, permission risk, lifecycle,
 verification, transition history, and advisory fields. Discovery/latest include
 only listed entries; exact soft-hidden/yanked versions remain resolvable and
-revoked versions fail closed. The default branch contains seed packages, but
-the file remains empty until eligible protected evidence lists them.
+revoked versions fail closed. The catalog currently lists the
+`task-inspect/0.1.0` production canary. Package source directories that lack
+eligible protected evidence do not appear in discovery, even when their
+behavior tests pass.
 `hivecli.sh/honeycombs` remains a documented external static rendering surface;
 no route, handler, or site code is implemented here.
 

@@ -31,6 +31,14 @@ change.
 These public files are normative. Wiki pages summarize implementation facts and
 link to policy rather than restating it.
 
+## Flagship Source Status
+
+Architecture, Writing, and SEO Content 1.0.0 behavior sources are present under
+`packages/`. They are agent-agnostic and are exercised by a focused test against
+Hive's real registry install, configuration-pin, task-creation, and package-root
+seams. They are not catalog listings until canonical manifests, released-Hive
+compatibility, protected lint evidence, and independent approvals exist.
+
 ## Update Protocol
 
 - Update affected pages when code behavior, architecture, commands, or

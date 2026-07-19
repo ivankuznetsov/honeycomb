@@ -31,9 +31,10 @@ catalog renderer.
   runs the complete source contract suite against an exact Hive source commit,
   then compares submitted `catalog.json` bytes with the protected normalized
   evidence branch.
-- `packages/<name>/<semver>/` is the immutable release store; `bench/0.1.0`,
-  `docs-sync/0.1.0`, and the production canary `task-inspect/0.1.0` are present
-  on the current default branch.
+- `packages/<name>/<semver>/` is the immutable release store. The historical
+  `bench/0.1.0`, `docs-sync/0.1.0`, and production canary
+  `task-inspect/0.1.0` are present, alongside source trees for the not-yet-listed
+  Architecture, Writing, and SEO Content 1.0.0 flagships.
 - `reviews/<name>/<version>/<github-user>.md` is the mutable, external
   community-review namespace; checked documentation fixtures demonstrate its
   strict record shape without creating production reviews.
@@ -46,6 +47,12 @@ catalog renderer.
 - `test/fixtures/` and `test/run.rb` prove the format without a network or gem
   install. The production listing-evidence fixture mirrors the public protected
   record solely so the committed catalog can be re-derived offline in tests.
+- `test/flagship_hive_execution_test.rb` builds a temporary immutable Git
+  registry from the three real source trees, then exercises a compatible Hive's
+  registry client, install/configuration store, managed task creation, pinned
+  runtime context, optional-input isolation, and package-tool mode. Its separate
+  deterministic artifacts check package quality rubrics; they do not claim a
+  provider-backed agent or council run.
 - `docs/PACKAGE_FORMAT.md` is the authoritative public format/command contract;
   root `CONTRIBUTING.md`/`SECURITY.md` and `docs/TRUST.md`/`REVIEWS.md` are the
   canonical public policy; `wiki/` records agent-facing architecture and
@@ -115,3 +122,10 @@ and released Hive v0.5.2 installs it from the official registry with immutable
 catalog/digest task pins and task-local read-only runtime policy. Evidence
 branch/environment protection remains live; emergency lifecycle transitions
 and positive community-review identity cases remain rollout operations.
+
+The flagship source trees are ahead of that released runtime: their per-slot
+agent mapping, configuration digest, exact actor policy, optional input, and
+package-root contracts require the compatible Hive prerequisite release. Local
+cross-repository proof does not make those versions public. Canonical manifest
+generation, protected reviews, catalog projection, site publication, and live
+agent/provider evidence remain ordered gates.
