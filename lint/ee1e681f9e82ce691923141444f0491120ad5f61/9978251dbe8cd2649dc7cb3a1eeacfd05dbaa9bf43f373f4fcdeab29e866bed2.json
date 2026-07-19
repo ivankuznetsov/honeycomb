@@ -1,0 +1,774 @@
+{
+  "artifact_digest": "9978251dbe8cd2649dc7cb3a1eeacfd05dbaa9bf43f373f4fcdeab29e866bed2",
+  "base_sha": "0150e61419df8d270fe460a505bf1989fac2e295",
+  "event": {
+    "action": "labeled",
+    "gate": "applied",
+    "label_sha": "ee1e681f9e82ce691923141444f0491120ad5f61"
+  },
+  "head_sha": "ee1e681f9e82ce691923141444f0491120ad5f61",
+  "packages": [
+    {
+      "commands": [],
+      "counts": {
+        "advisory": 8,
+        "downgraded": 0,
+        "hard": 0
+      },
+      "findings": [],
+      "hosts": [],
+      "identity": {
+        "name": "architecture",
+        "path": "packages/architecture/1.0.1",
+        "release_sha256": "1d84025fe5d2fa23e63126ddb8bb06906cedc38be7463c7431e068117dd19bd9",
+        "version": "1.0.1"
+      },
+      "requested_permissions": {
+        "capabilities": [
+          "filesystem-read",
+          "filesystem-write"
+        ],
+        "filesystem_read": [
+          "repository",
+          "task"
+        ],
+        "filesystem_write": [
+          "task/architecture.md",
+          "task/draft.md",
+          "task/research.md",
+          "task/reviews/**"
+        ],
+        "network_hosts": [],
+        "risk": "moderate",
+        "secrets": []
+      },
+      "scanned_files": [
+        {
+          "bytes": 1361,
+          "kind": "text",
+          "path": "packages/architecture/1.0.1/README.md",
+          "sha256": "c08d60b825b663957405b14192f2027611e58e46b9083021a9d72e829c1281fe"
+        },
+        {
+          "bytes": 1033,
+          "kind": "text",
+          "path": "packages/architecture/1.0.1/instructions/architecture.md",
+          "sha256": "3513fb7320230cb806584c63665b4e73a199a6b169a3c731fadbd18e9cd00f7a"
+        },
+        {
+          "bytes": 895,
+          "kind": "text",
+          "path": "packages/architecture/1.0.1/instructions/draft.md",
+          "sha256": "c550c19b073b7328e4ce269420eb71df1b2d71fad1cb8d196d1eb89de1f8b250"
+        },
+        {
+          "bytes": 1100,
+          "kind": "text",
+          "path": "packages/architecture/1.0.1/instructions/research.md",
+          "sha256": "fe95348952e495f3e12fce4a1f6535cbb1308005a77167bc9127ab3cea9674ab"
+        },
+        {
+          "bytes": 669,
+          "kind": "text",
+          "path": "packages/architecture/1.0.1/instructions/revise.md",
+          "sha256": "4d4f5c55924551102b0e3f09369a7fc2abd27a1e1ebf06c0676a0c53b5824826"
+        },
+        {
+          "bytes": 1867,
+          "kind": "text",
+          "path": "packages/architecture/1.0.1/manifest.yml",
+          "sha256": "563baf0f2071ab04bac225dbc272538b14eb3c3ac2a970c1f8b7b9b912111ae3"
+        },
+        {
+          "bytes": 2882,
+          "kind": "text",
+          "path": "packages/architecture/1.0.1/workflow.yml",
+          "sha256": "2471e12ed4918a5b69ab1a550ca571a15b1e5c91400800630fca0e87cdbc505c"
+        }
+      ],
+      "suppressions": [],
+      "validator_findings": [
+        {
+          "code": "hive.compatible",
+          "message": "descriptor parsed with Hive 0.6.0",
+          "path": "packages/architecture/1.0.1/workflow.yml",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.1/workflow.yml.stages[1] contributes scoped tools permissions",
+          "path": "packages/architecture/1.0.1/workflow.yml.stages[1].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.1/workflow.yml.stages[2] contributes scoped tools permissions",
+          "path": "packages/architecture/1.0.1/workflow.yml.stages[2].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.1/workflow.yml.stages[3].council.revise contributes scoped tools permissions",
+          "path": "packages/architecture/1.0.1/workflow.yml.stages[3].council.revise.permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.1/workflow.yml.stages[3] contributes read-only permissions",
+          "path": "packages/architecture/1.0.1/workflow.yml.stages[3].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.1/workflow.yml.stages[3].reviewers[0] contributes scoped tools permissions",
+          "path": "packages/architecture/1.0.1/workflow.yml.stages[3].reviewers[0].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.1/workflow.yml.stages[3].reviewers[1] contributes scoped tools permissions",
+          "path": "packages/architecture/1.0.1/workflow.yml.stages[3].reviewers[1].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.1/workflow.yml.stages[4] contributes scoped tools permissions",
+          "path": "packages/architecture/1.0.1/workflow.yml.stages[4].permissions",
+          "severity": "info"
+        }
+      ],
+      "verdict": "pass"
+    },
+    {
+      "commands": [
+        {
+          "column": 5,
+          "kind": "ruby",
+          "line": 18,
+          "path": "packages/seo-content/1.0.1/tools/provider-metrics.rb",
+          "redacted": "    \"ahrefs\" => \"https://api.ahrefs.com\","
+        },
+        {
+          "column": 5,
+          "kind": "ruby",
+          "line": 19,
+          "path": "packages/seo-content/1.0.1/tools/provider-metrics.rb",
+          "redacted": "    \"dataforseo\" => \"https://api.dataforseo.com\","
+        },
+        {
+          "column": 5,
+          "kind": "ruby",
+          "line": 20,
+          "path": "packages/seo-content/1.0.1/tools/provider-metrics.rb",
+          "redacted": "    \"ga4\" => \"https://analyticsdata.googleapis.com\","
+        },
+        {
+          "column": 5,
+          "kind": "ruby",
+          "line": 21,
+          "path": "packages/seo-content/1.0.1/tools/provider-metrics.rb",
+          "redacted": "    \"gsc\" => \"https://www.googleapis.com\""
+        },
+        {
+          "column": 5,
+          "kind": "ruby",
+          "line": 178,
+          "path": "packages/seo-content/1.0.1/tools/provider-metrics.rb",
+          "redacted": "    request_class = method == :post ? Net\\::HTTP\\::Post : Net\\::HTTP\\::Get # https://analyticsdata.googleapis.com https://www.googleapis.com https://api.dataforseo.com https://api.ahrefs.com"
+        },
+        {
+          "column": 5,
+          "kind": "ruby",
+          "line": 187,
+          "path": "packages/seo-content/1.0.1/tools/provider-metrics.rb",
+          "redacted": "    response = Net\\::HTTP.start(uri.host, uri.port, use_ssl: true, open_timeout: CONNECT_TIMEOUT, read_timeout: READ_TIMEOUT) do |http| # https://analyticsdata.googleapis.com https://www.googleapis.com https://api.dataforseo.com https://api.ahrefs.com"
+        },
+        {
+          "column": 5,
+          "kind": "ruby",
+          "line": 195,
+          "path": "packages/seo-content/1.0.1/tools/provider-metrics.rb",
+          "redacted": "    raise IOError, \"provider returned HTTP #{response.code}\" unless response.is_a?(Net\\::HTTPSuccess)"
+        },
+        {
+          "column": 1,
+          "kind": "ruby",
+          "line": 18,
+          "path": "packages/seo-content/1.0.1/tools/seo-analyze.rb",
+          "redacted": "text = File.read(path, encoding: \"UTF-8\")"
+        }
+      ],
+      "counts": {
+        "advisory": 17,
+        "downgraded": 0,
+        "hard": 0
+      },
+      "findings": [
+        {
+          "approval": null,
+          "category": "permission",
+          "column": 1,
+          "disposition": "advisory",
+          "fingerprint": "57bd77e9287255f8f9c35c11589f82f2806dc26e96e7b94c21366b149cf31cbb",
+          "line": 1,
+          "message": "Broad declared permissions require human review",
+          "original_severity": "advisory",
+          "path": "manifest.yml",
+          "redacted_evidence": "Broad permissions declared",
+          "request": null,
+          "rule_id": "permission.broad-declaration"
+        }
+      ],
+      "hosts": [
+        {
+          "column": 22,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "api.ahrefs.com",
+          "line": 18,
+          "path": "packages/seo-content/1.0.1/tools/provider-metrics.rb",
+          "reason": "Queries Ahrefs organic keyword metrics for the configured site"
+        },
+        {
+          "column": 26,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "api.dataforseo.com",
+          "line": 19,
+          "path": "packages/seo-content/1.0.1/tools/provider-metrics.rb",
+          "reason": "Queries DataForSEO search-volume metrics for the bounded keyword set"
+        },
+        {
+          "column": 19,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "analyticsdata.googleapis.com",
+          "line": 20,
+          "path": "packages/seo-content/1.0.1/tools/provider-metrics.rb",
+          "reason": "Queries the configured GA4 property reporting API"
+        },
+        {
+          "column": 19,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "www.googleapis.com",
+          "line": 21,
+          "path": "packages/seo-content/1.0.1/tools/provider-metrics.rb",
+          "reason": "Queries Google Search Console performance for the configured site"
+        },
+        {
+          "column": 78,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "analyticsdata.googleapis.com",
+          "line": 178,
+          "path": "packages/seo-content/1.0.1/tools/provider-metrics.rb",
+          "reason": "Queries the configured GA4 property reporting API"
+        },
+        {
+          "column": 115,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "www.googleapis.com",
+          "line": 178,
+          "path": "packages/seo-content/1.0.1/tools/provider-metrics.rb",
+          "reason": "Queries Google Search Console performance for the configured site"
+        },
+        {
+          "column": 142,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "api.dataforseo.com",
+          "line": 178,
+          "path": "packages/seo-content/1.0.1/tools/provider-metrics.rb",
+          "reason": "Queries DataForSEO search-volume metrics for the bounded keyword set"
+        },
+        {
+          "column": 169,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "api.ahrefs.com",
+          "line": 178,
+          "path": "packages/seo-content/1.0.1/tools/provider-metrics.rb",
+          "reason": "Queries Ahrefs organic keyword metrics for the configured site"
+        },
+        {
+          "column": 142,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "analyticsdata.googleapis.com",
+          "line": 187,
+          "path": "packages/seo-content/1.0.1/tools/provider-metrics.rb",
+          "reason": "Queries the configured GA4 property reporting API"
+        },
+        {
+          "column": 179,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "www.googleapis.com",
+          "line": 187,
+          "path": "packages/seo-content/1.0.1/tools/provider-metrics.rb",
+          "reason": "Queries Google Search Console performance for the configured site"
+        },
+        {
+          "column": 206,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "api.dataforseo.com",
+          "line": 187,
+          "path": "packages/seo-content/1.0.1/tools/provider-metrics.rb",
+          "reason": "Queries DataForSEO search-volume metrics for the bounded keyword set"
+        },
+        {
+          "column": 233,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "api.ahrefs.com",
+          "line": 187,
+          "path": "packages/seo-content/1.0.1/tools/provider-metrics.rb",
+          "reason": "Queries Ahrefs organic keyword metrics for the configured site"
+        }
+      ],
+      "identity": {
+        "name": "seo-content",
+        "path": "packages/seo-content/1.0.1",
+        "release_sha256": "30226a0694e62f54177dc514c55bb8965098a0adae83439efa8045345ca7ce76",
+        "version": "1.0.1"
+      },
+      "requested_permissions": {
+        "capabilities": [
+          "filesystem-read",
+          "filesystem-write",
+          "network",
+          "shell"
+        ],
+        "filesystem_read": [
+          "*"
+        ],
+        "filesystem_write": [
+          "*"
+        ],
+        "network_hosts": [
+          "*"
+        ],
+        "risk": "high",
+        "secrets": [
+          "*"
+        ]
+      },
+      "scanned_files": [
+        {
+          "bytes": 1206,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.1/NOTICE.md",
+          "sha256": "854a43eab3ed1d1b2fcfb8600c52d6cb39bb5b793a60acf85042c9d6d24ea800"
+        },
+        {
+          "bytes": 3669,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.1/README.md",
+          "sha256": "849e1964dfdb7e16b1179a520e7ab54121b6ddc3914782523451e10368462ccd"
+        },
+        {
+          "bytes": 929,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.1/assets/quality-rubric.md",
+          "sha256": "8f3258b7101d53d64ef8d52e3ede415315288a48818deaa1d51f3fd17e7d084c"
+        },
+        {
+          "bytes": 487,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.1/instructions/analyze.md",
+          "sha256": "fa714a0b95422e6196e56b54efa28e355d74fc162e325734be221feeb88e9a29"
+        },
+        {
+          "bytes": 673,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.1/instructions/draft.md",
+          "sha256": "e01c635aef1e7712a7d4adafda14c7a95029b41023a808082ceb194f6f44ee4f"
+        },
+        {
+          "bytes": 727,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.1/instructions/fact-check.md",
+          "sha256": "976e496898231803e08fa00693529cf80b6bd19ac10d4836175c30b52fed41ef"
+        },
+        {
+          "bytes": 707,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.1/instructions/humanize.md",
+          "sha256": "a50c5232e9d25bd01e196e93079bceff754b51e738efa5819595292fe592ca9d"
+        },
+        {
+          "bytes": 689,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.1/instructions/intent.md",
+          "sha256": "2207fb8b197a2a1039d58a51386b6e2e5652326bbe48429e13a2a0e347fce3c1"
+        },
+        {
+          "bytes": 1091,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.1/instructions/optimize.md",
+          "sha256": "cb0faeece268706b4a6da910705ff95f4121d3f6dbb366084518d1d8a5bb9866"
+        },
+        {
+          "bytes": 604,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.1/instructions/outline.md",
+          "sha256": "70d156b6061b4c176b04a6c462dd4cfb89e5439cf8636a98c26bf869a273f5eb"
+        },
+        {
+          "bytes": 702,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.1/instructions/provider-data.md",
+          "sha256": "d4a823e3aa9d76633405fe300f05f9f2df150d0629ba18e44dc14e8dba126fe6"
+        },
+        {
+          "bytes": 402,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.1/instructions/repo-research.md",
+          "sha256": "ba6f8fcb0f8f657f8ed99f87b3dce448897efdcb7317912e75030861168ca8da"
+        },
+        {
+          "bytes": 1236,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.1/instructions/research.md",
+          "sha256": "0b89370741f2036b796f9fe4f40fe84532874e9d3c0173a00aa2c1082c610db3"
+        },
+        {
+          "bytes": 449,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.1/instructions/web-research.md",
+          "sha256": "b4d6ed40b5659f2153bad616d2d34392ef38dc1389d4e0c7011b82930558a54c"
+        },
+        {
+          "bytes": 4658,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.1/manifest.yml",
+          "sha256": "815ae3356de53895db5be3aa1aa1a3b40efe97a522f864f0cd892d9083704fc4"
+        },
+        {
+          "bytes": 8877,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.1/tools/provider-metrics.rb",
+          "sha256": "3e03e1797a9ae4de2a13662b4660fee29ac43cbd97e31d37132e389f6f7d6e9f"
+        },
+        {
+          "bytes": 2502,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.1/tools/seo-analyze.rb",
+          "sha256": "a8d426f391794e164acd4c8bc63fc6500452c6af2aaefe9ba9dfd3b7c70d8c76"
+        },
+        {
+          "bytes": 3552,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.1/workflow.yml",
+          "sha256": "7e57fd159d43dbf15c8381f1463d2ae4179c9fa4e45eb8821c328b6c4e56714a"
+        }
+      ],
+      "suppressions": [],
+      "validator_findings": [
+        {
+          "code": "hive.compatible",
+          "message": "descriptor parsed with Hive 0.6.0",
+          "path": "packages/seo-content/1.0.1/workflow.yml",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/seo-content/1.0.1/workflow.yml.stages[10] contributes scoped Bash tool permissions",
+          "path": "packages/seo-content/1.0.1/workflow.yml.stages[10].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/seo-content/1.0.1/workflow.yml.stages[10] requests unbounded access",
+          "path": "packages/seo-content/1.0.1/workflow.yml.stages[10].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/seo-content/1.0.1/workflow.yml.stages[11] contributes scoped tools permissions",
+          "path": "packages/seo-content/1.0.1/workflow.yml.stages[11].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/seo-content/1.0.1/workflow.yml.stages[1] contributes scoped tools permissions",
+          "path": "packages/seo-content/1.0.1/workflow.yml.stages[1].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/seo-content/1.0.1/workflow.yml.stages[2] contributes scoped tools permissions",
+          "path": "packages/seo-content/1.0.1/workflow.yml.stages[2].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/seo-content/1.0.1/workflow.yml.stages[2] requests unbounded access",
+          "path": "packages/seo-content/1.0.1/workflow.yml.stages[2].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/seo-content/1.0.1/workflow.yml.stages[3] contributes scoped Bash tool permissions",
+          "path": "packages/seo-content/1.0.1/workflow.yml.stages[3].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/seo-content/1.0.1/workflow.yml.stages[3] requests unbounded access",
+          "path": "packages/seo-content/1.0.1/workflow.yml.stages[3].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/seo-content/1.0.1/workflow.yml.stages[4] contributes scoped tools permissions",
+          "path": "packages/seo-content/1.0.1/workflow.yml.stages[4].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/seo-content/1.0.1/workflow.yml.stages[5] contributes scoped tools permissions",
+          "path": "packages/seo-content/1.0.1/workflow.yml.stages[5].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/seo-content/1.0.1/workflow.yml.stages[6] contributes scoped tools permissions",
+          "path": "packages/seo-content/1.0.1/workflow.yml.stages[6].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/seo-content/1.0.1/workflow.yml.stages[7] contributes scoped tools permissions",
+          "path": "packages/seo-content/1.0.1/workflow.yml.stages[7].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/seo-content/1.0.1/workflow.yml.stages[8] contributes scoped tools permissions",
+          "path": "packages/seo-content/1.0.1/workflow.yml.stages[8].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/seo-content/1.0.1/workflow.yml.stages[8] requests unbounded access",
+          "path": "packages/seo-content/1.0.1/workflow.yml.stages[8].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/seo-content/1.0.1/workflow.yml.stages[9] contributes scoped tools permissions",
+          "path": "packages/seo-content/1.0.1/workflow.yml.stages[9].permissions",
+          "severity": "info"
+        }
+      ],
+      "verdict": "pass"
+    },
+    {
+      "commands": [],
+      "counts": {
+        "advisory": 12,
+        "downgraded": 0,
+        "hard": 0
+      },
+      "findings": [
+        {
+          "approval": null,
+          "category": "permission",
+          "column": 1,
+          "disposition": "advisory",
+          "fingerprint": "a046661e46dbf3ac6fbff17073421807fac7cca14e9452076283fef2592795a0",
+          "line": 1,
+          "message": "Broad declared permissions require human review",
+          "original_severity": "advisory",
+          "path": "manifest.yml",
+          "redacted_evidence": "Broad permissions declared",
+          "request": null,
+          "rule_id": "permission.broad-declaration"
+        }
+      ],
+      "hosts": [],
+      "identity": {
+        "name": "writing",
+        "path": "packages/writing/1.0.1",
+        "release_sha256": "2daf087f0712b44a53d5dd8fab94033a2735cf5035ea1262192e1d780f352127",
+        "version": "1.0.1"
+      },
+      "requested_permissions": {
+        "capabilities": [
+          "filesystem-read",
+          "filesystem-write",
+          "network"
+        ],
+        "filesystem_read": [
+          "repository",
+          "task"
+        ],
+        "filesystem_write": [
+          "task/article.md",
+          "task/draft.md",
+          "task/repo-research.md",
+          "task/research.md",
+          "task/reviews/**",
+          "task/verification.md",
+          "task/web-research.md"
+        ],
+        "network_hosts": [
+          "*"
+        ],
+        "risk": "moderate",
+        "secrets": []
+      },
+      "scanned_files": [
+        {
+          "bytes": 1151,
+          "kind": "text",
+          "path": "packages/writing/1.0.1/NOTICE.md",
+          "sha256": "b8ccf56f1fe45243638cfd7531059db1e41bb11cd5057b94e67727a72851f646"
+        },
+        {
+          "bytes": 2074,
+          "kind": "text",
+          "path": "packages/writing/1.0.1/README.md",
+          "sha256": "c119b172fcec921bff84ac41b0e35e89717628e87742bf38ee654ecb8548cc8a"
+        },
+        {
+          "bytes": 1182,
+          "kind": "text",
+          "path": "packages/writing/1.0.1/instructions/deliver.md",
+          "sha256": "b0c425f7c9669fb6c4c32f42f64e1f76aa2306b9561025644a50b441fe8a8d0d"
+        },
+        {
+          "bytes": 876,
+          "kind": "text",
+          "path": "packages/writing/1.0.1/instructions/draft.md",
+          "sha256": "4a283310fe566bbd453e0cd228045186e8d87d12dc38174dc8065da4ce70fd5f"
+        },
+        {
+          "bytes": 436,
+          "kind": "text",
+          "path": "packages/writing/1.0.1/instructions/repo-research.md",
+          "sha256": "350c47ba6a05be2e2c62065c6702fd7e9bca61dbfe97969b7f6858f2447c8404"
+        },
+        {
+          "bytes": 1211,
+          "kind": "text",
+          "path": "packages/writing/1.0.1/instructions/research.md",
+          "sha256": "e4d78f0987aff32e3983c2a9296dda2d837161f0e7a019eca3a0f52cf55940c0"
+        },
+        {
+          "bytes": 729,
+          "kind": "text",
+          "path": "packages/writing/1.0.1/instructions/revise.md",
+          "sha256": "2cba643a828b31e6fa38bb2ba9086e4cbdda812847f762c6385d533135f0b666"
+        },
+        {
+          "bytes": 515,
+          "kind": "text",
+          "path": "packages/writing/1.0.1/instructions/web-research.md",
+          "sha256": "8637e54d67b30e6e60240b75771dc2ccecbccf1cec4cd7c92bd18c0cb30c48e3"
+        },
+        {
+          "bytes": 2412,
+          "kind": "text",
+          "path": "packages/writing/1.0.1/manifest.yml",
+          "sha256": "eedfa232524bef3268460fdba1bd004fb96b121f2dd59f72e267f00c54214c2b"
+        },
+        {
+          "bytes": 3801,
+          "kind": "text",
+          "path": "packages/writing/1.0.1/workflow.yml",
+          "sha256": "dc07b0d2d07ea4dd6ddfa5d8123b6c6372c7c4dfbfd4b25b6ed22d920ea0b47f"
+        }
+      ],
+      "suppressions": [],
+      "validator_findings": [
+        {
+          "code": "hive.compatible",
+          "message": "descriptor parsed with Hive 0.6.0",
+          "path": "packages/writing/1.0.1/workflow.yml",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/writing/1.0.1/workflow.yml.stages[1] contributes scoped tools permissions",
+          "path": "packages/writing/1.0.1/workflow.yml.stages[1].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/writing/1.0.1/workflow.yml.stages[2] contributes scoped tools permissions",
+          "path": "packages/writing/1.0.1/workflow.yml.stages[2].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/writing/1.0.1/workflow.yml.stages[2] requests unbounded access",
+          "path": "packages/writing/1.0.1/workflow.yml.stages[2].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/writing/1.0.1/workflow.yml.stages[3] contributes scoped tools permissions",
+          "path": "packages/writing/1.0.1/workflow.yml.stages[3].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/writing/1.0.1/workflow.yml.stages[4] contributes scoped tools permissions",
+          "path": "packages/writing/1.0.1/workflow.yml.stages[4].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/writing/1.0.1/workflow.yml.stages[5].council.revise contributes scoped tools permissions",
+          "path": "packages/writing/1.0.1/workflow.yml.stages[5].council.revise.permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/writing/1.0.1/workflow.yml.stages[5] contributes read-only permissions",
+          "path": "packages/writing/1.0.1/workflow.yml.stages[5].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/writing/1.0.1/workflow.yml.stages[5].reviewers[0] contributes scoped tools permissions",
+          "path": "packages/writing/1.0.1/workflow.yml.stages[5].reviewers[0].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/writing/1.0.1/workflow.yml.stages[5].reviewers[1] contributes scoped tools permissions",
+          "path": "packages/writing/1.0.1/workflow.yml.stages[5].reviewers[1].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/writing/1.0.1/workflow.yml.stages[6] contributes scoped tools permissions",
+          "path": "packages/writing/1.0.1/workflow.yml.stages[6].permissions",
+          "severity": "info"
+        }
+      ],
+      "verdict": "pass"
+    }
+  ],
+  "pull_request": 20,
+  "run": {
+    "attempt": 1,
+    "id": 29682937163,
+    "repository": "ivankuznetsov/honeycomb",
+    "workflow": "Security lint"
+  },
+  "schema": "honeycomb.security-lint/v1",
+  "state": "pass",
+  "totals": {
+    "advisory": 37,
+    "downgraded": 0,
+    "hard": 0
+  },
+  "verdict": "Security lint passed"
+}
