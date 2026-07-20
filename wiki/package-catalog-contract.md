@@ -155,7 +155,8 @@ owner is the sole authority for each remote or release action and for any later
 Hive template removal; local passing tests do not replace those gates.
 
 Reviewer Panel's source and manifest commits complete the two-commit package
-provenance. The sole owner may use the protected repository-owner publication
-lane, but no agent verdict or local test supplies that authority. Lint/approval
-evidence, catalog/site publication, public-install and live-run acceptance,
-deployment, and any Hive template removal remain separate gates.
+provenance. The sole owner used the protected repository-owner publication lane
+for both managed-repair releases; no agent verdict or local test supplied that
+authority. Exact-head lint/approval evidence and generated catalog projection
+are complete. Site publication, public-install and live-run acceptance,
+deployment verification, and any Hive template removal remain separate gates.

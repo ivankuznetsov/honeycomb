@@ -39,9 +39,10 @@ installable from `honeycomb/<name>`.
 
 `packages/root-cause-repair/1.0.0` is the immutable Root Cause Repair package.
 Its canonical manifest binds the behavior bytes to the preserved source commit;
-exact-pinned Hive acceptance is separate local evidence. Package presence alone
-is not catalog listing: protected listing evidence and the generated catalog
-remain the authority for discovery and public installation.
+exact-pinned Hive acceptance is separate local evidence. Protected
+repository-owner evidence for the exact listing head now projects the package
+into `catalog.json`; public site sync and clean remote-install acceptance remain
+separate rollout gates. Package presence alone never proves public installation.
 
 This is a full Git-only repair workflow, not a read-only report. Every
 executable stage is high-risk and may run arbitrary local commands and leave
@@ -65,8 +66,9 @@ test-evidence. Those meanings belong to the workflow; the compatible agents or
 execution profiles chosen during Hive installation do not. Exact pinned-runtime
 acceptance maps every slot to one compatible profile, demonstrating that the
 package does not intrinsically require multiple providers or a particular
-provider. Protected evidence and catalog projection still determine whether
-the package is publicly discoverable and installable.
+provider. Protected repository-owner evidence for the exact listing head now
+projects the package into `catalog.json`; public site sync and clean
+remote-install acceptance remain separate rollout gates.
 
 Reviewer Panel is Git-only and high-risk. Its basis, test-evidence, repair, and
 readiness actors may run arbitrary local commands, and accepted repairs remain
@@ -75,9 +77,10 @@ and `state-stale` are state-bound analytical outcomes. They are not human
 collaboration, merge approval, trust endorsement, listing approval, release
 authorization, publication, or deployment decisions.
 
-The sole owner may use the protected repository-owner publication lane, but
-agent output never satisfies that authority. Source/manifest commits, protected
-evidence, catalog, site, public-install, live-run, and any Hive-template removal
+The sole owner used the protected repository-owner publication lane for these
+exact releases; agent output did not satisfy that authority. Source/manifest
+commits, protected evidence, and catalog projection are complete. Site sync,
+public-install acceptance, live-run evidence, and any Hive-template removal
 remain separately auditable steps.
 
 ```sh

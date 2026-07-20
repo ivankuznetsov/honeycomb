@@ -51,8 +51,9 @@ Root Cause Repair 1.0.0 is an immutable package under
 registry-original behavior source commit. The Git-only high-risk workflow uses
 install-time agent mappings and can run arbitrary local commands that leave
 repository repairs uncommitted; its terminal outcomes are `verified`,
-`not-reproduced`, and `blocked`. Protected evidence and catalog projection,
-not package presence, determine public installability. See
+`not-reproduced`, and `blocked`. Protected repository-owner evidence now
+projects this release into `catalog.json`; site sync and public-install
+acceptance remain rollout gates. See
 [[architecture]], [[command-api-surface]], [[package-catalog-contract]], and
 [[gaps]] for the runtime, publication, evidence, and uncertainty boundaries.
 
@@ -63,8 +64,9 @@ lenses—correctness, security, reliability, and test-evidence—independently o
 the compatible execution profiles mapped at install time. Its `ready`,
 `changes-requested`, `inconclusive`, and `state-stale` records are analytical
 evidence for the sole owner, never human collaboration or merge, trust,
-listing, release, publication, or deployment authority. Protected evidence and
-catalog projection remain the public-install gate.
+listing, release, publication, or deployment authority. Protected
+repository-owner evidence now projects this release into `catalog.json`; site
+sync and public-install acceptance remain rollout gates.
 
 ## Update Protocol
 

@@ -142,9 +142,10 @@ Author tooling, seed packages, security-lint CI, and the read-only catalog drift
 gate are shipped on this branch. Analyzer/exporter code is deterministic and
 offline; only the trusted reporter and approval issuer use GitHub HTTPS metadata
 APIs. Protected normalized evidence now projects the listed Community
-`task-inspect/0.1.0`, `architecture/1.0.1`, `writing/1.0.1`, and
-`seo-content/1.0.1` releases into `catalog.json`. The static site consumes that
-exact snapshot without reconstructing entries, and released Hive v0.6.0
+`task-inspect/0.1.0`, `architecture/1.0.1`, `writing/1.0.1`,
+`seo-content/1.0.1`, `root-cause-repair/1.0.0`, and `reviewer-panel/1.0.0`
+releases into `catalog.json`. The static site consumes that exact snapshot
+without reconstructing entries, and released Hive v0.6.0
 installs it from the official registry with immutable catalog/digest task pins
 and task-local read-only runtime policy. Evidence branch/environment protection
 remains live; static-site publication, public flagship acceptance, emergency
@@ -180,9 +181,9 @@ Bounds or unsupported repository entries fail closed.
 
 The repository owner is the sole authority for committing, pushing, opening or
 merging pull requests, tagging, releasing, publishing, listing, deploying, or
-removing a Hive-shipped template. The source and manifest commits are complete;
-public execution still requires protected evidence, catalog and site
-publication, and public-install acceptance.
+removing a Hive-shipped template. The source/manifest commits, protected
+repository-owner evidence, and catalog projection are complete; public
+execution still requires site publication and clean public-install acceptance.
 
 ## Reviewer Panel identity and authority boundary
 
@@ -207,7 +208,7 @@ state; `changes-requested` means a blocker remains; `inconclusive` means require
 evidence is unavailable; and `state-stale` means the reviewed state changed.
 All are analytical evidence for the sole owner, not human collaboration, merge
 approval, trust endorsement, listing approval, release authorization,
-publication, or deployment. The owner may use the protected repository-owner
-publication lane, but agent output never satisfies it; protected evidence,
-catalog/site publication, public acceptance, deployment, and template removal
-remain separate actions.
+publication, or deployment. The owner used the protected repository-owner lane
+for this exact release; agent output did not satisfy it. Site publication,
+public acceptance, deployment verification, and template removal remain
+separate actions after protected evidence and catalog projection.
