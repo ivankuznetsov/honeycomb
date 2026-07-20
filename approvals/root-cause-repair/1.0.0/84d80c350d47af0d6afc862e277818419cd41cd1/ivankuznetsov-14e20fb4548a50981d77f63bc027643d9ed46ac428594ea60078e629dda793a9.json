@@ -1,0 +1,20 @@
+{
+  "approvals": [
+    {
+      "approved_suppressions": [],
+      "authority": "repository_owner",
+      "decision": "approved",
+      "evidence_digest": "60129d410603a81a7053c709d44d72011cf583a5998633c4d117c0d175184c71",
+      "head_sha": "84d80c350d47af0d6afc862e277818419cd41cd1",
+      "name": "root-cause-repair",
+      "notes": "Owner-approved first-party publication after exact-head lint, multi-lens review, exact-pinned Hive tests, and disposable Docker acceptance.",
+      "path": "packages/root-cause-repair/1.0.0",
+      "release_sha256": "f2f3fcf68a396964718533d3e2f1480acd59ad9e4f460a2f3c170d8e2e25c7f3",
+      "review_url": "https://github.com/ivankuznetsov/honeycomb/actions/runs/29768941496",
+      "reviewed_at": "2026-07-20T18:43:04Z",
+      "reviewer": "ivankuznetsov",
+      "version": "1.0.0"
+    }
+  ],
+  "schema": "honeycomb.listing-approval/v1"
+}
