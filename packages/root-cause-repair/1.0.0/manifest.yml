@@ -1,0 +1,63 @@
+schema: "honeycomb-manifest/v1"
+name: "root-cause-repair"
+version: "1.0.0"
+description: "Reproduce a defect, repair its root cause, and issue a state-bound verification certificate"
+author:
+  name: "Honeycomb Maintainers"
+  url: "https://github.com/ivankuznetsov/honeycomb"
+license: "MIT"
+hive_min_version: "0.6.0"
+source:
+  url: "https://github.com/ivankuznetsov/honeycomb/tree/4a0d06d67881ea7026030b35dd1b89551b7f0e45/packages/root-cause-repair/1.0.0"
+  revision: "4a0d06d67881ea7026030b35dd1b89551b7f0e45"
+permissions:
+  risk: "high"
+  capabilities:
+    - "filesystem-read"
+    - "filesystem-write"
+    - "network"
+    - "shell"
+  network_hosts:
+    - "*"
+  filesystem_read:
+    - "*"
+  filesystem_write:
+    - "*"
+  secrets:
+    - "*"
+files:
+  "packages/root-cause-repair/1.0.0/README.md": "01ec457a55bb836625bb706b2cc54ea2a3397b6209b3189245ede727a67aa883"
+  "packages/root-cause-repair/1.0.0/assets/evidence-contract.md": "ab285f6a729658c2eb136dc7473b33925d9e123fb329d03c5bf12a2cd8ceca2c"
+  "packages/root-cause-repair/1.0.0/instructions/certificate.md": "8b6bc462d21966ca4702b288cbc94142f8330c99f764dcccf74bedb8a7bb96c3"
+  "packages/root-cause-repair/1.0.0/instructions/diagnose.md": "17ca86ddfca4ff0294a78e09135817bfbe3d45694afc66dba259e67d0acae692"
+  "packages/root-cause-repair/1.0.0/instructions/repair.md": "ecd61fa7d34fc082655cd22197aedee050067a5d530fc872d93680bb07bd64dc"
+  "packages/root-cause-repair/1.0.0/instructions/reproduce.md": "16f21b92f6eae9ad690c854871b58e8e7d5b82d68a4e3dddba9a78b713c42eb3"
+  "packages/root-cause-repair/1.0.0/instructions/revise-repair.md": "8c79aa849016f1be25f87f17de79bc096c3e7d13a247b9cb290e3b3fab34cfa3"
+  "packages/root-cause-repair/1.0.0/instructions/verify.md": "5ac0950a0b57821ac5a85af34deb1121d856bdcb2c78a58ae88b8cae03782ed0"
+  "packages/root-cause-repair/1.0.0/tools/repository-state.rb": "99539859ff74d4e235bf8ea7e02b4f98f47a22a2f3da37927c01643c15d8fb0b"
+  "packages/root-cause-repair/1.0.0/workflow.yml": "eb8ce59d08ac8cb301e3de9c3d633ed4d2547888b7c2d810fb12548ef2af6859"
+release_sha256: "f2f3fcf68a396964718533d3e2f1480acd59ad9e4f460a2f3c170d8e2e25c7f3"
+x-hive:
+  tools:
+    -
+      path: "tools/repository-state.rb"
+  prompt_assets:
+    -
+      path: "assets/evidence-contract.md"
+  optional_inputs: []
+x-provenance:
+  kind: "registry-original"
+  source_paths:
+    - "README.md"
+    - "workflow.yml"
+    - "instructions/certificate.md"
+    - "instructions/diagnose.md"
+    - "instructions/repair.md"
+    - "instructions/reproduce.md"
+    - "instructions/revise-repair.md"
+    - "instructions/verify.md"
+    - "assets/evidence-contract.md"
+    - "tools/repository-state.rb"
+x-security:
+  network_host_reasons: {}
+  suppressions: []
