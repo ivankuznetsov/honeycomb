@@ -35,12 +35,13 @@ the released Hive 0.6.0 runtime; until each package has protected lint evidence
 plus the required independent approvals, it is not discoverable or publicly
 installable from `honeycomb/<name>`.
 
-## Local managed-repair candidates
+## Managed repair packages
 
-`candidates/root-cause-repair/1.0.0` is an unpublished, unlisted local source
-candidate. It has no canonical `manifest.yml`, protected listing evidence,
-catalog entry, or public install path. The checked-in source is for local
-contract and exact-pinned Hive acceptance testing only.
+`packages/root-cause-repair/1.0.0` is the immutable Root Cause Repair package.
+Its canonical manifest binds the behavior source and its exact-pinned Hive
+acceptance evidence. Package presence alone is not catalog listing: protected
+listing evidence and the generated catalog remain the authority for discovery
+and public installation.
 
 This is a full Git-only repair workflow, not a read-only report. Every
 executable stage is high-risk and may run arbitrary local commands and leave
@@ -52,20 +53,20 @@ does not change the workflow semantics. Terminal certificates use exactly
 
 The repository owner remains the sole authority for commits, pushes, pull
 requests, merges, tags, releases, publication, catalog listing, deployment, and
-any later removal of a Hive-shipped workflow. A future release tail requires an
-explicit owner request: preserve the behavior source commit, generate and
-review the canonical manifest in a later commit, obtain protected lint and
-approval evidence, update the catalog and site, and record public-install and
-live-run acceptance. Local green tests do not authorize any of those steps.
+any later removal of a Hive-shipped workflow. Publication preserves the
+behavior source commit, generates and reviews the canonical manifest in a later
+commit, obtains protected lint and approval evidence, updates the catalog and
+site, and records public-install and live-run acceptance. Local green tests do
+not substitute for those gates.
 
-`candidates/reviewer-panel/1.0.0` is likewise an unpublished, unlisted local
-source candidate with no canonical manifest, protected evidence, catalog entry,
-or public install. Its four fixed semantic lenses are correctness, security,
-reliability, and test-evidence. Those meanings belong to the workflow; the
-compatible agents or execution profiles chosen during Hive installation do not.
-The exact pinned-runtime acceptance maps every slot to one compatible profile,
-which demonstrates that the package does not intrinsically require multiple
-providers or a particular provider.
+`packages/reviewer-panel/1.0.0` is the immutable Reviewer Panel package. Its
+four fixed semantic lenses are correctness, security, reliability, and
+test-evidence. Those meanings belong to the workflow; the compatible agents or
+execution profiles chosen during Hive installation do not. Exact pinned-runtime
+acceptance maps every slot to one compatible profile, demonstrating that the
+package does not intrinsically require multiple providers or a particular
+provider. Protected evidence and catalog projection still determine whether
+the package is publicly discoverable and installable.
 
 Reviewer Panel is Git-only and high-risk. Its basis, test-evidence, repair, and
 readiness actors may run arbitrary local commands, and accepted repairs remain
@@ -74,10 +75,10 @@ and `state-stale` are state-bound analytical outcomes. They are not human
 collaboration, merge approval, trust endorsement, listing approval, release
 authorization, publication, or deployment decisions.
 
-The sole owner may later use the protected repository-owner publication lane,
-but agent output never satisfies that authority. An explicit owner request is
-still required before the source/manifest commits, protected evidence, catalog,
-site, public-install, live-run, or Hive-template-removal release tail begins.
+The sole owner may use the protected repository-owner publication lane, but
+agent output never satisfies that authority. Source/manifest commits, protected
+evidence, catalog, site, public-install, live-run, and any Hive-template removal
+remain separately auditable steps.
 
 ```sh
 ruby script/honeycomb-manifest --check --all

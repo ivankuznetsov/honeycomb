@@ -6,7 +6,7 @@ require "honeycomb_security_lint"
 require "psych"
 
 class RootCauseRepairPackageTest < Minitest::Test
-  PACKAGE_ROOT = File.join(ROOT, "candidates", "root-cause-repair", "1.0.0")
+  PACKAGE_ROOT = File.join(ROOT, "packages", "root-cause-repair", "1.0.0")
   IDENTITY_KEYS = %w[agent model effort].freeze
   PROHIBITED_OPERATIONS = %w[
     reset clean stash revert commit push PR merge tag release publish deploy
@@ -126,15 +126,16 @@ class RootCauseRepairPackageTest < Minitest::Test
     assert_match(/do not|never|prohibit/i, corpus)
   end
 
-  def test_readme_discloses_high_risk_local_mutation_and_unpublished_status
+  def test_readme_discloses_high_risk_local_mutation_and_listing_boundary
     readme = File.read(File.join(PACKAGE_ROOT, "README.md"))
 
     %w[arbitrary local command high-risk mutation uncommitted].each do |phrase|
       assert_includes readme.downcase, phrase, phrase
     end
     assert_match(/sole.*owner.*authority|owner.*sole.*authority/i, readme)
-    assert_match(/unpublished/i, readme)
-    assert_match(/no manifest|manifest.*not.*present/i, readme)
+    assert_match(/immutable/i, readme)
+    assert_match(/canonical manifest/i, readme)
+    assert_match(/package presence alone/i, readme)
   end
 
   def test_terminal_evidence_fixtures_enforce_semantic_outcomes
@@ -188,7 +189,7 @@ class RootCauseRepairPackageTest < Minitest::Test
       assert_empty manifest.dig("x-security", "suppressions")
       assert_empty manifest.dig("x-security", "network_host_reasons")
       assert_equal HoneycombRegistry::CanonicalYAML.dump_manifest(manifest), File.binread(package.manifest_path)
-      refute File.exist?(File.join(PACKAGE_ROOT, "manifest.yml"))
+      assert File.exist?(File.join(PACKAGE_ROOT, "manifest.yml"))
     end
   end
 

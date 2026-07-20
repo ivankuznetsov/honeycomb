@@ -23,30 +23,28 @@ stores an immutable configuration digest beside the package generation, and
 pins both identities into created tasks. Those flagships must not declare
 public compatibility until that Hive prerequisite is released.
 
-`root-cause-repair/1.0.0` is currently an unpublished, unlisted local source
-candidate, not an eligible catalog release. It has no canonical manifest or
-catalog entry, so `hive workflow install honeycomb/root-cause-repair` must not be
-presented as working from the public registry. Local acceptance constructs a
-disposable manifest/catalog registry and passes explicit high-risk escalation;
-that fixture is not a supported user install command.
+`root-cause-repair/1.0.0` is an immutable package release with a canonical
+manifest. `hive workflow install honeycomb/root-cause-repair` resolves it only
+when current protected evidence projects it into the generated catalog;
+package presence alone is not a public-install claim. Disposable-registry
+acceptance also passes explicit high-risk escalation but remains local evidence.
 
-When a future owner-authorized release exists, Hive installation will ask for
-agent mappings for all seven semantic slots and suggest supported defaults, as
-it does during Hive initialization. The choices configure execution identity;
-they do not become part of the workflow or change the `verified`,
-`not-reproduced`, and `blocked` outcome contract. All slots are unbounded, so
-installation must disclose high-risk arbitrary local command execution and
-repository mutation before activation.
+Hive installation asks for agent mappings for all seven semantic slots and
+suggests supported defaults, as it does during Hive initialization. The choices
+configure execution identity; they do not become part of the workflow or
+change the `verified`, `not-reproduced`, and `blocked` outcome contract. All
+slots are unbounded, so installation must disclose high-risk arbitrary local
+command execution and repository mutation before activation.
 
-`reviewer-panel/1.0.0` has the same unpublished and unlisted command boundary:
-there is no canonical manifest or catalog entry, so
-`hive workflow install honeycomb/reviewer-panel` is not a current public-registry
-install. Local acceptance uses a disposable registry and the exact clean pinned
-Hive revision. That runtime asks for mappings across basis, council, the four
-fixed semantic lenses, repair, and readiness; it rejects mappings whose profile
-cannot enforce a bounded lens before activation. The acceptance fixture maps
-all compatible slots to one profile, proving that lens semantics do not imply a
-particular provider, independent providers, or human collaborators.
+`reviewer-panel/1.0.0` has the same package-versus-catalog boundary:
+`hive workflow install honeycomb/reviewer-panel` resolves it only when current
+protected evidence projects it into the generated catalog. Local acceptance
+uses the exact clean pinned Hive revision. That runtime asks for mappings across
+basis, council, the four fixed semantic lenses, repair, and readiness; it
+rejects mappings whose profile cannot enforce a bounded lens before activation.
+The acceptance fixture maps all compatible slots to one profile, proving that
+lens semantics do not imply a particular provider, independent providers, or
+human collaborators.
 
 Installation must disclose Reviewer Panel's Git-only high-risk arbitrary local
 commands and possible uncommitted repair mutations. Its `ready`,

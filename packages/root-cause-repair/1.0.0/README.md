@@ -45,5 +45,7 @@ later hidden by restoring the same local state.
 
 ## Publication status
 
-This source package is unpublished. No manifest is present, and no catalog,
-listing, release, or installation claim is made for version 1.0.0.
+This is the immutable `1.0.0` package source. Its canonical manifest binds the
+behavior bytes to the preserved registry source commit. Package presence alone
+does not claim catalog listing or public installation; protected listing
+evidence and the generated catalog remain the authority for those states.

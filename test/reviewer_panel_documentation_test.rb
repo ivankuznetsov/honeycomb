@@ -15,16 +15,16 @@ class ReviewerPanelDocumentationTest < Minitest::Test
   def test_readme_separates_lenses_execution_identity_and_authority
     readme = File.read(File.join(ROOT, "README.md"))
 
-    assert_includes readme, "candidates/reviewer-panel/1.0.0"
+    assert_includes readme, "packages/reviewer-panel/1.0.0"
     %w[correctness security reliability test-evidence].each { |lens| assert_includes readme, lens }
-    %w[unpublished unlisted Git-only high-risk uncommitted analytical].each do |term|
+    %w[immutable package Git-only high-risk uncommitted analytical].each do |term|
       assert_includes readme.downcase, term.downcase, term
     end
-    assert_match(/compatible agents or execution profiles.*do not/im, readme)
+    assert_match(/compatible agents or\s+execution profiles.*do not/im, readme)
     assert_match(/does not intrinsically require.*provider/im, readme)
     assert_match(/not human\s+collaboration,\s+merge approval,\s+trust endorsement/im, readme)
     assert_match(/sole owner.*protected repository-owner publication lane/im, readme)
-    assert_match(/no canonical manifest/im, readme)
+    assert_match(/canonical manifest/im, readme)
   end
 
   def test_wiki_records_analytical_outcomes_runtime_limit_and_release_gap
@@ -42,8 +42,8 @@ class ReviewerPanelDocumentationTest < Minitest::Test
     assert_match(/merge approval/i, corpus)
     assert_match(/trust.*listing approval|trust\/listing approval/i, corpus)
     assert_match(/protected repository-owner/i, corpus)
-    assert_match(/no canonical manifest/i, corpus)
-    assert_match(/no .*public install|public install.*not/im, corpus)
+    assert_match(/canonical manifest/i, corpus)
+    assert_match(/package presence alone.*public install|public install.*package presence/im, corpus)
     assert_match(/template removal|template-removal/i, corpus)
   end
 
@@ -51,7 +51,7 @@ class ReviewerPanelDocumentationTest < Minitest::Test
     fragment = File.join(ROOT, "wiki", "log.d", LOG_FRAGMENT)
     assert File.file?(fragment)
     assert_includes File.read(fragment), "unpublished, unlisted local source"
-    assert_includes File.read(File.join(ROOT, "README.md")), "candidates/root-cause-repair/1.0.0"
+    assert_includes File.read(File.join(ROOT, "README.md")), "packages/root-cause-repair/1.0.0"
     assert_includes File.read(File.join(ROOT, "wiki", "index.md")), "Root Cause Repair"
     assert File.file?(File.join(ROOT, "wiki", "log.md"))
   end

@@ -58,7 +58,7 @@ end
 class ReviewerPanelHiveExecutionTest < Minitest::Test
   PACKAGE_NAME = "reviewer-panel"
   PACKAGE_VERSION = "1.0.0"
-  PACKAGE_ROOT = File.join(ROOT, "candidates", PACKAGE_NAME, PACKAGE_VERSION)
+  PACKAGE_ROOT = File.join(ROOT, "packages", PACKAGE_NAME, PACKAGE_VERSION)
   LENSES = %w[correctness security reliability test-evidence].freeze
   MAPPING_SLOTS = %w[
     stages.basis

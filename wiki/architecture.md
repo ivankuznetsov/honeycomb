@@ -55,32 +55,32 @@ catalog renderer.
   runtime context, optional-input isolation, package tools, and real Agent and
   Council engines with deterministic test agents. It does not claim an
   authenticated provider-backed run.
-- `candidates/root-cause-repair/1.0.0` is an unpublished and unlisted local source
-  candidate with no canonical manifest. Its Git-only workflow captures a
+- `packages/root-cause-repair/1.0.0` is an immutable high-risk package with a
+  registry-original canonical manifest. Its Git-only workflow captures a
   content-blind repository-state fingerprint, reproduces a symptom, diagnoses
   its cause, leaves a repair uncommitted, runs causal Council review and
   revision, and emits one terminal `verified`, `not-reproduced`, or `blocked`
   certificate. `test/root_cause_repair_hive_execution_test.rb` builds a
   disposable canonical registry and exercises released Hive at the exact clean
-  pinned source revision; this is local behavioral evidence, not a public
-  installation or provider-backed production run.
-- `candidates/reviewer-panel/1.0.0` is another unpublished, unlisted local source
-  candidate without a canonical manifest. It binds correctness, security,
+  pinned source revision; this is local behavioral evidence, while protected
+  listing evidence and catalog projection separately authorize public install.
+- `packages/reviewer-panel/1.0.0` is another immutable high-risk package with a
+  registry-original canonical manifest. It binds correctness, security,
   reliability, and test-evidence reviews to one Git state, permits at most three
   repair executions across four panel passes, re-runs all four lenses after a
   changed basis, and emits analytical `ready`, `changes-requested`,
   `inconclusive`, or `state-stale` evidence. Its disposable-registry execution
   test uses the same exact clean Hive pin as Root Cause Repair and native Agent
-  and Council engines; it is not provider-backed, public-install, or human
-  review evidence.
+  and Council engines; it is not provider-backed or human-review evidence, and
+  package presence alone does not authorize public install.
 - `docs/PACKAGE_FORMAT.md` is the authoritative public format/command contract;
   root `CONTRIBUTING.md`/`SECURITY.md` and `docs/TRUST.md`/`REVIEWS.md` are the
   canonical public policy; `wiki/` records agent-facing architecture and
   cross-task boundaries.
-- `candidates/` is outside the canonical package tree. Its manifest-free source
-  candidates are testable but cannot enter validation, catalog generation, or
-  publication until an explicit owner-authorized change promotes them into
-  `packages/` under the complete contribution contract.
+- `candidates/` is an optional staging area outside the canonical package tree.
+  Manifest-free sources there are testable but cannot enter validation, catalog
+  generation, or publication until an owner-authorized change promotes them
+  into `packages/` under the complete contribution contract.
 
 ## Intended Product Shape
 
