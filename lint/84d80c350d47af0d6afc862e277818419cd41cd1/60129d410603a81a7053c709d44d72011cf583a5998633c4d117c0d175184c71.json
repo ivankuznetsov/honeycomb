@@ -1,0 +1,577 @@
+{
+  "artifact_digest": "60129d410603a81a7053c709d44d72011cf583a5998633c4d117c0d175184c71",
+  "base_sha": "8c2ebb72e54eb091b5f580112c3571845ac5d995",
+  "event": {
+    "action": "labeled",
+    "gate": "applied",
+    "label_sha": "84d80c350d47af0d6afc862e277818419cd41cd1"
+  },
+  "head_sha": "84d80c350d47af0d6afc862e277818419cd41cd1",
+  "packages": [
+    {
+      "commands": [
+        {
+          "column": 13,
+          "kind": "inline",
+          "line": 7,
+          "path": "packages/reviewer-panel/1.0.0/assets/evidence-contract.md",
+          "redacted": "HEAD"
+        },
+        {
+          "column": 34,
+          "kind": "inline",
+          "line": 7,
+          "path": "packages/reviewer-panel/1.0.0/assets/evidence-contract.md",
+          "redacted": "HEAD"
+        },
+        {
+          "column": 1,
+          "kind": "plain",
+          "line": 24,
+          "path": "packages/reviewer-panel/1.0.0/assets/evidence-contract.md",
+          "redacted": "Git root. It fails with canonical structured JSON and a nonzero exit status for"
+        },
+        {
+          "column": 2,
+          "kind": "inline",
+          "line": 38,
+          "path": "packages/reviewer-panel/1.0.0/assets/evidence-contract.md",
+          "redacted": "HEAD"
+        },
+        {
+          "column": 71,
+          "kind": "inline",
+          "line": 11,
+          "path": "packages/reviewer-panel/1.0.0/instructions/basis.md",
+          "redacted": "HEAD"
+        },
+        {
+          "column": 39,
+          "kind": "inline",
+          "line": 17,
+          "path": "packages/reviewer-panel/1.0.0/instructions/basis.md",
+          "redacted": "HEAD"
+        },
+        {
+          "column": 9,
+          "kind": "ruby",
+          "line": 252,
+          "path": "packages/reviewer-panel/1.0.0/tools/repository-state.rb",
+          "redacted": "        File.readlink(path).b"
+        },
+        {
+          "column": 5,
+          "kind": "ruby",
+          "line": 301,
+          "path": "packages/reviewer-panel/1.0.0/tools/repository-state.rb",
+          "redacted": "    File.open(path, flags) do |file|"
+        },
+        {
+          "column": 7,
+          "kind": "ruby",
+          "line": 307,
+          "path": "packages/reviewer-panel/1.0.0/tools/repository-state.rb",
+          "redacted": "      while (chunk = file.read(READ_CHUNK_BYTES))"
+        },
+        {
+          "column": 5,
+          "kind": "ruby",
+          "line": 371,
+          "path": "packages/reviewer-panel/1.0.0/tools/repository-state.rb",
+          "redacted": "    Open3.popen3(GIT_ENV, *command) do |stdin, stdout_io, stderr_io, wait_thread|"
+        }
+      ],
+      "counts": {
+        "advisory": 14,
+        "downgraded": 0,
+        "hard": 0
+      },
+      "findings": [
+        {
+          "approval": null,
+          "category": "permission",
+          "column": 1,
+          "disposition": "advisory",
+          "fingerprint": "57bd77e9287255f8f9c35c11589f82f2806dc26e96e7b94c21366b149cf31cbb",
+          "line": 1,
+          "message": "Broad declared permissions require human review",
+          "original_severity": "advisory",
+          "path": "manifest.yml",
+          "redacted_evidence": "Broad permissions declared",
+          "request": null,
+          "rule_id": "permission.broad-declaration"
+        }
+      ],
+      "hosts": [],
+      "identity": {
+        "name": "reviewer-panel",
+        "path": "packages/reviewer-panel/1.0.0",
+        "release_sha256": "8a4c95c9c0163ca7b9a313c5a13ff4347bf2a165b604337ad7556a64ee46f12a",
+        "version": "1.0.0"
+      },
+      "requested_permissions": {
+        "capabilities": [
+          "filesystem-read",
+          "filesystem-write",
+          "network",
+          "shell"
+        ],
+        "filesystem_read": [
+          "*"
+        ],
+        "filesystem_write": [
+          "*"
+        ],
+        "network_hosts": [
+          "*"
+        ],
+        "risk": "high",
+        "secrets": [
+          "*"
+        ]
+      },
+      "scanned_files": [
+        {
+          "bytes": 3957,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.0/README.md",
+          "sha256": "e70dfe7a90fd29ec81449fed750fcf2f731d8dc2a980fa39f2b508fa501d391e"
+        },
+        {
+          "bytes": 2742,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.0/assets/evidence-contract.md",
+          "sha256": "ab285f6a729658c2eb136dc7473b33925d9e123fb329d03c5bf12a2cd8ceca2c"
+        },
+        {
+          "bytes": 3352,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.0/instructions/basis.md",
+          "sha256": "3b9398f42a35d827d40164d396e50b240b352717c9cea0ee076b829dba95508a"
+        },
+        {
+          "bytes": 3251,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.0/instructions/readiness.md",
+          "sha256": "726a78b5e049a9f3387f14935918851e6d90fbde56ad75203d8b05cd5628ef7b"
+        },
+        {
+          "bytes": 3432,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.0/instructions/repair.md",
+          "sha256": "17b0864c96e403a7f66103bcf8a68078116178ca3c9aaf187f039cd9d9b50f7c"
+        },
+        {
+          "bytes": 2227,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.0/instructions/review-correctness.md",
+          "sha256": "c2c31196202ad32c92ccde92106f90f6144f4e982eb32ca8642f96d2a64a2336"
+        },
+        {
+          "bytes": 2249,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.0/instructions/review-reliability.md",
+          "sha256": "fe1286a8094cf608480950b12a38c96ee5a9ac15eb1cc1592975e07e63ea52cc"
+        },
+        {
+          "bytes": 2302,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.0/instructions/review-security.md",
+          "sha256": "9f33bde1273189dbdcad1981964dad65b88c588d075d274ee2aefd6c89585695"
+        },
+        {
+          "bytes": 2954,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.0/instructions/review-test-evidence.md",
+          "sha256": "48ce21cb8613c893dc3bf0ea6520c6f4aac1dcfa85fd1b92994505aa4d0aea1c"
+        },
+        {
+          "bytes": 2880,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.0/manifest.yml",
+          "sha256": "c5f6e9ec3e45a50cdb205cfda4ee742101ae57385835c953ec77cd8ad92baaf9"
+        },
+        {
+          "bytes": 20220,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.0/tools/repository-state.rb",
+          "sha256": "99539859ff74d4e235bf8ea7e02b4f98f47a22a2f3da37927c01643c15d8fb0b"
+        },
+        {
+          "bytes": 2575,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.0/workflow.yml",
+          "sha256": "386de33ba6bd96196a16562749aabc8d9c601922add68216101fd00604405118"
+        }
+      ],
+      "suppressions": [],
+      "validator_findings": [
+        {
+          "code": "hive.compatible",
+          "message": "descriptor parsed with Hive 0.6.0",
+          "path": "packages/reviewer-panel/1.0.0/workflow.yml",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/reviewer-panel/1.0.0/workflow.yml.stages[1] contributes yolo permissions",
+          "path": "packages/reviewer-panel/1.0.0/workflow.yml.stages[1].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/reviewer-panel/1.0.0/workflow.yml.stages[1] requests unbounded access",
+          "path": "packages/reviewer-panel/1.0.0/workflow.yml.stages[1].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/reviewer-panel/1.0.0/workflow.yml.stages[2].council.revise contributes yolo permissions",
+          "path": "packages/reviewer-panel/1.0.0/workflow.yml.stages[2].council.revise.permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/reviewer-panel/1.0.0/workflow.yml.stages[2].council.revise requests unbounded access",
+          "path": "packages/reviewer-panel/1.0.0/workflow.yml.stages[2].council.revise.permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/reviewer-panel/1.0.0/workflow.yml.stages[2] contributes read-only permissions",
+          "path": "packages/reviewer-panel/1.0.0/workflow.yml.stages[2].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/reviewer-panel/1.0.0/workflow.yml.stages[2].reviewers[0] contributes scoped tools permissions",
+          "path": "packages/reviewer-panel/1.0.0/workflow.yml.stages[2].reviewers[0].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/reviewer-panel/1.0.0/workflow.yml.stages[2].reviewers[1] contributes scoped tools permissions",
+          "path": "packages/reviewer-panel/1.0.0/workflow.yml.stages[2].reviewers[1].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/reviewer-panel/1.0.0/workflow.yml.stages[2].reviewers[2] contributes scoped tools permissions",
+          "path": "packages/reviewer-panel/1.0.0/workflow.yml.stages[2].reviewers[2].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/reviewer-panel/1.0.0/workflow.yml.stages[2].reviewers[3] contributes yolo permissions",
+          "path": "packages/reviewer-panel/1.0.0/workflow.yml.stages[2].reviewers[3].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/reviewer-panel/1.0.0/workflow.yml.stages[2].reviewers[3] requests unbounded access",
+          "path": "packages/reviewer-panel/1.0.0/workflow.yml.stages[2].reviewers[3].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/reviewer-panel/1.0.0/workflow.yml.stages[3] contributes yolo permissions",
+          "path": "packages/reviewer-panel/1.0.0/workflow.yml.stages[3].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/reviewer-panel/1.0.0/workflow.yml.stages[3] requests unbounded access",
+          "path": "packages/reviewer-panel/1.0.0/workflow.yml.stages[3].permissions",
+          "severity": "warning"
+        }
+      ],
+      "verdict": "pass"
+    },
+    {
+      "commands": [
+        {
+          "column": 13,
+          "kind": "inline",
+          "line": 7,
+          "path": "packages/root-cause-repair/1.0.0/assets/evidence-contract.md",
+          "redacted": "HEAD"
+        },
+        {
+          "column": 34,
+          "kind": "inline",
+          "line": 7,
+          "path": "packages/root-cause-repair/1.0.0/assets/evidence-contract.md",
+          "redacted": "HEAD"
+        },
+        {
+          "column": 1,
+          "kind": "plain",
+          "line": 24,
+          "path": "packages/root-cause-repair/1.0.0/assets/evidence-contract.md",
+          "redacted": "Git root. It fails with canonical structured JSON and a nonzero exit status for"
+        },
+        {
+          "column": 2,
+          "kind": "inline",
+          "line": 38,
+          "path": "packages/root-cause-repair/1.0.0/assets/evidence-contract.md",
+          "redacted": "HEAD"
+        },
+        {
+          "column": 9,
+          "kind": "ruby",
+          "line": 252,
+          "path": "packages/root-cause-repair/1.0.0/tools/repository-state.rb",
+          "redacted": "        File.readlink(path).b"
+        },
+        {
+          "column": 5,
+          "kind": "ruby",
+          "line": 301,
+          "path": "packages/root-cause-repair/1.0.0/tools/repository-state.rb",
+          "redacted": "    File.open(path, flags) do |file|"
+        },
+        {
+          "column": 7,
+          "kind": "ruby",
+          "line": 307,
+          "path": "packages/root-cause-repair/1.0.0/tools/repository-state.rb",
+          "redacted": "      while (chunk = file.read(READ_CHUNK_BYTES))"
+        },
+        {
+          "column": 5,
+          "kind": "ruby",
+          "line": 371,
+          "path": "packages/root-cause-repair/1.0.0/tools/repository-state.rb",
+          "redacted": "    Open3.popen3(GIT_ENV, *command) do |stdin, stdout_io, stderr_io, wait_thread|"
+        }
+      ],
+      "counts": {
+        "advisory": 16,
+        "downgraded": 0,
+        "hard": 0
+      },
+      "findings": [
+        {
+          "approval": null,
+          "category": "permission",
+          "column": 1,
+          "disposition": "advisory",
+          "fingerprint": "57bd77e9287255f8f9c35c11589f82f2806dc26e96e7b94c21366b149cf31cbb",
+          "line": 1,
+          "message": "Broad declared permissions require human review",
+          "original_severity": "advisory",
+          "path": "manifest.yml",
+          "redacted_evidence": "Broad permissions declared",
+          "request": null,
+          "rule_id": "permission.broad-declaration"
+        }
+      ],
+      "hosts": [],
+      "identity": {
+        "name": "root-cause-repair",
+        "path": "packages/root-cause-repair/1.0.0",
+        "release_sha256": "f2f3fcf68a396964718533d3e2f1480acd59ad9e4f460a2f3c170d8e2e25c7f3",
+        "version": "1.0.0"
+      },
+      "requested_permissions": {
+        "capabilities": [
+          "filesystem-read",
+          "filesystem-write",
+          "network",
+          "shell"
+        ],
+        "filesystem_read": [
+          "*"
+        ],
+        "filesystem_write": [
+          "*"
+        ],
+        "network_hosts": [
+          "*"
+        ],
+        "risk": "high",
+        "secrets": [
+          "*"
+        ]
+      },
+      "scanned_files": [
+        {
+          "bytes": 2704,
+          "kind": "text",
+          "path": "packages/root-cause-repair/1.0.0/README.md",
+          "sha256": "01ec457a55bb836625bb706b2cc54ea2a3397b6209b3189245ede727a67aa883"
+        },
+        {
+          "bytes": 2742,
+          "kind": "text",
+          "path": "packages/root-cause-repair/1.0.0/assets/evidence-contract.md",
+          "sha256": "ab285f6a729658c2eb136dc7473b33925d9e123fb329d03c5bf12a2cd8ceca2c"
+        },
+        {
+          "bytes": 2972,
+          "kind": "text",
+          "path": "packages/root-cause-repair/1.0.0/instructions/certificate.md",
+          "sha256": "8b6bc462d21966ca4702b288cbc94142f8330c99f764dcccf74bedb8a7bb96c3"
+        },
+        {
+          "bytes": 2429,
+          "kind": "text",
+          "path": "packages/root-cause-repair/1.0.0/instructions/diagnose.md",
+          "sha256": "17ca86ddfca4ff0294a78e09135817bfbe3d45694afc66dba259e67d0acae692"
+        },
+        {
+          "bytes": 2692,
+          "kind": "text",
+          "path": "packages/root-cause-repair/1.0.0/instructions/repair.md",
+          "sha256": "ecd61fa7d34fc082655cd22197aedee050067a5d530fc872d93680bb07bd64dc"
+        },
+        {
+          "bytes": 2387,
+          "kind": "text",
+          "path": "packages/root-cause-repair/1.0.0/instructions/reproduce.md",
+          "sha256": "16f21b92f6eae9ad690c854871b58e8e7d5b82d68a4e3dddba9a78b713c42eb3"
+        },
+        {
+          "bytes": 2578,
+          "kind": "text",
+          "path": "packages/root-cause-repair/1.0.0/instructions/revise-repair.md",
+          "sha256": "8c79aa849016f1be25f87f17de79bc096c3e7d13a247b9cb290e3b3fab34cfa3"
+        },
+        {
+          "bytes": 1341,
+          "kind": "text",
+          "path": "packages/root-cause-repair/1.0.0/instructions/verify.md",
+          "sha256": "5ac0950a0b57821ac5a85af34deb1121d856bdcb2c78a58ae88b8cae03782ed0"
+        },
+        {
+          "bytes": 2689,
+          "kind": "text",
+          "path": "packages/root-cause-repair/1.0.0/manifest.yml",
+          "sha256": "ce1eaaceb59d9538c42b349ffd2d9de3f17ef15ebf9b8ac22ad1e043b3c4d9df"
+        },
+        {
+          "bytes": 20220,
+          "kind": "text",
+          "path": "packages/root-cause-repair/1.0.0/tools/repository-state.rb",
+          "sha256": "99539859ff74d4e235bf8ea7e02b4f98f47a22a2f3da37927c01643c15d8fb0b"
+        },
+        {
+          "bytes": 1758,
+          "kind": "text",
+          "path": "packages/root-cause-repair/1.0.0/workflow.yml",
+          "sha256": "eb8ce59d08ac8cb301e3de9c3d633ed4d2547888b7c2d810fb12548ef2af6859"
+        }
+      ],
+      "suppressions": [],
+      "validator_findings": [
+        {
+          "code": "hive.compatible",
+          "message": "descriptor parsed with Hive 0.6.0",
+          "path": "packages/root-cause-repair/1.0.0/workflow.yml",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/root-cause-repair/1.0.0/workflow.yml.stages[1] contributes yolo permissions",
+          "path": "packages/root-cause-repair/1.0.0/workflow.yml.stages[1].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/root-cause-repair/1.0.0/workflow.yml.stages[1] requests unbounded access",
+          "path": "packages/root-cause-repair/1.0.0/workflow.yml.stages[1].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/root-cause-repair/1.0.0/workflow.yml.stages[2] contributes yolo permissions",
+          "path": "packages/root-cause-repair/1.0.0/workflow.yml.stages[2].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/root-cause-repair/1.0.0/workflow.yml.stages[2] requests unbounded access",
+          "path": "packages/root-cause-repair/1.0.0/workflow.yml.stages[2].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/root-cause-repair/1.0.0/workflow.yml.stages[3] contributes yolo permissions",
+          "path": "packages/root-cause-repair/1.0.0/workflow.yml.stages[3].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/root-cause-repair/1.0.0/workflow.yml.stages[3] requests unbounded access",
+          "path": "packages/root-cause-repair/1.0.0/workflow.yml.stages[3].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/root-cause-repair/1.0.0/workflow.yml.stages[4].council.revise contributes yolo permissions",
+          "path": "packages/root-cause-repair/1.0.0/workflow.yml.stages[4].council.revise.permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/root-cause-repair/1.0.0/workflow.yml.stages[4].council.revise requests unbounded access",
+          "path": "packages/root-cause-repair/1.0.0/workflow.yml.stages[4].council.revise.permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/root-cause-repair/1.0.0/workflow.yml.stages[4] contributes yolo permissions",
+          "path": "packages/root-cause-repair/1.0.0/workflow.yml.stages[4].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/root-cause-repair/1.0.0/workflow.yml.stages[4] requests unbounded access",
+          "path": "packages/root-cause-repair/1.0.0/workflow.yml.stages[4].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/root-cause-repair/1.0.0/workflow.yml.stages[4].reviewers[0] contributes yolo permissions",
+          "path": "packages/root-cause-repair/1.0.0/workflow.yml.stages[4].reviewers[0].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/root-cause-repair/1.0.0/workflow.yml.stages[4].reviewers[0] requests unbounded access",
+          "path": "packages/root-cause-repair/1.0.0/workflow.yml.stages[4].reviewers[0].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/root-cause-repair/1.0.0/workflow.yml.stages[5] contributes yolo permissions",
+          "path": "packages/root-cause-repair/1.0.0/workflow.yml.stages[5].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/root-cause-repair/1.0.0/workflow.yml.stages[5] requests unbounded access",
+          "path": "packages/root-cause-repair/1.0.0/workflow.yml.stages[5].permissions",
+          "severity": "warning"
+        }
+      ],
+      "verdict": "pass"
+    }
+  ],
+  "pull_request": 27,
+  "run": {
+    "attempt": 1,
+    "id": 29768824183,
+    "repository": "ivankuznetsov/honeycomb",
+    "workflow": "Security lint"
+  },
+  "schema": "honeycomb.security-lint/v1",
+  "state": "pass",
+  "totals": {
+    "advisory": 30,
+    "downgraded": 0,
+    "hard": 0
+  },
+  "verdict": "Security lint passed"
+}
