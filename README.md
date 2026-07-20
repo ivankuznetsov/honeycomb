@@ -35,6 +35,50 @@ the released Hive 0.6.0 runtime; until each package has protected lint evidence
 plus the required independent approvals, it is not discoverable or publicly
 installable from `honeycomb/<name>`.
 
+## Local managed-repair candidates
+
+`packages/root-cause-repair/1.0.0` is an unpublished, unlisted local source
+candidate. It has no canonical `manifest.yml`, protected listing evidence,
+catalog entry, or public install path. The checked-in source is for local
+contract and exact-pinned Hive acceptance testing only.
+
+This is a full Git-only repair workflow, not a read-only report. Every
+executable stage is high-risk and may run arbitrary local commands and leave
+intended repository mutations uncommitted. Hive asks for install-time agent
+mappings for reproduction, diagnosis, repair, council verification, causal
+review, revision, and certification; mapping every slot to one supported agent
+does not change the workflow semantics. Terminal certificates use exactly
+`verified`, `not-reproduced`, or `blocked`.
+
+The repository owner remains the sole authority for commits, pushes, pull
+requests, merges, tags, releases, publication, catalog listing, deployment, and
+any later removal of a Hive-shipped workflow. A future release tail requires an
+explicit owner request: preserve the behavior source commit, generate and
+review the canonical manifest in a later commit, obtain protected lint and
+approval evidence, update the catalog and site, and record public-install and
+live-run acceptance. Local green tests do not authorize any of those steps.
+
+`packages/reviewer-panel/1.0.0` is likewise an unpublished, unlisted local
+source candidate with no canonical manifest, protected evidence, catalog entry,
+or public install. Its four fixed semantic lenses are correctness, security,
+reliability, and test-evidence. Those meanings belong to the workflow; the
+compatible agents or execution profiles chosen during Hive installation do not.
+The exact pinned-runtime acceptance maps every slot to one compatible profile,
+which demonstrates that the package does not intrinsically require multiple
+providers or a particular provider.
+
+Reviewer Panel is Git-only and high-risk. Its basis, test-evidence, repair, and
+readiness actors may run arbitrary local commands, and accepted repairs remain
+as uncommitted target mutations. `ready`, `changes-requested`, `inconclusive`,
+and `state-stale` are state-bound analytical outcomes. They are not human
+collaboration, merge approval, trust endorsement, listing approval, release
+authorization, publication, or deployment decisions.
+
+The sole owner may later use the protected repository-owner publication lane,
+but agent output never satisfies that authority. An explicit owner request is
+still required before the source/manifest commits, protected evidence, catalog,
+site, public-install, live-run, or Hive-template-removal release tail begins.
+
 ```sh
 ruby script/honeycomb-manifest --check --all
 ruby script/honeycomb-validate --all --json

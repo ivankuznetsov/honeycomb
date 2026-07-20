@@ -1,0 +1,90 @@
+id: reviewer-panel
+stages:
+  - name: inbox
+    kind: terminal
+    state_file: brief.md
+  - name: basis
+    kind: agent
+    state_file: review-basis.md
+    instruction: instructions/basis.md
+    mapping_role: development
+    mapping_contract: reviewer-panel-basis-v1
+    permissions: yolo
+  - name: panel
+    kind: council
+    state_file: panel.md
+    input: review-basis.md
+    mapping_role: reviewer
+    mapping_contract: reviewer-panel-council-v1
+    permissions: read-only
+    council:
+      quorum: 4
+      max_rounds: 4
+      exit_rule: consensus
+      on_max_rounds: complete
+      triage_output: reviews/triage.md
+      revise:
+        instruction: instructions/repair.md
+        mapping_role: development
+        mapping_contract: reviewer-panel-repair-v1
+        permissions: yolo
+    reviewers:
+      - name: correctness
+        instruction: instructions/review-correctness.md
+        output_basename: correctness
+        mapping_role: reviewer
+        mapping_contract: reviewer-panel-correctness-v1
+        permissions:
+          preset: scoped
+          tools:
+            - Read
+            - LS
+            - Grep
+            - Glob
+            - Edit(./reviews/correctness-*.md)
+          dirs:
+            - ../../../..
+      - name: security
+        instruction: instructions/review-security.md
+        output_basename: security
+        mapping_role: reviewer
+        mapping_contract: reviewer-panel-security-v1
+        permissions:
+          preset: scoped
+          tools:
+            - Read
+            - LS
+            - Grep
+            - Glob
+            - Edit(./reviews/security-*.md)
+          dirs:
+            - ../../../..
+      - name: reliability
+        instruction: instructions/review-reliability.md
+        output_basename: reliability
+        mapping_role: reviewer
+        mapping_contract: reviewer-panel-reliability-v1
+        permissions:
+          preset: scoped
+          tools:
+            - Read
+            - LS
+            - Grep
+            - Glob
+            - Edit(./reviews/reliability-*.md)
+          dirs:
+            - ../../../..
+      - name: test-evidence
+        instruction: instructions/review-test-evidence.md
+        output_basename: test-evidence
+        mapping_role: reviewer
+        mapping_contract: reviewer-panel-test-evidence-v1
+        permissions: yolo
+  - name: readiness
+    kind: agent
+    state_file: merge-readiness.md
+    deliverable: merge-readiness.md
+    instruction: instructions/readiness.md
+    mapping_role: reviewer
+    mapping_contract: reviewer-panel-readiness-v1
+    permissions: yolo
