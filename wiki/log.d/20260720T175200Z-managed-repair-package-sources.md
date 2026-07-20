@@ -6,3 +6,5 @@
   mapping, state-checkpoint, and analytical-outcome boundaries.
 - Kept package presence distinct from protected listing evidence, catalog
   projection, site deployment, public installation, and live-run acceptance.
+- Generated canonical manifests in the required second commit and added direct
+  source-revision byte checks for both registry-original package trees.

@@ -164,7 +164,7 @@ diagnose, repair, verification council, causal verifier, reviser, and
 certificate. The descriptor contains no agent, model, or effort identity, and
 mapping all slots to one supported agent leaves the workflow semantics intact.
 All actors are deliberately `yolo`; they may run arbitrary local commands and
-mutate the target worktree. This makes the candidate high risk even though its
+mutate the target worktree. This makes the package high risk even though its
 instructions require the intended repair to remain uncommitted and target refs
 to remain unchanged.
 
@@ -180,9 +180,9 @@ Bounds or unsupported repository entries fail closed.
 
 The repository owner is the sole authority for committing, pushing, opening or
 merging pull requests, tagging, releasing, publishing, listing, deploying, or
-removing a Hive-shipped template. The candidate has no public execution path
-until the owner explicitly starts the manifest, protected evidence, catalog,
-site, and public-acceptance release tail.
+removing a Hive-shipped template. The source and manifest commits are complete;
+public execution still requires protected evidence, catalog and site
+publication, and public-install acceptance.
 
 ## Reviewer Panel identity and authority boundary
 
@@ -207,6 +207,7 @@ state; `changes-requested` means a blocker remains; `inconclusive` means require
 evidence is unavailable; and `state-stale` means the reviewed state changed.
 All are analytical evidence for the sole owner, not human collaboration, merge
 approval, trust endorsement, listing approval, release authorization,
-publication, or deployment. The owner may later use the protected
-repository-owner publication lane, but agent output never satisfies it and no
-release-tail action is currently authorized.
+publication, or deployment. The owner may use the protected repository-owner
+publication lane, but agent output never satisfies it; protected evidence,
+catalog/site publication, public acceptance, deployment, and template removal
+remain separate actions.

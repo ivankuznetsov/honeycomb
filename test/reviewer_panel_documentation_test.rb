@@ -45,6 +45,8 @@ class ReviewerPanelDocumentationTest < Minitest::Test
     assert_match(/canonical manifest/i, corpus)
     assert_match(/package presence alone.*public install|public install.*package presence/im, corpus)
     assert_match(/template removal|template-removal/i, corpus)
+    refute_match(/Reviewer Panel has the same deferred two-commit/im, corpus)
+    refute_match(/manifest generation.*remain absent/im, corpus)
   end
 
   def test_fragment_exists_without_displacing_root_cause_or_compiled_log

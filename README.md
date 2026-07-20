@@ -38,10 +38,10 @@ installable from `honeycomb/<name>`.
 ## Managed repair packages
 
 `packages/root-cause-repair/1.0.0` is the immutable Root Cause Repair package.
-Its canonical manifest binds the behavior source and its exact-pinned Hive
-acceptance evidence. Package presence alone is not catalog listing: protected
-listing evidence and the generated catalog remain the authority for discovery
-and public installation.
+Its canonical manifest binds the behavior bytes to the preserved source commit;
+exact-pinned Hive acceptance is separate local evidence. Package presence alone
+is not catalog listing: protected listing evidence and the generated catalog
+remain the authority for discovery and public installation.
 
 This is a full Git-only repair workflow, not a read-only report. Every
 executable stage is high-risk and may run arbitrary local commands and leave

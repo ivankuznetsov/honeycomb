@@ -114,12 +114,11 @@ behavior tests pass.
 `hivecli.sh/honeycombs` remains a documented external static rendering surface;
 no route, handler, or site code is implemented here.
 
-No local command may convert the Root Cause Repair source candidate into a
-release implicitly. Manifest generation, source/manifest commits, protected
-lint and approval evidence, catalog mutation, static-site publication, public
-install acceptance, and live workflow evidence are a later explicit
-owner-authorized release tail. The owner also separately decides whether and
-when a corresponding Hive-shipped workflow can be removed.
+Root Cause Repair's owner-authorized source and manifest commits are complete.
+No local command can implicitly issue protected lint or approval evidence,
+mutate the catalog, publish the static site, certify a public install or live
+workflow run, or remove a corresponding Hive-shipped workflow. Those remain
+separately recorded owner-controlled gates.
 
 Candidate sources live outside `packages/`, so package-wide validation and
 catalog commands do not silently treat a manifest-free candidate as a release
@@ -127,11 +126,11 @@ submission. Promotion into the canonical package tree is an explicit reviewed
 change, not an effect of testing or opening a source-candidate pull request.
 
 Reviewer Panel follows the same explicit release boundary. Its source and
-disposable-registry tests cannot trigger manifest generation, protected
-evidence, catalog/site mutation, public-install acceptance, or deployment. One
-sole owner can later choose the protected repository-owner publication lane,
-but agent output never qualifies as that decision and Hive template removal is
-a separate owner-controlled gate.
+manifest commits are complete, while disposable-registry tests cannot issue
+protected evidence, mutate the catalog/site, certify public-install acceptance,
+deploy, or remove a Hive template. The sole owner may use the protected
+repository-owner publication lane, but agent output never qualifies as that
+decision.
 
 `.github/workflows/catalog-check.yml` is the read-only publication gate. It
 compares the committed catalog with

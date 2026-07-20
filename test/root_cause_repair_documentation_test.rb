@@ -38,6 +38,7 @@ class RootCauseRepairDocumentationTest < Minitest::Test
     assert_match(/explicit owner|owner-authorized/i, corpus)
     assert_match(/public-install|public install/i, corpus)
     assert_match(/template removal|template-removal/i, corpus)
+    refute_match(/Root Cause Repair source candidate|candidate has no public execution path/i, corpus)
   end
 
   def test_candidate_has_a_fragment_but_compiled_log_remains_separate
