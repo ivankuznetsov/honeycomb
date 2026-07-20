@@ -182,7 +182,12 @@ class RepositoryStateToolTest < Minitest::Test
 
       git(repository, "config", "core.fsmonitor", "true")
       git(repository, "update-index", "--fsmonitor-valid", "tracked.txt")
-      assert_error(task_directory, "index_flags_unsupported")
+      # Git 2.43 accepts --fsmonitor-valid but leaves the bit unset when the
+      # configured fsmonitor is unavailable. Newer Git versions set it and
+      # expose a lowercase tag, which the tool must reject.
+      unless index_flag(repository, "tracked.txt") == "H"
+        assert_error(task_directory, "index_flags_unsupported")
+      end
       git(repository, "update-index", "--no-fsmonitor-valid", "tracked.txt")
       git(repository, "config", "--unset", "core.fsmonitor")
       fingerprint(task_directory)
@@ -453,6 +458,13 @@ class RepositoryStateToolTest < Minitest::Test
 
   def git_with_file_protocol(repository, *arguments)
     git(repository, "-c", "protocol.file.allow=always", *arguments)
+  end
+
+  def index_flag(repository, path)
+    entry = git(repository, "ls-files", "-v", "-f", "-z").split("\0").find do |candidate|
+      candidate.byteslice(2..) == path
+    end
+    entry&.byteslice(0, 1)
   end
 
   def filesystem_snapshot(root)
