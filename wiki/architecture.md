@@ -150,7 +150,8 @@ installs it from the official registry with immutable catalog/digest task pins
 and task-local read-only runtime policy. Evidence branch/environment protection
 remains live; static-site publication, public flagship acceptance, emergency
 lifecycle transitions, and positive community-review identity cases remain
-rollout operations.
+rollout operations. Managed-repair site publication and clean public
+install/task-creation acceptance are complete.
 
 The flagship packages target that released runtime: their per-slot agent
 mapping, configuration digest, exact actor policy, optional input, prompt-asset,
@@ -182,8 +183,9 @@ Bounds or unsupported repository entries fail closed.
 The repository owner is the sole authority for committing, pushing, opening or
 merging pull requests, tagging, releasing, publishing, listing, deploying, or
 removing a Hive-shipped template. The source/manifest commits, protected
-repository-owner evidence, and catalog projection are complete; public
-execution still requires site publication and clean public-install acceptance.
+repository-owner evidence, catalog projection, production site publication,
+and clean public install/task-creation acceptance are complete. Provider-backed
+live-run evidence and any Hive-template removal remain separate gates.
 
 ## Reviewer Panel identity and authority boundary
 
@@ -210,5 +212,6 @@ All are analytical evidence for the sole owner, not human collaboration, merge
 approval, trust endorsement, listing approval, release authorization,
 publication, or deployment. The owner used the protected repository-owner lane
 for this exact release; agent output did not satisfy it. Site publication,
-public acceptance, deployment verification, and template removal remain
+public install/task-creation acceptance, and deployment verification are
+complete. Provider-backed live-run evidence and template removal remain
 separate actions after protected evidence and catalog projection.

@@ -53,7 +53,9 @@ install-time agent mappings and can run arbitrary local commands that leave
 repository repairs uncommitted; its terminal outcomes are `verified`,
 `not-reproduced`, and `blocked`. Protected repository-owner evidence now
 projects this release into `catalog.json`; site sync and public-install
-acceptance remain rollout gates. See
+acceptance against released Hive are complete, including managed task creation.
+Provider-backed live-run evidence and any Hive-template removal remain separate
+rollout gates. See
 [[architecture]], [[command-api-surface]], [[package-catalog-contract]], and
 [[gaps]] for the runtime, publication, evidence, and uncertainty boundaries.
 
@@ -66,7 +68,9 @@ the compatible execution profiles mapped at install time. Its `ready`,
 evidence for the sole owner, never human collaboration or merge, trust,
 listing, release, publication, or deployment authority. Protected
 repository-owner evidence now projects this release into `catalog.json`; site
-sync and public-install acceptance remain rollout gates.
+sync and public-install acceptance against released Hive are complete,
+including managed task creation. Provider-backed live-run evidence and any
+Hive-template removal remain separate rollout gates.
 
 ## Update Protocol
 

@@ -158,5 +158,7 @@ Reviewer Panel's source and manifest commits complete the two-commit package
 provenance. The sole owner used the protected repository-owner publication lane
 for both managed-repair releases; no agent verdict or local test supplied that
 authority. Exact-head lint/approval evidence and generated catalog projection
-are complete. Site publication, public-install and live-run acceptance,
-deployment verification, and any Hive template removal remain separate gates.
+are complete. Production site publication, clean public install/task-creation
+acceptance against released Hive, and deployment verification are also
+complete. Provider-backed live-run evidence and any Hive template removal
+remain separate gates.
