@@ -41,8 +41,11 @@ installable from `honeycomb/<name>`.
 Its canonical manifest binds the behavior bytes to the preserved source commit;
 exact-pinned Hive acceptance is separate local evidence. Protected
 repository-owner evidence for the exact listing head now projects the package
-into `catalog.json`; public site sync and clean remote-install acceptance remain
-separate rollout gates. Package presence alone never proves public installation.
+into `catalog.json`. The production site now consumes that catalog, and a clean
+released-Hive install plus managed task creation has passed against the public
+registry. Package presence alone never proves public installation; this
+acceptance is recorded separately. Provider-backed live-run evidence remains a
+separate rollout gate.
 
 This is a full Git-only repair workflow, not a read-only report. Every
 executable stage is high-risk and may run arbitrary local commands and leave
@@ -67,8 +70,9 @@ execution profiles chosen during Hive installation do not. Exact pinned-runtime
 acceptance maps every slot to one compatible profile, demonstrating that the
 package does not intrinsically require multiple providers or a particular
 provider. Protected repository-owner evidence for the exact listing head now
-projects the package into `catalog.json`; public site sync and clean
-remote-install acceptance remain separate rollout gates.
+projects the package into `catalog.json`. The production site and clean public
+released-Hive install/task-creation acceptance are complete; provider-backed
+live-run evidence remains a separate rollout gate.
 
 Reviewer Panel is Git-only and high-risk. Its basis, test-evidence, repair, and
 readiness actors may run arbitrary local commands, and accepted repairs remain
@@ -79,9 +83,9 @@ authorization, publication, or deployment decisions.
 
 The sole owner used the protected repository-owner publication lane for these
 exact releases; agent output did not satisfy that authority. Source/manifest
-commits, protected evidence, and catalog projection are complete. Site sync,
-public-install acceptance, live-run evidence, and any Hive-template removal
-remain separately auditable steps.
+commits, protected evidence, catalog projection, production site sync, and clean
+public install/task-creation acceptance are complete. Provider-backed live-run
+evidence and any Hive-template removal remain separately auditable steps.
 
 ```sh
 ruby script/honeycomb-manifest --check --all

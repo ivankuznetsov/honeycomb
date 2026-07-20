@@ -117,7 +117,9 @@ no route, handler, or site code is implemented here.
 Root Cause Repair's owner-authorized source and manifest commits are complete.
 No local command can implicitly issue protected lint or approval evidence,
 mutate the catalog, publish the static site, certify a public install or live
-workflow run, or remove a corresponding Hive-shipped workflow. Those remain
+workflow run, or remove a corresponding Hive-shipped workflow. The catalog,
+site, deployment, and clean public install/task-creation gates are now recorded
+as complete; provider-backed live execution and template removal remain
 separately recorded owner-controlled gates.
 
 Candidate sources live outside `packages/`, so package-wide validation and
@@ -130,7 +132,9 @@ manifest commits are complete, while disposable-registry tests cannot issue
 protected evidence, mutate the catalog/site, certify public-install acceptance,
 deploy, or remove a Hive template. The sole owner may use the protected
 repository-owner publication lane, but agent output never qualifies as that
-decision.
+decision. Protected evidence, catalog/site publication, production deployment,
+and clean public install/task-creation acceptance are now complete;
+provider-backed live execution and template removal are not.
 
 `.github/workflows/catalog-check.yml` is the read-only publication gate. It
 compares the committed catalog with
