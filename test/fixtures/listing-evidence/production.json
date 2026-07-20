@@ -34,6 +34,64 @@
       "approvals": [
         {
           "authority": "repository_owner",
+          "evidence_digest": "60129d410603a81a7053c709d44d72011cf583a5998633c4d117c0d175184c71",
+          "head_sha": "84d80c350d47af0d6afc862e277818419cd41cd1",
+          "release_sha256": "8a4c95c9c0163ca7b9a313c5a13ff4347bf2a165b604337ad7556a64ee46f12a",
+          "review_url": "https://github.com/ivankuznetsov/honeycomb/actions/runs/29768926728",
+          "reviewed_at": "2026-07-20T18:42:52Z",
+          "reviewer": "ivankuznetsov",
+          "status": "approved"
+        }
+      ],
+      "current_tier": "community",
+      "history": [],
+      "lint": {
+        "checked_at": "2026-07-20T18:47:03Z",
+        "head_sha": "84d80c350d47af0d6afc862e277818419cd41cd1",
+        "release_sha256": "8a4c95c9c0163ca7b9a313c5a13ff4347bf2a165b604337ad7556a64ee46f12a",
+        "status": "pass"
+      },
+      "name": "reviewer-panel",
+      "permission_risk": "high",
+      "release_tier": "community",
+      "state": "listed",
+      "verification": null,
+      "version": "1.0.0"
+    },
+    {
+      "advisories": [],
+      "approvals": [
+        {
+          "authority": "repository_owner",
+          "evidence_digest": "60129d410603a81a7053c709d44d72011cf583a5998633c4d117c0d175184c71",
+          "head_sha": "84d80c350d47af0d6afc862e277818419cd41cd1",
+          "release_sha256": "f2f3fcf68a396964718533d3e2f1480acd59ad9e4f460a2f3c170d8e2e25c7f3",
+          "review_url": "https://github.com/ivankuznetsov/honeycomb/actions/runs/29768941496",
+          "reviewed_at": "2026-07-20T18:43:04Z",
+          "reviewer": "ivankuznetsov",
+          "status": "approved"
+        }
+      ],
+      "current_tier": "community",
+      "history": [],
+      "lint": {
+        "checked_at": "2026-07-20T18:47:03Z",
+        "head_sha": "84d80c350d47af0d6afc862e277818419cd41cd1",
+        "release_sha256": "f2f3fcf68a396964718533d3e2f1480acd59ad9e4f460a2f3c170d8e2e25c7f3",
+        "status": "pass"
+      },
+      "name": "root-cause-repair",
+      "permission_risk": "high",
+      "release_tier": "community",
+      "state": "listed",
+      "verification": null,
+      "version": "1.0.0"
+    },
+    {
+      "advisories": [],
+      "approvals": [
+        {
+          "authority": "repository_owner",
           "evidence_digest": "9978251dbe8cd2649dc7cb3a1eeacfd05dbaa9bf43f373f4fcdeab29e866bed2",
           "head_sha": "ee1e681f9e82ce691923141444f0491120ad5f61",
           "release_sha256": "30226a0694e62f54177dc514c55bb8965098a0adae83439efa8045345ca7ce76",
