@@ -32,6 +32,7 @@ class CatalogPublicationWorkflowTest < Minitest::Test
     assert_equal "honeycomb-evidence", evidence_checkout.dig("with", "ref")
     assert_equal false, evidence_checkout.dig("with", "persist-credentials")
     assert_equal "ruby test/run.rb", source_contracts.fetch("run")
+    assert_equal "${{ github.workspace }}/hive", source_contracts.dig("env", "HONEYCOMB_HIVE_SOURCE")
     assert_equal "${{ github.workspace }}/hive/lib", source_contracts.dig("env", "RUBYLIB")
     assert_includes catalog_check.fetch("run"), "ruby script/honeycomb-catalog --check"
     assert_includes catalog_check.fetch("run"), "normalized/listing-evidence-v1.json"

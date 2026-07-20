@@ -1,0 +1,1 @@
+abort "PANEL_REQUIRED_SERVICE is unavailable" unless ENV["PANEL_REQUIRED_SERVICE"]

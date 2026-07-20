@@ -39,8 +39,9 @@ The read-only catalog publication gate checks out Hive at the exact compatible
 commit recorded in the workflow. The current pin is
 `edaa7131493446f8bb40092fe7801afbaf2f2c04`, the merged Hive v0.6.0 release
 source containing the full managed-workflow runtime contract and production
-catalog-v2 client. The gate exposes that checkout through `RUBYLIB` and runs
-the complete registry test suite. Only then does it compare root
+catalog-v2 client. The gate identifies that exact clean checkout through
+`HONEYCOMB_HIVE_SOURCE`, exposes its libraries through `RUBYLIB`, and runs the
+complete registry test suite. Only then does it compare root
 `catalog.json` with the normalized snapshot from the protected
 `honeycomb-evidence` branch. It receives no secret or write permission and does
 not publish any checkout.

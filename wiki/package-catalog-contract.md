@@ -119,10 +119,44 @@ depth, and requires no security-lint suppression requests.
   checks in CI.
 - Task 1850: shipped the canonical public contribution, security, trust, and
   community-review policies plus their documentation contract tests.
-- Flagship packages: behavior sources may land before their generated manifests
-  and evidence, but only protected evidence can add them to the populated
-  catalog.
+- Candidate sources: manifest-free work remains under `candidates/`, outside
+  the canonical package scanner. Promotion into `packages/` must satisfy the
+  complete contribution contract and still requires protected evidence before
+  catalog inclusion.
+- Root Cause Repair: `candidates/root-cause-repair/1.0.0` is an unpublished,
+  unlisted local source candidate and intentionally has no canonical manifest.
+  Its source tree and disposable-registry tests are behavioral evidence only;
+  they confer no listing, public-install, release, or deployment status. It is a
+  Git-only high-risk workflow whose install-time mappings cover every
+  executable actor and whose arbitrary local command execution may leave
+  intended target mutations uncommitted. `verified`, `not-reproduced`, and
+  `blocked` are semantic terminal outcomes, not catalog trust or publication
+  states.
+- Reviewer Panel: `candidates/reviewer-panel/1.0.0` is also an unpublished,
+  unlisted local source candidate with no canonical manifest, protected
+  evidence, catalog entry, or public install. Correctness, security,
+  reliability, and test-evidence are fixed semantic lenses; install-time
+  execution mappings are separate configuration and do not establish provider
+  or human independence. Git-only high-risk actors may run arbitrary local
+  commands and leave attributed repairs uncommitted. `ready`,
+  `changes-requested`, `inconclusive`, and `state-stale` are analytical states,
+  not merge approval, trust endorsement, listing approval, or release status.
 - Static site: consume catalog entries as generated; do not reinterpret package
   manifests independently.
 - Hive: consumes the documented install/latest semantics and owns per-slot
   execution mappings plus immutable task configuration pins.
+
+For Root Cause Repair, later publication remains the ordinary two-commit and
+protected-evidence flow: an explicit owner-approved behavior source commit,
+canonical manifest generation in a later commit, security lint, required
+approval, catalog projection, site publication, public-install acceptance, and
+live-run evidence. The repository owner is the sole authority for each remote
+or release action and for any later Hive template removal; local passing tests
+do not advance that state.
+
+Reviewer Panel has the same deferred two-commit and protected-evidence release
+tail. The sole owner may later use the protected repository-owner publication
+lane, but no agent verdict or local test supplies that authority. Manifest
+generation, lint/approval evidence, catalog/site publication, public-install and
+live-run acceptance, deployment, and any Hive template removal remain absent
+until separately authorized.

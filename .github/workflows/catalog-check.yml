@@ -43,6 +43,7 @@ jobs:
       - name: Verify source contracts
         working-directory: source
         env:
+          HONEYCOMB_HIVE_SOURCE: ${{ github.workspace }}/hive
           RUBYLIB: ${{ github.workspace }}/hive/lib
         run: ruby test/run.rb
 
