@@ -55,7 +55,7 @@ catalog renderer.
   runtime context, optional-input isolation, package tools, and real Agent and
   Council engines with deterministic test agents. It does not claim an
   authenticated provider-backed run.
-- `packages/root-cause-repair/1.0.0` is an unpublished and unlisted local source
+- `candidates/root-cause-repair/1.0.0` is an unpublished and unlisted local source
   candidate with no canonical manifest. Its Git-only workflow captures a
   content-blind repository-state fingerprint, reproduces a symptom, diagnoses
   its cause, leaves a repair uncommitted, runs causal Council review and
@@ -64,7 +64,7 @@ catalog renderer.
   disposable canonical registry and exercises released Hive at the exact clean
   pinned source revision; this is local behavioral evidence, not a public
   installation or provider-backed production run.
-- `packages/reviewer-panel/1.0.0` is another unpublished, unlisted local source
+- `candidates/reviewer-panel/1.0.0` is another unpublished, unlisted local source
   candidate without a canonical manifest. It binds correctness, security,
   reliability, and test-evidence reviews to one Git state, permits at most three
   repair executions across four panel passes, re-runs all four lenses after a
@@ -77,6 +77,10 @@ catalog renderer.
   root `CONTRIBUTING.md`/`SECURITY.md` and `docs/TRUST.md`/`REVIEWS.md` are the
   canonical public policy; `wiki/` records agent-facing architecture and
   cross-task boundaries.
+- `candidates/` is outside the canonical package tree. Its manifest-free source
+  candidates are testable but cannot enter validation, catalog generation, or
+  publication until an explicit owner-authorized change promotes them into
+  `packages/` under the complete contribution contract.
 
 ## Intended Product Shape
 

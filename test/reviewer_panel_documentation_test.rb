@@ -15,7 +15,7 @@ class ReviewerPanelDocumentationTest < Minitest::Test
   def test_readme_separates_lenses_execution_identity_and_authority
     readme = File.read(File.join(ROOT, "README.md"))
 
-    assert_includes readme, "packages/reviewer-panel/1.0.0"
+    assert_includes readme, "candidates/reviewer-panel/1.0.0"
     %w[correctness security reliability test-evidence].each { |lens| assert_includes readme, lens }
     %w[unpublished unlisted Git-only high-risk uncommitted analytical].each do |term|
       assert_includes readme.downcase, term.downcase, term
@@ -51,7 +51,7 @@ class ReviewerPanelDocumentationTest < Minitest::Test
     fragment = File.join(ROOT, "wiki", "log.d", LOG_FRAGMENT)
     assert File.file?(fragment)
     assert_includes File.read(fragment), "unpublished, unlisted local source"
-    assert_includes File.read(File.join(ROOT, "README.md")), "packages/root-cause-repair/1.0.0"
+    assert_includes File.read(File.join(ROOT, "README.md")), "candidates/root-cause-repair/1.0.0"
     assert_includes File.read(File.join(ROOT, "wiki", "index.md")), "Root Cause Repair"
     assert File.file?(File.join(ROOT, "wiki", "log.md"))
   end

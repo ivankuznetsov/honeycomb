@@ -6,7 +6,7 @@ require "honeycomb_security_lint"
 require "psych"
 
 class RootCauseRepairPackageTest < Minitest::Test
-  PACKAGE_ROOT = File.join(ROOT, "packages", "root-cause-repair", "1.0.0")
+  PACKAGE_ROOT = File.join(ROOT, "candidates", "root-cause-repair", "1.0.0")
   IDENTITY_KEYS = %w[agent model effort].freeze
   PROHIBITED_OPERATIONS = %w[
     reset clean stash revert commit push PR merge tag release publish deploy

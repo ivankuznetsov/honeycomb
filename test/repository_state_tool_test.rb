@@ -7,7 +7,7 @@ require "timeout"
 
 class RepositoryStateToolTest < Minitest::Test
   TOOLS = %w[root-cause-repair reviewer-panel].to_h do |name|
-    [name, File.join(ROOT, "packages", name, "1.0.0", "tools", "repository-state.rb")]
+    [name, File.join(ROOT, "candidates", name, "1.0.0", "tools", "repository-state.rb")]
   end.freeze
 
   def test_tools_are_byte_identical_executable_and_repeatable_without_mutation_or_disclosure

@@ -15,3 +15,5 @@
 - Bound executable reviewer instructions to one source of truth, made terminal
   inconclusive handling a real no-op, and hardened the shared state primitive
   without expanding it into remote-operation attestation.
+- Kept the manifest-free source under `candidates/`, outside package validation
+  and catalog discovery until a separately authorized publication change.

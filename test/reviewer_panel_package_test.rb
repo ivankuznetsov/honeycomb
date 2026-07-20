@@ -6,7 +6,7 @@ require "honeycomb_security_lint"
 require "psych"
 
 class ReviewerPanelPackageTest < Minitest::Test
-  PACKAGE_ROOT = File.join(ROOT, "packages", "reviewer-panel", "1.0.0")
+  PACKAGE_ROOT = File.join(ROOT, "candidates", "reviewer-panel", "1.0.0")
   IDENTITY_KEYS = %w[agent model effort].freeze
   REVIEWERS = %w[correctness security reliability test-evidence].freeze
   SEMANTIC_SLOTS = %w[

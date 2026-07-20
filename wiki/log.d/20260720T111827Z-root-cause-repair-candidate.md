@@ -14,3 +14,5 @@
 - Hardened the shared local-state primitive with full double capture, hidden
   index-flag rejection, bounded ignored-path traversal and file growth, and Git
   deadlines; documented that this is not remote-operation attestation.
+- Kept the manifest-free source under `candidates/` so committing its tests does
+  not turn it into a canonical package submission or bypass contribution rules.

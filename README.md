@@ -37,7 +37,7 @@ installable from `honeycomb/<name>`.
 
 ## Local managed-repair candidates
 
-`packages/root-cause-repair/1.0.0` is an unpublished, unlisted local source
+`candidates/root-cause-repair/1.0.0` is an unpublished, unlisted local source
 candidate. It has no canonical `manifest.yml`, protected listing evidence,
 catalog entry, or public install path. The checked-in source is for local
 contract and exact-pinned Hive acceptance testing only.
@@ -58,7 +58,7 @@ review the canonical manifest in a later commit, obtain protected lint and
 approval evidence, update the catalog and site, and record public-install and
 live-run acceptance. Local green tests do not authorize any of those steps.
 
-`packages/reviewer-panel/1.0.0` is likewise an unpublished, unlisted local
+`candidates/reviewer-panel/1.0.0` is likewise an unpublished, unlisted local
 source candidate with no canonical manifest, protected evidence, catalog entry,
 or public install. Its four fixed semantic lenses are correctness, security,
 reliability, and test-evidence. Those meanings belong to the workflow; the

@@ -123,6 +123,11 @@ install acceptance, and live workflow evidence are a later explicit
 owner-authorized release tail. The owner also separately decides whether and
 when a corresponding Hive-shipped workflow can be removed.
 
+Candidate sources live outside `packages/`, so package-wide validation and
+catalog commands do not silently treat a manifest-free candidate as a release
+submission. Promotion into the canonical package tree is an explicit reviewed
+change, not an effect of testing or opening a source-candidate pull request.
+
 Reviewer Panel follows the same explicit release boundary. Its source and
 disposable-registry tests cannot trigger manifest generation, protected
 evidence, catalog/site mutation, public-install acceptance, or deployment. One

@@ -15,7 +15,7 @@ class RootCauseRepairDocumentationTest < Minitest::Test
   def test_root_readme_discloses_candidate_risk_and_publication_boundary
     readme = File.read(File.join(ROOT, "README.md"))
 
-    assert_includes readme, "packages/root-cause-repair/1.0.0"
+    assert_includes readme, "candidates/root-cause-repair/1.0.0"
     %w[unpublished unlisted Git-only high-risk uncommitted].each do |term|
       assert_includes readme.downcase, term.downcase, term
     end

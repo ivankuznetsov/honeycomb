@@ -119,10 +119,11 @@ depth, and requires no security-lint suppression requests.
   checks in CI.
 - Task 1850: shipped the canonical public contribution, security, trust, and
   community-review policies plus their documentation contract tests.
-- Flagship packages: behavior sources may land before their generated manifests
-  and evidence, but only protected evidence can add them to the populated
-  catalog.
-- Root Cause Repair: `packages/root-cause-repair/1.0.0` is an unpublished,
+- Candidate sources: manifest-free work remains under `candidates/`, outside
+  the canonical package scanner. Promotion into `packages/` must satisfy the
+  complete contribution contract and still requires protected evidence before
+  catalog inclusion.
+- Root Cause Repair: `candidates/root-cause-repair/1.0.0` is an unpublished,
   unlisted local source candidate and intentionally has no canonical manifest.
   Its source tree and disposable-registry tests are behavioral evidence only;
   they confer no listing, public-install, release, or deployment status. It is a
@@ -131,7 +132,7 @@ depth, and requires no security-lint suppression requests.
   intended target mutations uncommitted. `verified`, `not-reproduced`, and
   `blocked` are semantic terminal outcomes, not catalog trust or publication
   states.
-- Reviewer Panel: `packages/reviewer-panel/1.0.0` is also an unpublished,
+- Reviewer Panel: `candidates/reviewer-panel/1.0.0` is also an unpublished,
   unlisted local source candidate with no canonical manifest, protected
   evidence, catalog entry, or public install. Correctness, security,
   reliability, and test-evidence are fixed semantic lenses; install-time

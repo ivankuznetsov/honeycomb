@@ -47,7 +47,7 @@ acceptance remain rollout gates.
 ## Managed Repair Candidate Status
 
 Root Cause Repair 1.0.0 exists only as an unpublished, unlisted local source
-candidate under `packages/root-cause-repair/1.0.0`. It has no canonical
+candidate under `candidates/root-cause-repair/1.0.0`. It has no canonical
 manifest, protected listing evidence, catalog entry, or public install path.
 The Git-only high-risk workflow uses install-time agent mappings and can run
 arbitrary local commands that leave repository repairs uncommitted; its
@@ -56,7 +56,8 @@ terminal outcomes are `verified`, `not-reproduced`, and `blocked`. See
 [[gaps]] for the runtime, publication, evidence, and uncertainty boundaries.
 
 Reviewer Panel 1.0.0 is a second unpublished, unlisted local source candidate
-with no canonical manifest, protected evidence, catalog entry, or public
+under `candidates/reviewer-panel/1.0.0`, outside the canonical package tree. It
+has no canonical manifest, protected evidence, catalog entry, or public
 install. It applies four fixed semantic lenses—correctness, security,
 reliability, and test-evidence—independently of the compatible execution
 profiles mapped at install time. Its `ready`, `changes-requested`,
