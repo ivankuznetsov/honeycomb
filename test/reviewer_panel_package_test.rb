@@ -6,7 +6,7 @@ require "honeycomb_security_lint"
 require "psych"
 
 class ReviewerPanelPackageTest < Minitest::Test
-  PACKAGE_ROOT = File.join(ROOT, "candidates", "reviewer-panel", "1.0.0")
+  PACKAGE_ROOT = File.join(ROOT, "packages", "reviewer-panel", "1.0.0")
   IDENTITY_KEYS = %w[agent model effort].freeze
   REVIEWERS = %w[correctness security reliability test-evidence].freeze
   SEMANTIC_SLOTS = %w[
@@ -159,16 +159,17 @@ class ReviewerPanelPackageTest < Minitest::Test
     end
   end
 
-  def test_readme_discloses_the_local_high_risk_analytical_only_candidate
+  def test_readme_discloses_the_high_risk_analytical_listing_boundary
     readme = File.read(File.join(PACKAGE_ROOT, "README.md"))
 
-    %w[unpublished high-risk uncommitted mutation analytical].each do |term|
+    %w[immutable high-risk uncommitted mutation analytical].each do |term|
       assert_includes readme.downcase, term
     end
     assert_match(/four.*semantic.*lens|semantic.*lenses/i, readme)
     assert_match(/same.*execution profile|one.*agent/i, readme)
     assert_match(/owner.*sole.*authority|sole.*owner.*authority/i, readme)
-    assert_match(/no manifest|manifest.*not.*present/i, readme)
+    assert_match(/canonical manifest/i, readme)
+    assert_match(/package\s+presence/i, readme)
     assert_match(/not.*human approval|not.*merge approval/i, readme)
   end
 
@@ -251,7 +252,7 @@ class ReviewerPanelPackageTest < Minitest::Test
       assert_empty manifest.dig("x-security", "suppressions")
       assert_empty manifest.dig("x-security", "network_host_reasons")
       assert_equal HoneycombRegistry::CanonicalYAML.dump_manifest(manifest), File.binread(package.manifest_path)
-      refute File.exist?(File.join(PACKAGE_ROOT, "manifest.yml"))
+      assert File.exist?(File.join(PACKAGE_ROOT, "manifest.yml"))
 
       bounded_reviewers.each do |reviewer|
         result = HoneycombRegistry::Permissions.derive(

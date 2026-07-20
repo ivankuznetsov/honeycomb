@@ -1,0 +1,65 @@
+schema: "honeycomb-manifest/v1"
+name: "reviewer-panel"
+version: "1.0.0"
+description: "Review one Git state through four semantic lenses and produce state-bound merge-readiness evidence"
+author:
+  name: "Honeycomb Maintainers"
+  url: "https://github.com/ivankuznetsov/honeycomb"
+license: "MIT"
+hive_min_version: "0.6.0"
+source:
+  url: "https://github.com/ivankuznetsov/honeycomb/tree/4a0d06d67881ea7026030b35dd1b89551b7f0e45/packages/reviewer-panel/1.0.0"
+  revision: "4a0d06d67881ea7026030b35dd1b89551b7f0e45"
+permissions:
+  risk: "high"
+  capabilities:
+    - "filesystem-read"
+    - "filesystem-write"
+    - "network"
+    - "shell"
+  network_hosts:
+    - "*"
+  filesystem_read:
+    - "*"
+  filesystem_write:
+    - "*"
+  secrets:
+    - "*"
+files:
+  "packages/reviewer-panel/1.0.0/README.md": "e70dfe7a90fd29ec81449fed750fcf2f731d8dc2a980fa39f2b508fa501d391e"
+  "packages/reviewer-panel/1.0.0/assets/evidence-contract.md": "ab285f6a729658c2eb136dc7473b33925d9e123fb329d03c5bf12a2cd8ceca2c"
+  "packages/reviewer-panel/1.0.0/instructions/basis.md": "3b9398f42a35d827d40164d396e50b240b352717c9cea0ee076b829dba95508a"
+  "packages/reviewer-panel/1.0.0/instructions/readiness.md": "726a78b5e049a9f3387f14935918851e6d90fbde56ad75203d8b05cd5628ef7b"
+  "packages/reviewer-panel/1.0.0/instructions/repair.md": "17b0864c96e403a7f66103bcf8a68078116178ca3c9aaf187f039cd9d9b50f7c"
+  "packages/reviewer-panel/1.0.0/instructions/review-correctness.md": "c2c31196202ad32c92ccde92106f90f6144f4e982eb32ca8642f96d2a64a2336"
+  "packages/reviewer-panel/1.0.0/instructions/review-reliability.md": "fe1286a8094cf608480950b12a38c96ee5a9ac15eb1cc1592975e07e63ea52cc"
+  "packages/reviewer-panel/1.0.0/instructions/review-security.md": "9f33bde1273189dbdcad1981964dad65b88c588d075d274ee2aefd6c89585695"
+  "packages/reviewer-panel/1.0.0/instructions/review-test-evidence.md": "48ce21cb8613c893dc3bf0ea6520c6f4aac1dcfa85fd1b92994505aa4d0aea1c"
+  "packages/reviewer-panel/1.0.0/tools/repository-state.rb": "99539859ff74d4e235bf8ea7e02b4f98f47a22a2f3da37927c01643c15d8fb0b"
+  "packages/reviewer-panel/1.0.0/workflow.yml": "386de33ba6bd96196a16562749aabc8d9c601922add68216101fd00604405118"
+release_sha256: "8a4c95c9c0163ca7b9a313c5a13ff4347bf2a165b604337ad7556a64ee46f12a"
+x-hive:
+  tools:
+    -
+      path: "tools/repository-state.rb"
+  prompt_assets:
+    -
+      path: "assets/evidence-contract.md"
+  optional_inputs: []
+x-provenance:
+  kind: "registry-original"
+  source_paths:
+    - "README.md"
+    - "workflow.yml"
+    - "instructions/basis.md"
+    - "instructions/readiness.md"
+    - "instructions/repair.md"
+    - "instructions/review-correctness.md"
+    - "instructions/review-reliability.md"
+    - "instructions/review-security.md"
+    - "instructions/review-test-evidence.md"
+    - "assets/evidence-contract.md"
+    - "tools/repository-state.rb"
+x-security:
+  network_host_reasons: {}
+  suppressions: []

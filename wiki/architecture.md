@@ -55,32 +55,32 @@ catalog renderer.
   runtime context, optional-input isolation, package tools, and real Agent and
   Council engines with deterministic test agents. It does not claim an
   authenticated provider-backed run.
-- `candidates/root-cause-repair/1.0.0` is an unpublished and unlisted local source
-  candidate with no canonical manifest. Its Git-only workflow captures a
+- `packages/root-cause-repair/1.0.0` is an immutable high-risk package with a
+  registry-original canonical manifest. Its Git-only workflow captures a
   content-blind repository-state fingerprint, reproduces a symptom, diagnoses
   its cause, leaves a repair uncommitted, runs causal Council review and
   revision, and emits one terminal `verified`, `not-reproduced`, or `blocked`
   certificate. `test/root_cause_repair_hive_execution_test.rb` builds a
   disposable canonical registry and exercises released Hive at the exact clean
-  pinned source revision; this is local behavioral evidence, not a public
-  installation or provider-backed production run.
-- `candidates/reviewer-panel/1.0.0` is another unpublished, unlisted local source
-  candidate without a canonical manifest. It binds correctness, security,
+  pinned source revision; this is local behavioral evidence, while protected
+  listing evidence and catalog projection separately authorize public install.
+- `packages/reviewer-panel/1.0.0` is another immutable high-risk package with a
+  registry-original canonical manifest. It binds correctness, security,
   reliability, and test-evidence reviews to one Git state, permits at most three
   repair executions across four panel passes, re-runs all four lenses after a
   changed basis, and emits analytical `ready`, `changes-requested`,
   `inconclusive`, or `state-stale` evidence. Its disposable-registry execution
   test uses the same exact clean Hive pin as Root Cause Repair and native Agent
-  and Council engines; it is not provider-backed, public-install, or human
-  review evidence.
+  and Council engines; it is not provider-backed or human-review evidence, and
+  package presence alone does not authorize public install.
 - `docs/PACKAGE_FORMAT.md` is the authoritative public format/command contract;
   root `CONTRIBUTING.md`/`SECURITY.md` and `docs/TRUST.md`/`REVIEWS.md` are the
   canonical public policy; `wiki/` records agent-facing architecture and
   cross-task boundaries.
-- `candidates/` is outside the canonical package tree. Its manifest-free source
-  candidates are testable but cannot enter validation, catalog generation, or
-  publication until an explicit owner-authorized change promotes them into
-  `packages/` under the complete contribution contract.
+- `candidates/` is an optional staging area outside the canonical package tree.
+  Manifest-free sources there are testable but cannot enter validation, catalog
+  generation, or publication until an owner-authorized change promotes them
+  into `packages/` under the complete contribution contract.
 
 ## Intended Product Shape
 
@@ -164,7 +164,7 @@ diagnose, repair, verification council, causal verifier, reviser, and
 certificate. The descriptor contains no agent, model, or effort identity, and
 mapping all slots to one supported agent leaves the workflow semantics intact.
 All actors are deliberately `yolo`; they may run arbitrary local commands and
-mutate the target worktree. This makes the candidate high risk even though its
+mutate the target worktree. This makes the package high risk even though its
 instructions require the intended repair to remain uncommitted and target refs
 to remain unchanged.
 
@@ -180,9 +180,9 @@ Bounds or unsupported repository entries fail closed.
 
 The repository owner is the sole authority for committing, pushing, opening or
 merging pull requests, tagging, releasing, publishing, listing, deploying, or
-removing a Hive-shipped template. The candidate has no public execution path
-until the owner explicitly starts the manifest, protected evidence, catalog,
-site, and public-acceptance release tail.
+removing a Hive-shipped template. The source and manifest commits are complete;
+public execution still requires protected evidence, catalog and site
+publication, and public-install acceptance.
 
 ## Reviewer Panel identity and authority boundary
 
@@ -207,6 +207,7 @@ state; `changes-requested` means a blocker remains; `inconclusive` means require
 evidence is unavailable; and `state-stale` means the reviewed state changed.
 All are analytical evidence for the sole owner, not human collaboration, merge
 approval, trust endorsement, listing approval, release authorization,
-publication, or deployment. The owner may later use the protected
-repository-owner publication lane, but agent output never satisfies it and no
-release-tail action is currently authorized.
+publication, or deployment. The owner may use the protected repository-owner
+publication lane, but agent output never satisfies it; protected evidence,
+catalog/site publication, public acceptance, deployment, and template removal
+remain separate actions.

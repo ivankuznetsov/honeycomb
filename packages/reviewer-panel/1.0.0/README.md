@@ -1,10 +1,10 @@
 # Reviewer Panel
 
-Reviewer Panel is an unpublished local Honeycomb source candidate for reviewing
-and repairing one exact Git working state. It establishes a complete state-bound
-basis, runs four fixed semantic lenses in order—correctness, security,
-reliability, and test-evidence—applies bounded repairs, re-runs every lens after
-a changed state, and produces `merge-readiness.md` as analytical evidence.
+Reviewer Panel is an immutable Honeycomb package for reviewing and repairing
+one exact Git working state. It establishes a complete state-bound basis, runs
+four fixed semantic lenses in order—correctness, security, reliability, and
+test-evidence—applies bounded repairs, re-runs every lens after a changed state,
+and produces `merge-readiness.md` as analytical evidence.
 
 The package is agent-agnostic. Hive asks during installation which compatible
 execution profile should fill the basis, council, four reviewer, repair, and
@@ -59,6 +59,8 @@ flags are rejected, and Git subprocesses have a hard deadline. The resulting
 fingerprint is current local-state evidence, not proof that no remote or
 history-changing action occurred and was later hidden by restoring local state.
 
-This `1.0.0` directory is an unpublished source candidate. No manifest is
-present, it is not listed in `catalog.json`, and local verification is not
-release, installation-from-catalog, publication, or deployment proof.
+This `1.0.0` directory is an immutable package source. Its canonical manifest
+binds the behavior bytes to the preserved registry source commit. Package
+presence and local verification alone are not catalog-listing,
+installation-from-catalog, publication, or deployment proof; protected listing
+evidence and the generated catalog remain the authority for those states.
