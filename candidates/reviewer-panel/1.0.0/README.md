@@ -12,6 +12,16 @@ readiness slots. Mapping several roles to the same execution profile or one
 agent is valid, but it does not create multiple humans, independent providers,
 or approval identities. The package embeds no agent, model, or effort choice.
 
+Hive 0.6.0 operators using non-interactive `--yes` installation must explicitly
+map every Reviewer Panel slot to a profile that can enforce that slot's policy.
+The standard mixed Codex/Claude init configuration can otherwise suggest Codex
+for one of the bounded read-only reviewer slots, which Hive correctly rejects
+because that runner cannot enforce the requested tool scope. Interactive
+installation remains the preferred path because it asks for every mapping and
+shows suggested defaults; for automation, pass compatible per-slot `--mapping`
+overrides (for example, map every slot to a configured Claude profile). Do not
+weaken the workflow permissions to make an incompatible suggestion pass.
+
 ## Consequences and authority
 
 This is a high-risk workflow. Basis capture, the test-evidence lens, repair, and
