@@ -81,10 +81,10 @@ Video Production 0.1.0 behavior sources are present under
 workflow validates a project media manifest, stages an exact snapshot/take,
 requires detached Ed25519 owner receipts no workflow operation can mint,
 performs a bounded trusted-owner capture, carries capture/verification identity
-through editorial approval, and stops locally at `publish-ready`. Its checked-in
-manifest is intentionally a source-commit seed: canonical manifest generation,
-clean-project Hive installation, guarded real capture, protected review, and
-catalog listing remain ordered gates. See [[video-production]] and [[gaps]].
+through editorial approval, and stops locally at `publish-ready`. Its canonical
+manifest and disposable unrelated-project Hive install/task-pin proof are
+complete. Guarded real capture, protected review, and catalog listing remain
+ordered gates. See [[video-production]] and [[gaps]].
 
 ## Update Protocol
 

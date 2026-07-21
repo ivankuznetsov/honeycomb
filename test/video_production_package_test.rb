@@ -81,12 +81,17 @@ class VideoProductionPackageTest < Minitest::Test
     refute File.executable?(SHARED_TOOL), "shared implementation must not be a workflow executable"
   end
 
-  def test_manifest_seed_declares_the_tool_inputs_and_registry_original_provenance
-    manifest = Psych.safe_load_file(File.join(PACKAGE_ROOT, "manifest.yml"), permitted_classes: [], aliases: false)
+  def test_canonical_manifest_declares_tool_inputs_and_registry_original_provenance
+    manifest_path = File.join(PACKAGE_ROOT, "manifest.yml")
+    manifest = Psych.safe_load_file(manifest_path, permitted_classes: [], aliases: false)
+    source_revision = manifest.dig("source", "revision")
 
     assert_equal "honeycomb-manifest/v1", manifest.fetch("schema")
-    assert_equal "SOURCE_COMMIT_REQUIRED", manifest.dig("source", "revision")
-    assert_equal 2, File.read(File.join(PACKAGE_ROOT, "manifest.yml")).scan("SOURCE_COMMIT_REQUIRED").length
+    assert_match(/\A[0-9a-f]{40}\z/, source_revision)
+    assert_equal 0, File.read(manifest_path).scan("SOURCE_COMMIT_REQUIRED").length
+    assert_equal "https://github.com/ivankuznetsov/honeycomb/tree/#{source_revision}/packages/video-production/0.1.0",
+                 manifest.dig("source", "url")
+    assert_match(/\A[0-9a-f]{64}\z/, manifest.fetch("release_sha256"))
     expected_tools = %w[
       tools/video-approval-request.rb
       tools/video-capture.rb
@@ -114,6 +119,17 @@ class VideoProductionPackageTest < Minitest::Test
       destination = File.join(registry, "packages", "video-production", "0.1.0")
       FileUtils.mkdir_p(File.dirname(destination))
       FileUtils.cp_r(PACKAGE_ROOT, destination)
+      canonical = Psych.safe_load_file(File.join(destination, "manifest.yml"), permitted_classes: [], aliases: false)
+      canonical.delete("permissions")
+      canonical.delete("files")
+      canonical.delete("release_sha256")
+      canonical.fetch("source")["url"] =
+        "https://github.com/ivankuznetsov/honeycomb/tree/SOURCE_COMMIT_REQUIRED/packages/video-production/0.1.0"
+      canonical.fetch("source")["revision"] = "SOURCE_COMMIT_REQUIRED"
+      File.binwrite(
+        File.join(destination, "manifest.yml"),
+        HoneycombRegistry::CanonicalYAML.dump_manifest(canonical)
+      )
       git!(registry, "add", "packages")
       git!(registry, "commit", "-qm", "ephemeral behavior source")
       revision = git!(registry, "rev-parse", "HEAD").strip

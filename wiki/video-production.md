@@ -91,12 +91,14 @@ and grants no upload, posting, merge, deployment, release, or catalog authority.
 ## Provenance and rollout state
 
 Registry-original packages require two commits. The checked-in `manifest.yml`
-is a transparent seed with exactly two `SOURCE_COMMIT_REQUIRED` values. After a
-real behavior-source commit, the owner replaces those values with that exact
-revision, runs `script/honeycomb-manifest`, and commits the generated manifest
-separately. Focused tests prove this flow in an ephemeral Git registry without
-inventing the actual revision.
+binds the generated package to its immutable `source.revision`; the generated
+manifest was committed separately. A disposable unrelated project materialized
+the package through Hive 0.6.5, installed all six mapped slots, created a managed
+task with immutable catalog/manifest/configuration pins, preserved executable
+wrapper modes, and kept optional values absent and capture-only. The local
+registry entry used for that proof was synthetic and does not claim listing or
+publication.
 
-Until that canonicalization, clean unrelated Hive installation, guarded real
-capture, protected review, and catalog evidence are complete, package presence
-does not establish installability, listing, or publication.
+Guarded real capture, external owner-key handling, protected review, and catalog
+evidence remain incomplete. Package presence and local installation proof do
+not establish listing, publication, or approval for real capture.

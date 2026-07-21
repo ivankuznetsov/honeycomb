@@ -144,11 +144,12 @@ request and the unchanged evidence chain, then writes only
 
 ## Registry-original manifest finalization
 
-`manifest.yml` is intentionally a source-commit seed. Its two
-`SOURCE_COMMIT_REQUIRED` values cannot be replaced until the behavior-bearing
-files have a real Git revision. After the owner creates that source commit, run
-these exact commands from the repository root before the separate manifest
-commit:
+The canonical `manifest.yml` binds these package bytes to the immutable behavior
+revision recorded in `source.revision`; its generated manifest is committed
+separately. When authoring a new package version, begin with exactly two
+`SOURCE_COMMIT_REQUIRED` values. After the behavior-bearing files have a real
+Git revision, run these commands from the repository root before the separate
+manifest commit:
 
 ```sh
 source_revision="$(git rev-parse HEAD)"
@@ -158,7 +159,8 @@ ruby script/honeycomb-manifest --check packages/video-production/0.1.0
 ruby script/honeycomb-validate packages/video-production/0.1.0
 ```
 
-The source and manifest commits are distinct so `source.revision` is real
-registry-original provenance rather than a fabricated digest. Package presence
+The source and manifest commits must remain distinct so `source.revision` is
+real registry-original provenance rather than a fabricated digest. Do not rerun
+the seed replacement against this already-canonical manifest. Package presence
 and local validation do not claim catalogue listing, review, public
 installation, or publication.
