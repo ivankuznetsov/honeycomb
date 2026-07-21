@@ -8,8 +8,8 @@ author:
 license: "MIT"
 hive_min_version: "0.6.0"
 source:
-  url: "https://github.com/ivankuznetsov/honeycomb/tree/4d3d92818d8cdf36f5f7c4319df8fbbd82155e63/packages/video-production/0.1.0"
-  revision: "4d3d92818d8cdf36f5f7c4319df8fbbd82155e63"
+  url: "https://github.com/ivankuznetsov/honeycomb/tree/90d7854f67527d1186b567772d770eec49af6df5/packages/video-production/0.1.0"
+  revision: "90d7854f67527d1186b567772d770eec49af6df5"
 permissions:
   risk: "high"
   capabilities:
@@ -27,7 +27,7 @@ permissions:
     - "*"
 files:
   "packages/video-production/0.1.0/DEPENDENCIES.md": "c4e40e295ca2e24d077e1639f23a725ee581eae02a182f192fd52dfd1404c662"
-  "packages/video-production/0.1.0/README.md": "a083599cc8cccd5b1537f468a420d95d61d25e538ef560be6d84897c4c001a92"
+  "packages/video-production/0.1.0/README.md": "4ee9efec79c7e88555b9dc2626b07bd0ff66f1dc8c9963b577dca7894e722fec"
   "packages/video-production/0.1.0/instructions/capture-approval.md": "86b32d164497b66389dc0fc9022a08d86ee961a3c7c371578bb165916c67fba1"
   "packages/video-production/0.1.0/instructions/capture.md": "1caa8b1fad0f9a054083319efa2cb82a6faa3fe8576d658c16a77ccb9a4e391d"
   "packages/video-production/0.1.0/instructions/editorial-approval.md": "df36997ca5fa16aebc33cb1a570bac98f4b06b6b4abc12c746a25fb166533c27"
@@ -41,7 +41,7 @@ files:
   "packages/video-production/0.1.0/tools/video-publish-ready.rb": "0e88c56b448675e25ed6991bf72ec3589e7664bee40aa6a679577c9da4d3fa16"
   "packages/video-production/0.1.0/tools/video-verify.rb": "35bd6a6f9a292ba06f45ce32c71c4e39872b06cfe64b774620a4b2c553188221"
   "packages/video-production/0.1.0/workflow.yml": "0f39d81dd32c2732525a45524c3d056a8d81ffc4a6ed835c68ea5f59a4a1c455"
-release_sha256: "0ba8593fbdaf3fec5869bc1f53b492d705d8034381fb9ac4cfed59dcbcf13bbb"
+release_sha256: "d6961a54b3d07775ef78f22c1cd340e59dc38e540ca99479d16f61967f2ff3da"
 x-hive:
   tools:
     -
