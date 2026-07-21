@@ -13,6 +13,8 @@ change.
 - [[dependencies]] - runtime, development, and service dependencies.
 - [[package-catalog-contract]] - shipped package, manifest, evidence, and catalog
   contracts.
+- [[video-production]] - reusable approval-gated capture package, evidence
+  contract, trusted-owner boundary, and current publication gaps.
 - [[security-review-contract]] - identity binding and boundary with listing CI.
 - [[submission-canary]] - maintainer-dispatched bot submission used to smoke
   the real lint, independent approval, publication, site, and Hive boundaries;
@@ -71,6 +73,17 @@ repository-owner evidence now projects this release into `catalog.json`; site
 sync and public-install acceptance against released Hive are complete,
 including managed task creation. Provider-backed live-run evidence and any
 Hive-template removal remain separate rollout gates.
+
+## Video Production Candidate Status
+
+Video Production 0.1.0 behavior sources are present under
+`packages/video-production/0.1.0` with proof-first package/tool coverage. The
+workflow validates a project media manifest, records deterministic dry-run and
+fingerprint-bound approval evidence, performs a bounded trusted-owner capture,
+verifies media and hashes, and stops locally at `publish-ready`. Its checked-in
+manifest is intentionally a source-commit seed: canonical manifest generation,
+clean-project Hive installation, guarded real capture, protected review, and
+catalog listing remain ordered gates. See [[video-production]] and [[gaps]].
 
 ## Update Protocol
 

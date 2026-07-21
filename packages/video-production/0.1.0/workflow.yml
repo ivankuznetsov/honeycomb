@@ -1,0 +1,92 @@
+id: video-production
+stages:
+  - name: inbox
+    kind: terminal
+    state_file: brief.md
+  - name: prepare
+    kind: agent
+    state_file: preparation.md
+    instruction: instructions/prepare.md
+    mapping_role: planning
+    mapping_contract: video-production-prepare-v1
+    permissions:
+      preset: scoped
+      tools:
+        - Read
+        - LS
+        - Bash(*video-production.rb*)
+        - Edit(./preparation.md)
+        - Edit(./validation.json)
+        - Edit(./dry-run.json)
+      dirs:
+        - ../../../..
+  - name: capture-approval
+    kind: agent
+    state_file: capture-approval.md
+    instruction: instructions/capture-approval.md
+    mapping_role: planning
+    mapping_contract: video-production-capture-approval-v1
+    permissions:
+      preset: scoped
+      tools:
+        - Read
+        - LS
+        - Bash(*video-production.rb*)
+        - Edit(./capture-approval.md)
+        - Edit(./WAITING)
+      dirs:
+        - ../../../..
+  - name: capture
+    kind: agent
+    state_file: capture.md
+    instruction: instructions/capture.md
+    mapping_role: development
+    mapping_contract: video-production-capture-v1
+    permissions: yolo
+  - name: verify
+    kind: agent
+    state_file: verification.md
+    instruction: instructions/verify.md
+    mapping_role: reviewer
+    mapping_contract: video-production-verify-v1
+    permissions:
+      preset: scoped
+      tools:
+        - Read
+        - LS
+        - Bash(*video-production.rb*)
+        - Edit(./verification.md)
+      dirs:
+        - ../../../..
+  - name: editorial-approval
+    kind: agent
+    state_file: editorial-approval.md
+    instruction: instructions/editorial-approval.md
+    mapping_role: reviewer
+    mapping_contract: video-production-editorial-approval-v1
+    permissions:
+      preset: scoped
+      tools:
+        - Read
+        - LS
+        - Bash(*video-production.rb*)
+        - Edit(./editorial-approval.md)
+        - Edit(./WAITING)
+      dirs:
+        - ../../../..
+  - name: publish-ready
+    kind: agent
+    state_file: publish-ready.json
+    deliverable: publish-ready.json
+    instruction: instructions/publish-ready.md
+    mapping_role: reviewer
+    mapping_contract: video-production-publish-ready-v1
+    permissions:
+      preset: scoped
+      tools:
+        - Read
+        - LS
+        - Bash(*video-production.rb*)
+        - Edit(./publish-ready.json)
+      dirs:
+        - ../../../..

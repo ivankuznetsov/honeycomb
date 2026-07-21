@@ -51,6 +51,14 @@ commands and possible uncommitted repair mutations. Its `ready`,
 `changes-requested`, `inconclusive`, and `state-stale` values are analytical
 outcomes, not merge approval, trust/listing approval, or release authority.
 
+`video-production/0.1.0` is currently a behavior-source candidate in the
+canonical package path, not a listed release. Its packaged executable supports
+`validate`, `dry-run`, `approval-template`, `capture`, `verify`, and
+`publish-ready`. The final command writes local evidence with
+`published: false`; none of these operations submits a listing or performs a
+remote publication action. The source seed must receive a real source revision
+and generated canonical manifest before ordinary package validation can pass.
+
 ## Shipped Registry Commands
 
 | Command | Mutating mode | Read-only mode |

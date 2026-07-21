@@ -1,0 +1,42 @@
+schema: "honeycomb-manifest/v1"
+name: "video-production"
+version: "0.1.0"
+description: "Approval-gated deterministic terminal video capture and verification"
+author:
+  name: "Honeycomb Maintainers"
+  url: "https://github.com/ivankuznetsov/honeycomb"
+license: "MIT"
+hive_min_version: "0.6.0"
+source:
+  url: "https://github.com/ivankuznetsov/honeycomb/tree/SOURCE_COMMIT_REQUIRED/packages/video-production/0.1.0"
+  revision: "SOURCE_COMMIT_REQUIRED"
+x-hive:
+  tools:
+    - path: "tools/video-production.rb"
+  prompt_assets: []
+  optional_inputs:
+    - name: "VIDEO_CAPTURE_PASSWORD"
+      authorized_slots:
+        - "stages.capture"
+    - name: "VIDEO_CAPTURE_TOKEN"
+      authorized_slots:
+        - "stages.capture"
+    - name: "VIDEO_CAPTURE_USERNAME"
+      authorized_slots:
+        - "stages.capture"
+x-provenance:
+  kind: "registry-original"
+  source_paths:
+    - "DEPENDENCIES.md"
+    - "README.md"
+    - "workflow.yml"
+    - "instructions/capture-approval.md"
+    - "instructions/capture.md"
+    - "instructions/editorial-approval.md"
+    - "instructions/prepare.md"
+    - "instructions/publish-ready.md"
+    - "instructions/verify.md"
+    - "tools/video-production.rb"
+x-security:
+  network_host_reasons: {}
+  suppressions: []
