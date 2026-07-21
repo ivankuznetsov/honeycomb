@@ -74,12 +74,17 @@ catalog renderer.
   and Council engines; it is not provider-backed or human-review evidence, and
   package presence alone does not authorize public install.
 - `packages/video-production/0.1.0` contains an approval-gated high-risk
-  package candidate. Its manifest-bounded Ruby tool validates project media
-  JSON, hashes the declared snapshot and packaged tool, writes checked
-  fingerprint approval state, allocates unique takes, runs bounded trusted-owner
-  Docker/asciinema/agg/ffmpeg capture, verifies media through ffprobe, records
-  hashes, and stops at local `publish-ready` evidence. The package does not
-  depend on an external recording source tree. Its manifest remains a deliberate
+  package candidate. Five permission-scoped wrappers share one non-executable
+  Ruby implementation. The tool validates project media JSON, stages and hashes
+  a typed snapshot tree, reserves an exact take, and verifies detached Ed25519
+  owner receipts that no workflow operation can mint. Capture streams bounded
+  diagnostics, supervises child process groups through leader exit, uses a
+  take-local Docker cidfile for fail-closed bounded removal and exact absence
+  proof, records a canonical displayed approval plus context/receipt chain,
+  rejects private-key material and failed or synthetic evidence, verifies media
+  through ffprobe, and
+  stops at local `publish-ready` evidence. The package does not depend on an
+  external recording source tree. Its manifest remains a deliberate
   source-commit seed until real registry-original provenance can be recorded.
 - `docs/PACKAGE_FORMAT.md` is the authoritative public format/command contract;
   root `CONTRIBUTING.md`/`SECURITY.md` and `docs/TRUST.md`/`REVIEWS.md` are the
@@ -148,9 +153,11 @@ Video Production keeps capture approval, capture, verification, editorial
 approval, and terminal readiness as separate durable identities. Capture
 approval binds the workflow, manifest, tool, scene command, image, and snapshot;
 editorial approval additionally binds verified artifact hashes. The capture
-stage is explicitly unbounded because package instructions are not an OS
-sandbox. Optional credential values are exposed only to the capture slot at
-runtime and are never stored in package or approval evidence.
+stage is scoped to reading, listing, its exact wrapper, and `capture.md`; it has
+no permission to edit the manifest, owner key, packaged tools, approval, or
+evidence. These Hive permissions are not an OS sandbox. Optional credential
+values are exposed only to the capture slot at runtime and are never stored in
+package or approval evidence.
 
 ## Runtime Flow Status
 

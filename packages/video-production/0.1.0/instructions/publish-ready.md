@@ -1,10 +1,11 @@
 # Record the local publish-ready outcome
 
 Read `verification.md` and `editorial-approval.md`. Run only the declared
-`tools/video-production.rb publish-ready` command with the exact manifest,
-scene, take, verification, and checked editorial approval. The tool must reject
-identity or fingerprint drift and write `publish-ready.json` inside the
-selected take.
+`tools/video-publish-ready.rb` wrapper with the exact manifest, scene, take,
+verification, checked editorial approval, and detached owner signature. The
+tool must reject approval, capture context/receipt, staged snapshot,
+verification, artifact, or fingerprint drift and write `publish-ready.json`
+inside the selected take.
 
 Return that same JSON as the stage deliverable. Its only successful status is
 `publish-ready`, and `published` must remain `false`. This terminal stage is a

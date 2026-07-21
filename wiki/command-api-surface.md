@@ -52,9 +52,11 @@ commands and possible uncommitted repair mutations. Its `ready`,
 outcomes, not merge approval, trust/listing approval, or release authority.
 
 `video-production/0.1.0` is currently a behavior-source candidate in the
-canonical package path, not a listed release. Its packaged executable supports
-`validate`, `dry-run`, `approval-template`, `capture`, `verify`, and
-`publish-ready`. The final command writes local evidence with
+canonical package path, not a listed release. Its five declared stage wrappers
+expose `validate`/`dry-run`, approval-request, capture, verify, and
+publish-ready operations while the shared implementation remains
+non-executable. Approval consumers require a detached Ed25519 owner signature
+over the exact checked request. The final command writes local evidence with
 `published: false`; none of these operations submits a listing or performs a
 remote publication action. The source seed must receive a real source revision
 and generated canonical manifest before ordinary package validation can pass.

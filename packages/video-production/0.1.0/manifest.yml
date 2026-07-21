@@ -12,7 +12,11 @@ source:
   revision: "SOURCE_COMMIT_REQUIRED"
 x-hive:
   tools:
-    - path: "tools/video-production.rb"
+    - path: "tools/video-approval-request.rb"
+    - path: "tools/video-capture.rb"
+    - path: "tools/video-prepare.rb"
+    - path: "tools/video-publish-ready.rb"
+    - path: "tools/video-verify.rb"
   prompt_assets: []
   optional_inputs:
     - name: "VIDEO_CAPTURE_PASSWORD"
@@ -36,7 +40,12 @@ x-provenance:
     - "instructions/prepare.md"
     - "instructions/publish-ready.md"
     - "instructions/verify.md"
+    - "tools/video-approval-request.rb"
+    - "tools/video-capture.rb"
+    - "tools/video-prepare.rb"
     - "tools/video-production.rb"
+    - "tools/video-publish-ready.rb"
+    - "tools/video-verify.rb"
 x-security:
   network_host_reasons: {}
   suppressions: []

@@ -78,9 +78,10 @@ Hive-template removal remain separate rollout gates.
 
 Video Production 0.1.0 behavior sources are present under
 `packages/video-production/0.1.0` with proof-first package/tool coverage. The
-workflow validates a project media manifest, records deterministic dry-run and
-fingerprint-bound approval evidence, performs a bounded trusted-owner capture,
-verifies media and hashes, and stops locally at `publish-ready`. Its checked-in
+workflow validates a project media manifest, stages an exact snapshot/take,
+requires detached Ed25519 owner receipts no workflow operation can mint,
+performs a bounded trusted-owner capture, carries capture/verification identity
+through editorial approval, and stops locally at `publish-ready`. Its checked-in
 manifest is intentionally a source-commit seed: canonical manifest generation,
 clean-project Hive installation, guarded real capture, protected review, and
 catalog listing remain ordered gates. See [[video-production]] and [[gaps]].

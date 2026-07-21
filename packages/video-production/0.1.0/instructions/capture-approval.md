@@ -2,14 +2,23 @@
 
 Read `preparation.md` and stop unless it says `Workflow-Status: prepared` and
 the referenced dry-run evidence still matches the project manifest and scene.
-Run only the declared `tools/video-production.rb approval-template` command for
-the `capture` stage. Write the resulting checklist to `capture-approval.md`.
-The tool also writes executable `WAITING` state bound to the workflow,
-manifest, tool, scene command, image, snapshot, and fingerprint.
+Run only the declared `tools/video-approval-request.rb` wrapper for the
+`capture` stage, with `capture-approval.md` as its output. The tool reserves the
+exact take, privately stages the exact snapshot directory, and writes `WAITING`
+state bound to the workflow, manifest, tool, scene command, image, staged tree,
+take, artifact paths, owner public key, and fingerprint.
 
-Do not check the box. A human owner must inspect the exact command, image,
-snapshot, runtime-only environment names, output paths, and risk disclosure,
-then change the one checklist box to `[x]`. An agent statement, task status, or
-approval for an older fingerprint is not authorization. End this run with
-`Workflow-Status: waiting`; only an explicit rerun after the owner edit may
-advance.
+Every bound field appears in the human-readable request and in canonical
+`Context-JSON`. Inspect both forms and reject any contradiction; capture accepts
+only the exact canonical checked rendering, not merely a signature over edited
+display text.
+
+Do not check, edit, or sign the request. A human repository owner must inspect
+the exact command, image, network, staged snapshot digest, runtime-only
+environment names, reserved take, output paths, and risk disclosure. Outside
+the agent runtime, the owner changes only the exact owner sentence to `[x]` and
+creates a detached Ed25519 signature over every byte of that checked Markdown
+file. The private key must never be exposed to this task or any workflow actor.
+An agent-created signature, task status, unsigned checkbox, or receipt for
+different bytes is not authorization. End with `Workflow-Status: waiting` and
+the expected receipt path; only an explicit rerun with both files may advance.
