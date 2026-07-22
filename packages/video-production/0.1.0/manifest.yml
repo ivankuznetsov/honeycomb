@@ -1,0 +1,91 @@
+schema: "honeycomb-manifest/v1"
+name: "video-production"
+version: "0.1.0"
+description: "Approval-gated deterministic terminal video capture and verification"
+author:
+  name: "Honeycomb Maintainers"
+  url: "https://github.com/ivankuznetsov/honeycomb"
+license: "MIT"
+hive_min_version: "0.6.0"
+source:
+  url: "https://github.com/ivankuznetsov/honeycomb/tree/90d7854f67527d1186b567772d770eec49af6df5/packages/video-production/0.1.0"
+  revision: "90d7854f67527d1186b567772d770eec49af6df5"
+permissions:
+  risk: "high"
+  capabilities:
+    - "filesystem-read"
+    - "filesystem-write"
+    - "network"
+    - "shell"
+  network_hosts:
+    - "*"
+  filesystem_read:
+    - "*"
+  filesystem_write:
+    - "*"
+  secrets:
+    - "*"
+files:
+  "packages/video-production/0.1.0/DEPENDENCIES.md": "c4e40e295ca2e24d077e1639f23a725ee581eae02a182f192fd52dfd1404c662"
+  "packages/video-production/0.1.0/README.md": "4ee9efec79c7e88555b9dc2626b07bd0ff66f1dc8c9963b577dca7894e722fec"
+  "packages/video-production/0.1.0/instructions/capture-approval.md": "86b32d164497b66389dc0fc9022a08d86ee961a3c7c371578bb165916c67fba1"
+  "packages/video-production/0.1.0/instructions/capture.md": "1caa8b1fad0f9a054083319efa2cb82a6faa3fe8576d658c16a77ccb9a4e391d"
+  "packages/video-production/0.1.0/instructions/editorial-approval.md": "df36997ca5fa16aebc33cb1a570bac98f4b06b6b4abc12c746a25fb166533c27"
+  "packages/video-production/0.1.0/instructions/prepare.md": "4b310611329ce353e16acc3569d4ec96c0b7b9b8f7e2ff1984da29c120f7039a"
+  "packages/video-production/0.1.0/instructions/publish-ready.md": "7857aa59349e0032d8701b5c5dca53914786561ebc0ad5de6d8a57aa149513c9"
+  "packages/video-production/0.1.0/instructions/verify.md": "758758c8f1263a44197d18dec528e1ed3a12aebae5e876f12181c7f2ff190c83"
+  "packages/video-production/0.1.0/tools/video-approval-request.rb": "a32ce350b8cbf703ef367f280da1298fc84ef48ed466cdc35dc1f0a136ef0634"
+  "packages/video-production/0.1.0/tools/video-capture.rb": "71f4b8515351f2b8294eb70e0c8ccee9cf61ab5c2f0a304b49742fd77ba14d6f"
+  "packages/video-production/0.1.0/tools/video-prepare.rb": "ec5af76fa53fac5876a12235489840533595495c470622a4139266cc63d016bf"
+  "packages/video-production/0.1.0/tools/video-production.rb": "d8b81cfbb1168d4b0983118361a986593b8322d232e40640fd3a2363b09bd901"
+  "packages/video-production/0.1.0/tools/video-publish-ready.rb": "0e88c56b448675e25ed6991bf72ec3589e7664bee40aa6a679577c9da4d3fa16"
+  "packages/video-production/0.1.0/tools/video-verify.rb": "35bd6a6f9a292ba06f45ce32c71c4e39872b06cfe64b774620a4b2c553188221"
+  "packages/video-production/0.1.0/workflow.yml": "0f39d81dd32c2732525a45524c3d056a8d81ffc4a6ed835c68ea5f59a4a1c455"
+release_sha256: "d6961a54b3d07775ef78f22c1cd340e59dc38e540ca99479d16f61967f2ff3da"
+x-hive:
+  tools:
+    -
+      path: "tools/video-approval-request.rb"
+    -
+      path: "tools/video-capture.rb"
+    -
+      path: "tools/video-prepare.rb"
+    -
+      path: "tools/video-publish-ready.rb"
+    -
+      path: "tools/video-verify.rb"
+  prompt_assets: []
+  optional_inputs:
+    -
+      name: "VIDEO_CAPTURE_PASSWORD"
+      authorized_slots:
+        - "stages.capture"
+    -
+      name: "VIDEO_CAPTURE_TOKEN"
+      authorized_slots:
+        - "stages.capture"
+    -
+      name: "VIDEO_CAPTURE_USERNAME"
+      authorized_slots:
+        - "stages.capture"
+x-provenance:
+  kind: "registry-original"
+  source_paths:
+    - "DEPENDENCIES.md"
+    - "README.md"
+    - "workflow.yml"
+    - "instructions/capture-approval.md"
+    - "instructions/capture.md"
+    - "instructions/editorial-approval.md"
+    - "instructions/prepare.md"
+    - "instructions/publish-ready.md"
+    - "instructions/verify.md"
+    - "tools/video-approval-request.rb"
+    - "tools/video-capture.rb"
+    - "tools/video-prepare.rb"
+    - "tools/video-production.rb"
+    - "tools/video-publish-ready.rb"
+    - "tools/video-verify.rb"
+x-security:
+  network_host_reasons: {}
+  suppressions: []

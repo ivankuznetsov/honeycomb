@@ -19,6 +19,13 @@ Package tools follow the same explicit standard-library rule. In particular,
 SEO provider metrics loads `time` directly before using ISO 8601 timestamps so
 behavior is identical across supported Ruby default-library loading modes.
 
+Video Production's package tool uses only Ruby standard/default libraries. Its
+trusted-owner capture additionally requires host `docker`, `asciinema`, `agg`,
+`ffmpeg`, and `ffprobe`, an already-present digest-pinned image, and a declared
+pre-hardened snapshot. The package does not fetch, install, prepare, or mutate
+those prerequisites. Three optional credential bindings are authorized only for
+the capture slot and remain runtime-only.
+
 The unprivileged analyzer and evidence snapshot exporter remain offline. The
 trusted `workflow_run` reporter and protected approval issuer share one isolated
 standard-library `Net::HTTP` adapter for GitHub metadata, artifact, Git ref, and
