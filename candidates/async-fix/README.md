@@ -35,6 +35,24 @@ The package metadata used by local acceptance recommends medium reasoning
 effort for `stages.fix`; installation mappings remain an explicit maintainer
 choice and are not part of workflow identity.
 
+## Local acceptance
+
+`test/async_fix_candidate_test.rb` proves the source topology, authority
+boundary, temporary manifest shape, and package/catalog invisibility.
+`test/async_fix_hive_execution_test.rb` requires the exact clean Hive revision
+declared in that test and exercises real install, configuration, task creation,
+managed worktree execution, report validation, and draft-PR recovery with
+deterministic local agent and GitHub transports. It covers direct and compact
+plan/debug paths, remapping, no-fix, blocked, auth failure, push/create retry,
+and secret quarantine while preserving both source checkouts.
+
+Run the exact-Hive gate with:
+
+```sh
+HONEYCOMB_HIVE_SOURCE=/path/to/exact-clean-hive \
+  ruby -Itest test/async_fix_hive_execution_test.rb
+```
+
 ## Candidate status
 
 This directory is unversioned source, not a package release. It intentionally

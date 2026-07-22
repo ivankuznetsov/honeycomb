@@ -3,7 +3,7 @@
 require_relative "test_helper"
 require "digest"
 
-MAPPING_RECOMMENDATION_HIVE_REVISION = "3f91a71bdb29fd641eca9c3dd38d2ddb7a1f1bb6"
+MAPPING_RECOMMENDATION_HIVE_REVISION = "ee7c8cefd7da8f814170e37df727ab02009b05c3"
 mapping_recommendation_hive_source = ENV["HONEYCOMB_HIVE_SOURCE"].to_s
 MAPPING_RECOMMENDATION_HIVE_PRECHECK_ERROR = begin
   unless mapping_recommendation_hive_source.empty?

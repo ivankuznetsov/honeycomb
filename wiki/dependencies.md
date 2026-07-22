@@ -37,10 +37,11 @@ self-hosted runner, artifact extraction action, or gem installation.
 
 The read-only catalog publication gate checks out Hive at the exact compatible
 commit recorded in the workflow. The current pin is
-`3f91a71bdb29fd641eca9c3dd38d2ddb7a1f1bb6`, the merged Hive source containing
-the full managed-workflow runtime contract, production catalog-v2 client, and
-non-binding mapping recommendation contract. The gate identifies that exact
-clean checkout through
+`ee7c8cefd7da8f814170e37df727ab02009b05c3`, currently the exact head of Hive
+PR #831. It contains the full managed-workflow runtime and non-binding mapping
+recommendation contracts plus advanced-phase and UTF-8 draft-PR recovery. The
+pin is provisional until that prerequisite merges; U7 must repin to the merged
+commit if the resulting identity differs. The gate identifies that exact clean checkout through
 `HONEYCOMB_HIVE_SOURCE`, exposes its libraries through `RUBYLIB`, and runs the
 complete registry test suite. Only then does it compare root
 `catalog.json` with the normalized snapshot from the protected
