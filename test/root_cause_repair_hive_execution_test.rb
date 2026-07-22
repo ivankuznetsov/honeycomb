@@ -5,7 +5,7 @@ require "digest"
 require "json"
 require "yaml"
 
-ROOT_CAUSE_HIVE_REVISION = "edaa7131493446f8bb40092fe7801afbaf2f2c04"
+ROOT_CAUSE_HIVE_REVISION = "3f91a71bdb29fd641eca9c3dd38d2ddb7a1f1bb6"
 root_cause_hive_source = ENV["HONEYCOMB_HIVE_SOURCE"].to_s
 ROOT_CAUSE_HIVE_PRECHECK_ERROR = begin
   if root_cause_hive_source.empty?

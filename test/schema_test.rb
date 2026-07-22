@@ -126,6 +126,45 @@ class SchemaTest < Minitest::Test
     assert HoneycombRegistry::Schema.valid_hive_input_name?("GSC_ACCESS_TOKEN")
   end
 
+  def test_x_hive_accepts_canonical_mapping_recommendations
+    manifest = valid_manifest
+    manifest["x-hive"]["mapping_recommendations"] = [
+      {"slot" => "stages.draft", "effort" => "medium"},
+      {"slot" => "stages.draft.reviewers.accuracy"}
+    ]
+
+    findings = HoneycombRegistry::Schema.validate_manifest(manifest)
+
+    refute findings.errors?, findings.to_h.inspect
+  end
+
+  def test_x_hive_rejects_malformed_mapping_recommendations_with_stable_codes
+    cases = [
+      [[{"slot" => "stages.draft", "effort" => "turbo"}], "schema.invalid_hive_mapping_recommendation_effort"],
+      [[{"slot" => "not-a-slot"}], "schema.invalid_hive_mapping_recommendation_slot"],
+      [[{"slot" => "stages.draft", "agent" => "codex"}], "schema.unknown_key"],
+      [[{"slot" => "stages.draft", "model" => "gpt"}], "schema.unknown_key"],
+      [[{"slot" => "stages.draft", "unknown" => true}], "schema.unknown_key"],
+      [
+        [{"slot" => "stages.review"}, {"slot" => "stages.draft"}],
+        "schema.noncanonical_hive_mapping_recommendations"
+      ],
+      [
+        [{"slot" => "stages.draft"}, {"slot" => "stages.draft", "effort" => "medium"}],
+        "schema.noncanonical_hive_mapping_recommendations"
+      ]
+    ]
+
+    cases.each do |recommendations, expected_code|
+      manifest = valid_manifest
+      manifest["x-hive"]["mapping_recommendations"] = recommendations
+
+      findings = HoneycombRegistry::Schema.validate_manifest(manifest)
+
+      assert_includes findings.codes, expected_code, [recommendations, findings.to_h]
+    end
+  end
+
   def test_enforces_name_boundaries
     %w[ab -abc abc-].each do |name|
       assert HoneycombRegistry::Schema.validate_manifest(valid_manifest.merge("name" => name)).errors?

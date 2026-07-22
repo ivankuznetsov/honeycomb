@@ -11,7 +11,7 @@ trusted base and emit gate-only evidence without reading submitted content. A
 `labeled` event checks out the exact fork head only when a maintainer has just
 applied `safe-to-validate`, then fetches the exact trusted base SHA so the
 three-dot package diff has both identities and their merge base. The analyzer
-checks out the exact compatible released Hive source under a separate immutable
+checks out the exact compatible Hive source commit under a separate immutable
 pin, then invokes the production validator and deterministic Ruby scanners. It
 never executes submitted commands, instructions, hooks, or network requests.
 

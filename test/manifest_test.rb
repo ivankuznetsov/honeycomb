@@ -120,6 +120,9 @@ class ManifestTest < Minitest::Test
             x-hive:
               tools:
                 - path: tools/analyze.rb
+              mapping_recommendations:
+                - slot: stages.build
+                  effort: medium
               optional_inputs:
                 - name: SEO_API_TOKEN
                   authorized_slots:
@@ -132,6 +135,8 @@ class ManifestTest < Minitest::Test
 
       refute result.findings.errors?, result.findings.to_h.inspect
       assert_equal [{"path" => "tools/analyze.rb"}], result.document.dig("x-hive", "tools")
+      assert_equal [{"slot" => "stages.build", "effort" => "medium"}],
+                   result.document.dig("x-hive", "mapping_recommendations")
       assert_equal ["stages.build"],
                    result.document.dig("x-hive", "optional_inputs", 0, "authorized_slots")
       assert result.document.fetch("files").key?("packages/example/1.0.0/tools/analyze.rb")

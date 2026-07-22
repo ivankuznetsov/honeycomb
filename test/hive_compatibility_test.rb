@@ -1,9 +1,87 @@
 # frozen_string_literal: true
 
 require_relative "test_helper"
+require "digest"
+
+MAPPING_RECOMMENDATION_HIVE_REVISION = "3f91a71bdb29fd641eca9c3dd38d2ddb7a1f1bb6"
+mapping_recommendation_hive_source = ENV["HONEYCOMB_HIVE_SOURCE"].to_s
+MAPPING_RECOMMENDATION_HIVE_PRECHECK_ERROR = begin
+  unless mapping_recommendation_hive_source.empty?
+    if !File.directory?(File.join(mapping_recommendation_hive_source, "lib"))
+      "HONEYCOMB_HIVE_SOURCE does not contain Hive lib/"
+    else
+      head, head_error, head_status = Open3.capture3(
+        "git", "-C", mapping_recommendation_hive_source, "rev-parse", "HEAD"
+      )
+      dirty, dirty_error, dirty_status = Open3.capture3(
+        "git", "-C", mapping_recommendation_hive_source, "status", "--porcelain=v1", "--untracked-files=all"
+      )
+      flags, flags_error, flags_status = Open3.capture3(
+        "git", "-C", mapping_recommendation_hive_source, "ls-files", "-v", "-f", "-z"
+      )
+      hidden_flag = flags.split("\0").find { |entry| !entry.empty? && entry.getbyte(0) != "H".ord }
+      if !head_status.success?
+        "cannot read Hive revision: #{head_error.strip}"
+      elsif head.strip != MAPPING_RECOMMENDATION_HIVE_REVISION
+        "Hive revision #{head.strip.inspect} is not #{MAPPING_RECOMMENDATION_HIVE_REVISION}"
+      elsif !dirty_status.success?
+        "cannot inspect Hive checkout: #{dirty_error.strip}"
+      elsif !flags_status.success?
+        "cannot inspect Hive index flags: #{flags_error.strip}"
+      elsif hidden_flag
+        "Hive checkout must not use non-default index flags; found #{hidden_flag.byteslice(0, 1).inspect}"
+      elsif !dirty.empty?
+        "Hive checkout must be clean; status is #{dirty.lines.first.to_s.strip.inspect}"
+      end
+    end
+  end
+end
+
+$LOAD_PATH.unshift(File.join(mapping_recommendation_hive_source, "lib")) if MAPPING_RECOMMENDATION_HIVE_PRECHECK_ERROR.nil? && !mapping_recommendation_hive_source.empty?
+MAPPING_RECOMMENDATION_HIVE_LOAD_ERROR = begin
+  unless mapping_recommendation_hive_source.empty? || MAPPING_RECOMMENDATION_HIVE_PRECHECK_ERROR
+    require "hive"
+    require "hive/workflow_package/validator"
+  end
+  nil
+rescue LoadError => e
+  e
+end
 
 class HiveCompatibilityTest < Minitest::Test
   Runtime = HoneycombRegistry::HiveCompatibility::Runtime
+  RECOMMENDATION_PARITY_CASES = {
+    "absent" => {present: false, recommendations: nil, valid: true},
+    "explicit empty" => {recommendations: [], valid: true},
+    "canonical" => {
+      recommendations: [
+        {"slot" => "stages.review", "effort" => "medium"},
+        {"slot" => "stages.review.reviewers.accuracy"},
+        {"slot" => "stages.review.revise", "effort" => "high"},
+        {"slot" => "stages.work", "effort" => "medium"}
+      ],
+      valid: true
+    },
+    "invalid effort" => {recommendations: [{"slot" => "stages.work", "effort" => "turbo"}], valid: false},
+    "embedded agent" => {recommendations: [{"slot" => "stages.work", "agent" => "codex"}], valid: false},
+    "embedded model" => {recommendations: [{"slot" => "stages.work", "model" => "gpt"}], valid: false},
+    "unknown field" => {recommendations: [{"slot" => "stages.work", "unknown" => true}], valid: false},
+    "non-array" => {recommendations: {"slot" => "stages.work"}, valid: false},
+    "non-map entry" => {recommendations: ["stages.work"], valid: false},
+    "missing slot" => {recommendations: [{"effort" => "medium"}], valid: false},
+    "non-string slot" => {recommendations: [{"slot" => 1}], valid: false},
+    "non-string effort" => {recommendations: [{"slot" => "stages.work", "effort" => 1}], valid: false},
+    "null value" => {recommendations: nil, valid: false},
+    "duplicate" => {
+      recommendations: [{"slot" => "stages.work"}, {"slot" => "stages.work"}], valid: false
+    },
+    "unsorted" => {
+      recommendations: [{"slot" => "stages.work"}, {"slot" => "stages.review"}], valid: false
+    },
+    "invalid syntax" => {recommendations: [{"slot" => "draft"}], valid: false},
+    "unknown slot" => {recommendations: [{"slot" => "stages.missing"}], valid: false},
+    "terminal slot" => {recommendations: [{"slot" => "stages.inbox"}], valid: false}
+  }.freeze
 
   class RecordingParser
     class << self
@@ -208,6 +286,77 @@ class HiveCompatibilityTest < Minitest::Test
     end
   end
 
+  def test_mapping_recommendations_accept_only_executable_slots
+    with_package do |package, _manifest, _workflow|
+      manifest = managed_manifest(
+        "x-hive" => {
+          "mapping_recommendations" => [
+            {"slot" => "stages.draft", "effort" => "medium"},
+            {"slot" => "stages.draft.reviewers.accuracy"},
+            {"slot" => "stages.draft.revise", "effort" => "high"}
+          ],
+          "tools" => [],
+          "optional_inputs" => []
+        }
+      )
+
+      findings = validate_contract(package, manifest: manifest)
+
+      refute findings.errors?, findings.to_h.inspect
+    end
+  end
+
+  def test_mapping_recommendations_reject_unknown_and_terminal_slots
+    with_package do |package, _manifest, _workflow|
+      {
+        "stages.missing" => "hive.unknown_mapping_recommendation_slot",
+        "stages.done" => "hive.terminal_mapping_recommendation_slot"
+      }.each do |slot, expected_code|
+        manifest = managed_manifest(
+          "x-hive" => {
+            "mapping_recommendations" => [{"slot" => slot, "effort" => "medium"}],
+            "tools" => [],
+            "optional_inputs" => []
+          }
+        )
+
+        findings = validate_contract(package, manifest: manifest)
+
+        assert_includes findings.codes, expected_code, [slot, findings.to_h]
+      end
+    end
+  end
+
+  def test_mapping_recommendation_acceptance_matches_pinned_hive_validator
+    skip "set HONEYCOMB_HIVE_SOURCE to the pinned Hive checkout" if ENV["HONEYCOMB_HIVE_SOURCE"].to_s.empty?
+    assert_nil MAPPING_RECOMMENDATION_HIVE_PRECHECK_ERROR, MAPPING_RECOMMENDATION_HIVE_PRECHECK_ERROR
+    assert_nil MAPPING_RECOMMENDATION_HIVE_LOAD_ERROR,
+               "pinned Hive could not be loaded: #{MAPPING_RECOMMENDATION_HIVE_LOAD_ERROR&.message}"
+
+    RECOMMENDATION_PARITY_CASES.each do |name, fixture|
+      with_package do |package, _manifest, _workflow|
+        File.binwrite(File.join(package.path, "workflow.yml"), HoneycombRegistry::CanonicalYAML.dump(parity_workflow))
+        result = HoneycombRegistry::Manifest.generate(package)
+        refute result.findings.errors?, [name, result.findings.to_h].inspect
+        write_mapping_recommendations(
+          package, fixture.fetch(:recommendations), present: fixture.fetch(:present, true)
+        )
+
+        honeycomb_findings = validate_without_hive(package)
+        hive_result = Hive::WorkflowPackage::Validator.validate(
+          package.path, expected_name: package.name, managed: true
+        )
+
+        expected = fixture.fetch(:valid)
+        assert_equal expected, !honeycomb_findings.errors?, [name, honeycomb_findings.to_h].inspect
+        assert_equal expected, hive_result.valid?, [name, hive_result.diagnostics.map(&:to_h)].inspect
+        assert_equal hive_result.valid?, !honeycomb_findings.errors?, [
+          name, honeycomb_findings.to_h, hive_result.diagnostics.map(&:to_h)
+        ].inspect
+      end
+    end
+  end
+
   def test_tool_declarations_are_contained_hashed_and_exactly_executable
     with_package do |package, _manifest, _workflow|
       tools = File.join(package.path, "tools")
@@ -278,5 +427,60 @@ class HiveCompatibilityTest < Minitest::Test
       refute_includes findings.codes, "hive.legacy_package_contract"
       assert_includes findings.codes, "hive.missing_extension"
     end
+  end
+
+  private
+
+  def validate_without_hive(package)
+    HoneycombRegistry::Validator.validate(package, hive_loader: -> { nil })
+  end
+
+  def parity_workflow
+    {
+      "id" => "example",
+      "stages" => [
+        {"name" => "inbox", "kind" => "terminal", "state_file" => "brief.md"},
+        {
+          "name" => "work", "kind" => "agent", "state_file" => "work.md",
+          "instruction" => "instructions/build.md", "mapping_role" => "development",
+          "mapping_contract" => "v1", "permissions" => "read-only"
+        },
+        {
+          "name" => "review", "kind" => "council", "state_file" => "review.md",
+          "input" => "work.md", "mapping_role" => "development",
+          "mapping_contract" => "v1", "permissions" => "read-only",
+          "council" => {
+            "quorum" => 1, "max_rounds" => 2, "exit_rule" => "consensus",
+            "triage_output" => "reviews/triage.md",
+            "revise" => {
+              "instruction" => "instructions/build.md", "mapping_role" => "development",
+              "mapping_contract" => "v1", "permissions" => "read-only"
+            }
+          },
+          "reviewers" => [
+            {
+              "name" => "accuracy", "prompt" => "Review the work for accuracy.",
+              "output_basename" => "accuracy", "mapping_role" => "reviewer",
+              "mapping_contract" => "v1", "permissions" => "read-only"
+            }
+          ]
+        }
+      ]
+    }
+  end
+
+  def write_mapping_recommendations(package, recommendations, present:)
+    manifest = HoneycombRegistry::SafeYAML.load_file(package.manifest_path)
+    extension = manifest.fetch("x-hive")
+    if present
+      extension["mapping_recommendations"] = recommendations
+    else
+      extension.delete("mapping_recommendations")
+    end
+    release_input = manifest.reject { |key, _value| key == "release_sha256" }
+    manifest["release_sha256"] = Digest::SHA256.hexdigest(
+      HoneycombRegistry::CanonicalYAML.dump_manifest(release_input, include_release: false)
+    )
+    File.binwrite(package.manifest_path, HoneycombRegistry::CanonicalYAML.dump_manifest(manifest))
   end
 end

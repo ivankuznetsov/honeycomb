@@ -153,8 +153,9 @@ Stable slot IDs are derived, never authored separately:
 - reviewer: `stages.<stage-name>.reviewers.<reviewer-name>`;
 - reviser: `stages.<stage-name>.revise`.
 
-New packages also declare the closed `x-hive` extension. All three arrays are
-required even when empty:
+New packages also declare the closed `x-hive` extension. `tools` and
+`optional_inputs` are required even when empty; `prompt_assets` and
+`mapping_recommendations` are optional:
 
 ```yaml
 x-hive:
@@ -162,6 +163,9 @@ x-hive:
     - path: tools/analyze.rb
   prompt_assets:
     - path: assets/quality-rubric.md
+  mapping_recommendations:
+    - slot: stages.research
+      effort: medium
   optional_inputs:
     - name: SEO_API_TOKEN
       authorized_slots:
@@ -180,6 +184,14 @@ Prompt-asset entries contain only `path`, use unique lexicographically sorted,
 normalized package-relative paths, and name regular manifest-hashed payload
 files. Hive exposes their absolute paths from the pinned package generation in
 the managed prompt preamble; an asset is context, never an executable.
+
+Mapping-recommendation entries contain only `slot` and optional `effort`.
+Entries use unique stable slot IDs sorted lexicographically, may name executable
+slots only, and accept the portable efforts `low`, `medium`, and `high`. They
+are non-binding installation suggestions: an explicit operator choice or a
+compatible retained mapping remains authoritative. Recommendations never carry
+an `agent` or `model`, and omitting the array preserves existing installation
+defaults.
 
 Optional input entries contain only `name` and `authorized_slots`. Names are
 portable uppercase environment names and entries sort uniquely by name. Slot

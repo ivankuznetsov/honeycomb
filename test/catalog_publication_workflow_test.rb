@@ -27,7 +27,7 @@ class CatalogPublicationWorkflowTest < Minitest::Test
     assert_equal false, source_checkout.dig("with", "persist-credentials")
     assert_equal 0, source_checkout.dig("with", "fetch-depth")
     assert_equal "ivankuznetsov/hive", hive_checkout.dig("with", "repository")
-    assert_equal "edaa7131493446f8bb40092fe7801afbaf2f2c04", hive_checkout.dig("with", "ref")
+    assert_equal "3f91a71bdb29fd641eca9c3dd38d2ddb7a1f1bb6", hive_checkout.dig("with", "ref")
     assert_equal false, hive_checkout.dig("with", "persist-credentials")
     assert_equal "honeycomb-evidence", evidence_checkout.dig("with", "ref")
     assert_equal false, evidence_checkout.dig("with", "persist-credentials")
