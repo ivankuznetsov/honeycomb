@@ -36,6 +36,14 @@ change the `verified`, `not-reproduced`, and `blocked` outcome contract. All
 slots are unbounded, so installation must disclose high-risk arbitrary local
 command execution and repository mutation before activation.
 
+Packages may supply a non-binding effort suggestion for a stable executable
+slot through `x-hive.mapping_recommendations`. Registry validation accepts only
+sorted unique slot entries with optional `low`, `medium`, or `high` effort and
+rejects terminal or unknown slots. The extension cannot select an agent or
+model; explicit operator mappings and compatible retained mappings remain
+authoritative, and packages without recommendations keep prior install
+behavior.
+
 `reviewer-panel/1.0.0` has the same package-versus-catalog boundary:
 `hive workflow install honeycomb/reviewer-panel` resolves it only when current
 protected evidence projects it into the generated catalog. Local acceptance

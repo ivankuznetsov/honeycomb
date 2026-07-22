@@ -37,16 +37,17 @@ self-hosted runner, artifact extraction action, or gem installation.
 
 The read-only catalog publication gate checks out Hive at the exact compatible
 commit recorded in the workflow. The current pin is
-`edaa7131493446f8bb40092fe7801afbaf2f2c04`, the merged Hive v0.6.0 release
-source containing the full managed-workflow runtime contract and production
-catalog-v2 client. The gate identifies that exact clean checkout through
+`3f91a71bdb29fd641eca9c3dd38d2ddb7a1f1bb6`, the merged Hive source containing
+the full managed-workflow runtime contract, production catalog-v2 client, and
+non-binding mapping recommendation contract. The gate identifies that exact
+clean checkout through
 `HONEYCOMB_HIVE_SOURCE`, exposes its libraries through `RUBYLIB`, and runs the
 complete registry test suite. Only then does it compare root
 `catalog.json` with the normalized snapshot from the protected
 `honeycomb-evidence` branch. It receives no secret or write permission and does
 not publish any checkout.
 
-The unprivileged security analyzer uses the same exact Hive v0.6.0 commit for
+The unprivileged security analyzer uses the same exact Hive compatibility commit for
 production descriptor validation on maintainer-authorized package heads. It is
 checked out separately from submitted content, exposed only through `RUBYLIB`,
 and never receives credentials or write permission.

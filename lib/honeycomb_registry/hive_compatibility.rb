@@ -178,21 +178,46 @@ module HoneycombRegistry
       validate_tool_semantics(package, extension["tools"], inventory, declared_files, findings)
       validate_prompt_asset_semantics(package, extension["prompt_assets"], inventory, declared_files, findings)
       inputs = extension["optional_inputs"]
-      return unless inputs.is_a?(Array)
+      if inputs.is_a?(Array)
+        inputs.each_with_index do |input, input_index|
+          next unless input.is_a?(Hash) && input["authorized_slots"].is_a?(Array)
 
-      inputs.each_with_index do |input, input_index|
-        next unless input.is_a?(Hash) && input["authorized_slots"].is_a?(Array)
+          input["authorized_slots"].each_with_index do |slot, slot_index|
+            next unless slot.is_a?(String)
+            next if executable_slots.include?(slot)
 
-        input["authorized_slots"].each_with_index do |slot, slot_index|
-          next unless slot.is_a?(String)
-          next if executable_slots.include?(slot)
-
-          path = "#{package.relative_manifest_path}.x-hive.optional_inputs[#{input_index}].authorized_slots[#{slot_index}]"
-          if terminal_slots.include?(slot)
-            findings.add(path, "hive.terminal_input_slot", "optional inputs cannot be authorized for terminal slots")
-          else
-            findings.add(path, "hive.unknown_input_slot", "optional input references an unknown executable slot")
+            path = "#{package.relative_manifest_path}.x-hive.optional_inputs[#{input_index}].authorized_slots[#{slot_index}]"
+            if terminal_slots.include?(slot)
+              findings.add(path, "hive.terminal_input_slot", "optional inputs cannot be authorized for terminal slots")
+            else
+              findings.add(path, "hive.unknown_input_slot", "optional input references an unknown executable slot")
+            end
           end
+        end
+      end
+
+      validate_mapping_recommendation_semantics(
+        package, extension["mapping_recommendations"], executable_slots, terminal_slots, findings
+      )
+    end
+
+    def validate_mapping_recommendation_semantics(package, recommendations, executable_slots, terminal_slots, findings)
+      return unless recommendations.is_a?(Array)
+
+      recommendations.each_with_index do |recommendation, index|
+        next unless recommendation.is_a?(Hash)
+
+        slot = recommendation["slot"]
+        next unless slot.is_a?(String)
+        next if executable_slots.include?(slot)
+
+        path = "#{package.relative_manifest_path}.x-hive.mapping_recommendations[#{index}].slot"
+        if terminal_slots.include?(slot)
+          findings.add(path, "hive.terminal_mapping_recommendation_slot",
+                       "mapping recommendations cannot name terminal slots")
+        else
+          findings.add(path, "hive.unknown_mapping_recommendation_slot",
+                       "mapping recommendation references an unknown executable slot")
         end
       end
     end
