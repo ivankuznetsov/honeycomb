@@ -122,3 +122,27 @@ Consequence: a single-maintainer repository can publish its own packages
 without pretending independence, while forks and community publishers retain
 the existing one/two-reviewer gates. Protected evidence records the authority;
 historical records without the field remain independent.
+
+## 2026-07-21: Video Capture Uses Detached Owner Receipts
+
+Context: an agent-writable checkbox cannot establish that a repository owner
+authorized a high-risk container capture, and hashing a live mutable source
+tree does not bind the bytes later executed.
+
+Decision: Video Production verifies detached Ed25519 signatures over exact
+stage-specific checked Markdown requests and exposes no signing operation. The
+private key must remain outside repository, task, workflow actor, and agent
+access. Capture approval first reserves one take and privately stages a typed,
+hashed directory tree; capture, verification, editorial approval, and
+publish-ready evidence carry that identity forward. Permission-scoped wrappers
+are executable while the shared implementation is not. Every bound value is
+also rendered in a canonical human-readable request, and checked approval must
+match the exact canonical rendering. Parsed private-key material is rejected
+regardless of PEM or DER encoding. The capture actor is scoped to its exact
+wrapper and state-file write, while process-group, container, and interrupt
+cleanup fail closed and preserve durable evidence.
+
+Consequence: workflow actors may create requests but cannot create owner
+authority, and approved execution no longer depends on later source-tree state.
+An agent-visible private key invalidates the boundary; real external-key and
+released-Hive proof remains a rollout gate.

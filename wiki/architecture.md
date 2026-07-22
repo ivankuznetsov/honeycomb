@@ -73,6 +73,19 @@ catalog renderer.
   test uses the same exact clean Hive pin as Root Cause Repair and native Agent
   and Council engines; it is not provider-backed or human-review evidence, and
   package presence alone does not authorize public install.
+- `packages/video-production/0.1.0` contains an approval-gated high-risk
+  package candidate. Five permission-scoped wrappers share one non-executable
+  Ruby implementation. The tool validates project media JSON, stages and hashes
+  a typed snapshot tree, reserves an exact take, and verifies detached Ed25519
+  owner receipts that no workflow operation can mint. Capture streams bounded
+  diagnostics, supervises child process groups through leader exit, uses a
+  take-local Docker cidfile for fail-closed bounded removal and exact absence
+  proof, records a canonical displayed approval plus context/receipt chain,
+  rejects private-key material and failed or synthetic evidence, verifies media
+  through ffprobe, and
+  stops at local `publish-ready` evidence. The package does not depend on an
+  external recording source tree. Its manifest remains a deliberate
+  source-commit seed until real registry-original provenance can be recorded.
 - `docs/PACKAGE_FORMAT.md` is the authoritative public format/command contract;
   root `CONTRIBUTING.md`/`SECURITY.md` and `docs/TRUST.md`/`REVIEWS.md` are the
   canonical public policy; `wiki/` records agent-facing architecture and
@@ -135,6 +148,16 @@ Catalog `reviews_url` retains the designated approval audit meaning;
 community record exists. Each `listing_approval.reviews` record carries the
 authority that made it eligible so downstream validators can enforce the same
 independent-versus-owner threshold without reconstructing protected evidence.
+
+Video Production keeps capture approval, capture, verification, editorial
+approval, and terminal readiness as separate durable identities. Capture
+approval binds the workflow, manifest, tool, scene command, image, and snapshot;
+editorial approval additionally binds verified artifact hashes. The capture
+stage is scoped to reading, listing, its exact wrapper, and `capture.md`; it has
+no permission to edit the manifest, owner key, packaged tools, approval, or
+evidence. These Hive permissions are not an OS sandbox. Optional credential
+values are exposed only to the capture slot at runtime and are never stored in
+package or approval evidence.
 
 ## Runtime Flow Status
 
