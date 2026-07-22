@@ -16,6 +16,7 @@ class AsyncFixDockerContractTest < Minitest::Test
     assert_includes source, "--network none"
     assert_includes source, "--pull=never"
     assert_includes source, "--cap-drop=ALL"
+    assert_includes source, "--init"
     assert_includes source, "--entrypoint /inputs/honeycomb/test/fixtures/async-fix/container_entry.sh"
     assert_includes source, "--cidfile"
     assert_includes source, "/usr/bin/timeout"

@@ -101,15 +101,16 @@ catalog renderer.
   ephemeral two-commit registry under a temporary directory. Exact-Hive
   acceptance uses released Hive 0.6.7 with deterministic agent/GitHub seams
   while retaining real installation, configuration, task, worktree, report,
-  receipt, and handoff code. `test/docker/async_fix_smoke.sh` adds the system boundary: it
-  materializes Git-tracked Honeycomb and Hive snapshots, mounts them read-only
-  into a disposable digest-pinned Ruby 3.4.5 container, installs Hive from an
-  offline gem cache, disables the container network, and routes only the exact
-  registry clone, target fetch, task-branch push, and draft-PR calls to local
-  fixtures. The bounded host wrapper forces the tracked entrypoint, proves
-  container cleanup, and accepts only one exact proof summary. Every other
-  provider, GitHub, Git transport, release, registry, or deployment call fails
-  closed.
+  receipt, and handoff code. `test/docker/async_fix_smoke.sh` adds the system
+  boundary: it materializes Git-tracked Honeycomb and Hive snapshots, mounts
+  them read-only into a disposable digest-pinned Ruby 3.4.5 container, installs
+  Hive from an offline gem cache, disables the container network, and routes
+  only the exact registry clone, target fetch, task-branch push, and draft-PR
+  calls to local fixtures. Docker's init reaper owns PID 1 so Hive's detached
+  attempt children cannot remain as zombies and delay durable completion. The
+  bounded host wrapper forces the tracked entrypoint, proves container cleanup,
+  and accepts only one exact proof summary. Every other provider, GitHub, Git
+  transport, release, registry, or deployment call fails closed.
   The real daemon proves both a normal draft-PR handoff and a PR-create failure
   that preserves one pushed branch until a manual `hive run` adopts the pending
   PR without repeating either mutation. Source fingerprints are identical

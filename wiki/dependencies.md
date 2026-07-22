@@ -47,11 +47,12 @@ released Hive v0.6.7 commit
 that checkout's locked gems. The entrypoint forbids image pulls and container
 network access, materializes Git-tracked source snapshots on the host, mounts
 those snapshots and the gem cache read-only, and copies only tracked source
-bytes into its disposable tmpfs before running Bundler in local mode. A bounded
-host wrapper forces the tracked entrypoint and accepts only one exact validated
-proof summary. Its `git`, `gh`, and agent fixtures allow only the scenario's
-exact local operations; unexpected commands exit through the audited
-default-deny path.
+bytes into its disposable tmpfs before running Bundler in local mode. The
+container uses Docker's init reaper so detached Hive attempt descendants do not
+accumulate as zombies under the fixture process. A bounded host wrapper forces
+the tracked entrypoint and accepts only one exact validated proof summary. Its
+`git`, `gh`, and agent fixtures allow only the scenario's exact local
+operations; unexpected commands exit through the audited default-deny path.
 
 GitHub workflows use hosted ephemeral runners and pin `actions/checkout` and
 `actions/upload-artifact` to full commit SHAs. There is no dependency cache,
