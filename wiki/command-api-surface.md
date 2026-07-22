@@ -142,8 +142,9 @@ separately recorded owner-controlled gates.
 
 Candidate sources live outside `packages/`, so package-wide validation and
 catalog commands do not silently treat a manifest-free candidate as a release
-submission. Promotion into the canonical package tree is an explicit reviewed
-change, not an effect of testing or opening a source-candidate pull request.
+submission. Async Fix has crossed that explicit boundary as version `0.1.0`:
+manifest and validation commands now include it, while catalog generation still
+excludes it because no protected listing evidence exists.
 
 Reviewer Panel follows the same explicit release boundary. Its source and
 manifest commits are complete, while disposable-registry tests cannot issue

@@ -87,6 +87,15 @@ commits, protected evidence, catalog projection, production site sync, and clean
 public install/task-creation acceptance are complete. Provider-backed live-run
 evidence and any Hive-template removal remain separately auditable steps.
 
+`packages/async-fix/0.1.0` is the immutable Async Fix package. One configurable
+development mapping performs a focused small-to-medium repair in an isolated
+worktree; Hive validates the committed result and owns the exact branch push
+and draft-PR creation or adoption. Its canonical manifest binds the behavior
+bytes to a preserved source commit and requires released Hive 0.6.7. The
+package remains absent from `catalog.json`: protected listing evidence, site
+publication, public-install acceptance, and a provider-backed run are separate
+owner-controlled gates.
+
 ```sh
 ruby script/honeycomb-manifest --check --all
 ruby script/honeycomb-validate --all --json

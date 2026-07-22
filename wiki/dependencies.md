@@ -41,8 +41,8 @@ states are tested without downloading runtimes. A CI job that invokes
 The Async Fix U8 acceptance entrypoint additionally requires Docker, an
 already-cached
 `ruby@sha256:7a61aa7fe86768830f65d8e12571fc115f381a54557c7c88619a5368b92a0474`
-image, an exact clean Hive checkout at
-`57b52dca65c2b037f9bf09007cf523ff7859d855`, and a local gem cache containing
+image, an exact clean Hive checkout at released v0.6.7 commit
+`af22485f9b2bee27a7497dc138e5e58ab9725bde`, and a local gem cache containing
 that checkout's locked gems. The entrypoint forbids image pulls and container
 network access, materializes Git-tracked source snapshots on the host, mounts
 those snapshots and the gem cache read-only, and copies only tracked source
@@ -57,11 +57,10 @@ GitHub workflows use hosted ephemeral runners and pin `actions/checkout` and
 self-hosted runner, artifact extraction action, or gem installation.
 
 The read-only catalog publication gate checks out Hive at the exact compatible
-commit recorded in the workflow. The current pin is
-`57b52dca65c2b037f9bf09007cf523ff7859d855`, the merged commit for Hive PR
-#831. It contains the full managed-workflow runtime and non-binding mapping
-recommendation contracts plus advanced-phase and UTF-8 draft-PR recovery. This
-is the final U7 runtime pin. The gate identifies that exact clean checkout
+commit recorded in the workflow. The current pin is released v0.6.7 commit
+`af22485f9b2bee27a7497dc138e5e58ab9725bde`. It contains the merged Hive PR
+#831 runtime plus the full managed-workflow and non-binding mapping contracts,
+advanced-phase recovery, and UTF-8 draft-PR recovery. The gate identifies that exact clean checkout
 through `HONEYCOMB_HIVE_SOURCE`, exposes its libraries through `RUBYLIB`, and
 runs the complete registry test suite. Only then does it compare root
 `catalog.json` with the normalized snapshot from the protected
