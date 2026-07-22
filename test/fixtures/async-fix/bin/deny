@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative "../lib/fixture_support"
+
+fixture = File.basename($PROGRAM_NAME)
+discovery = {
+  "claude" => [
+    ["--version"],
+    ["plugin", "list", "--json"],
+    ["plugin", "marketplace", "list", "--json"]
+  ],
+  "grok" => [["--version"]],
+  "pi" => [["--version"]],
+  "npm" => [["root", "-g"]]
+}
+if discovery.fetch(fixture, []).include?(ARGV)
+  AsyncFixFixtureSupport.append_log("availability.jsonl", {
+    "fixture" => fixture,
+    "argv" => ARGV,
+    "available" => false
+  })
+  warn "async-fix #{fixture} availability probe: unavailable in deterministic fixture"
+  exit 1
+end
+
+AsyncFixFixtureSupport.deny(fixture, ARGV)

@@ -1,0 +1,171 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "json"
+require "open3"
+require_relative "../lib/fixture_support"
+
+module AsyncFixCodexFixture
+  DISPLAY_ARGV = [
+    "exec",
+    "--dangerously-bypass-approvals-and-sandbox",
+    "--json",
+    "-"
+  ].freeze
+  REPAIR_TAIL = [
+    "--model", "fixture-model",
+    "-c", "model_reasoning_effort=medium",
+    "--json", "-"
+  ].freeze
+  DISPLAY_PROMPT = %r{\A
+    Return\ ONLY\ a\ short\ \(5\ words\ or\ fewer\)\ human-readable\ title\ for\ this\ task\ idea\.\n
+    No\ quotes\.\ No\ markdown\.\ No\ punctuation\ at\ the\ end\.\n\n
+    Task\ idea:\n.+
+  \z}mx
+  DISCOVERY_ARGV = [
+    ["plugin", "list", "--available", "--json"],
+    ["plugin", "marketplace", "list", "--json"]
+  ].freeze
+
+  module_function
+
+  def run(argv)
+    if argv == ["--version"]
+      puts "codex-cli 0.999.0"
+      return
+    end
+    if DISCOVERY_ARGV.include?(argv)
+      AsyncFixFixtureSupport.append_log("availability.jsonl", {
+        "fixture" => "codex",
+        "argv" => argv,
+        "available" => false
+      })
+      warn "async-fix codex availability probe: plugin inventory unavailable in deterministic fixture"
+      exit 1
+    end
+
+    AsyncFixFixtureSupport.assert_no_tokens!("codex")
+    prompt = $stdin.read
+    route = validate_argv!(argv)
+    if route == :display_name
+      unless DISPLAY_PROMPT.match?(prompt) &&
+             AsyncFixFixtureSupport.existing_within_root?(Dir.pwd)
+        AsyncFixFixtureSupport.deny("codex", argv, message: "unexpected display-name prompt or cwd")
+      end
+      log("display_name", argv)
+      puts "Repair seeded answer"
+      return
+    end
+
+    unless prompt.include?("Evidence report path:") &&
+           prompt.include?("Repository working directory:") &&
+           ["direct", "recovery"].one? { |name| prompt.include?("SMOKE_SCENARIO: #{name}") }
+      AsyncFixFixtureSupport.deny("codex", argv, message: "unexpected repair prompt")
+    end
+    repair(argv, prompt)
+  end
+
+  def repair(argv, prompt)
+    model = "fixture-model"
+    effort = "medium"
+
+    report_path = prompt[/^Evidence report path: (.+)$/i, 1].to_s.strip
+    worktree_path = prompt[/^Repository working directory: (.+)$/i, 1].to_s.strip
+    unless AsyncFixFixtureSupport.writable_within_root?(report_path) &&
+           AsyncFixFixtureSupport.existing_within_root?(worktree_path) &&
+           File.realpath(Dir.pwd) == File.realpath(worktree_path)
+      AsyncFixFixtureSupport.deny("codex", argv, message: "repair paths escaped the disposable root")
+    end
+
+    scenario = prompt.include?("SMOKE_SCENARIO: recovery") ? "recovery" : "direct"
+    fail_out, fail_err, fail_status = Open3.capture3("ruby", "test/value_check.rb", chdir: worktree_path)
+    unless !fail_status.success? && "#{fail_out}\n#{fail_err}".include?("Expected: 42")
+      AsyncFixFixtureSupport.deny("codex", argv, message: "focused regression did not fail before repair")
+    end
+
+    value_path = File.join(worktree_path, "lib", "value.rb")
+    original = File.read(value_path)
+    patched = original.sub("41", "42")
+    AsyncFixFixtureSupport.deny("codex", argv, message: "fixture defect was not present") if patched == original
+    File.write(value_path, patched)
+
+    pass_out, pass_err, pass_status = Open3.capture3("ruby", "test/value_check.rb", chdir: worktree_path)
+    unless pass_status.success?
+      AsyncFixFixtureSupport.deny(
+        "codex", argv,
+        message: "focused regression failed after repair: #{pass_out} #{pass_err}"
+      )
+    end
+
+    git!(worktree_path, "add", "lib/value.rb")
+    git!(worktree_path, "commit", "-m", "fix: return the expected fixture answer")
+    status = git!(worktree_path, "status", "--porcelain=v1", "--untracked-files=all")
+    AsyncFixFixtureSupport.deny("codex", argv, message: "repair worktree is dirty") unless status.empty?
+
+    File.write(report_path, report)
+    log("repair", argv, "scenario" => scenario, "model" => model, "effort" => effort,
+                        "red_before" => true, "focused_test_passed" => true)
+    puts JSON.generate({"type" => "turn.completed", "usage" => {"input_tokens" => 1, "output_tokens" => 1}})
+  end
+
+  def validate_argv!(argv)
+    return :display_name if argv == DISPLAY_ARGV
+
+    prefix = ["exec", "--dangerously-bypass-approvals-and-sandbox"]
+    index = prefix.length
+    add_dirs = []
+    if argv.take(index) == prefix
+      while argv[index] == "--add-dir"
+        add_dirs << argv[index + 1]
+        index += 2
+      end
+    end
+    valid = add_dirs.any? && add_dirs.none?(&:nil?) &&
+            add_dirs.all? { |path| AsyncFixFixtureSupport.existing_within_root?(path) } &&
+            argv.drop(index) == REPAIR_TAIL
+    AsyncFixFixtureSupport.deny("codex", argv, message: "unexpected provider argv") unless valid
+
+    :repair
+  end
+
+  def git!(path, *arguments)
+    stdout, stderr, status = Open3.capture3("git", "-C", path, *arguments)
+    return stdout if status.success?
+
+    AsyncFixFixtureSupport.deny("codex", arguments, message: "Git repair step failed: #{stderr.strip}")
+  end
+
+  def report
+    <<~REPORT
+      Decision: ready
+
+      Reproduction:
+      ruby test/value_check.rb failed because FixtureValue.answer returned 41 instead of 42.
+
+      Cause:
+      The fixture retained the stale literal 41.
+
+      Changes:
+      Changed lib/value.rb to return the expected value 42.
+
+      Tests:
+      ruby test/value_check.rb (failed before the repair and passed afterward)
+
+      Risks:
+      The deterministic fixture has no external-service dependency.
+
+      Suggested PR title: Repair the fixture answer
+    REPORT
+  end
+
+  def log(route, argv, extra = {})
+    AsyncFixFixtureSupport.append_log("agent.jsonl", {
+      "fixture" => "codex",
+      "route" => route,
+      "argv" => argv,
+      **extra
+    })
+  end
+end
+
+AsyncFixCodexFixture.run(ARGV)

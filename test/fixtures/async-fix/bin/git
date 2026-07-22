@@ -1,0 +1,245 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "open3"
+require_relative "../lib/fixture_support"
+
+module AsyncFixGitShim
+  OFFICIAL_REGISTRY = "https://github.com/ivankuznetsov/honeycomb.git"
+  TARGET_IDENTITY = "https://github.com/acme/widgets.git"
+  LOCAL_COMMANDS = %w[
+    add branch cat-file check-ignore checkout commit config diff diff-tree
+    for-each-ref hash-object init log merge-base rev-list rev-parse rm
+    show show-ref status symbolic-ref update-ref worktree ls-files ls-tree
+  ].freeze
+  MANAGED_CONFIG = %w[
+    core.hooksPath=/dev/null
+    core.fsmonitor=false
+    core.sshCommand=
+    core.askPass=
+    core.attributesFile=/dev/null
+    core.excludesFile=/dev/null
+    diff.external=
+    interactive.diffFilter=
+    protocol.allow=never
+    protocol.ext.allow=never
+    protocol.file.allow=never
+    protocol.git.allow=always
+    protocol.https.allow=always
+    protocol.ssh.allow=always
+    credential.helper=
+  ].push("credential.https://github.com.helper=!gh auth git-credential").freeze
+  FULL_OID = /\A[0-9a-f]{40}\z/
+  BRANCH = /\A[a-z][a-z0-9-]{1,62}\z/
+
+  module_function
+
+  def run(argv)
+    if argv == ["--version"]
+      return execute([AsyncFixFixtureSupport.real_git, *argv], argv, route: "version")
+    end
+
+    parsed = parse(argv)
+    command = parsed.fetch(:command)
+    arguments = parsed.fetch(:arguments)
+    cwd = parsed.fetch(:cwd)
+
+    case command
+    when "clone"
+      registry_clone(argv, arguments)
+    when "fetch"
+      target_fetch(cwd, arguments, argv)
+    when "ls-remote"
+      target_ls_remote(cwd, arguments, argv)
+    when "push"
+      target_push(cwd, arguments, argv)
+    when "remote"
+      target_remote(cwd, arguments, argv)
+    when *LOCAL_COMMANDS
+      validate_local!(cwd, command, arguments, argv)
+      execute([AsyncFixFixtureSupport.real_git, *argv], argv, route: "local")
+    else
+      deny(argv, "Git command #{command.inspect} is not allowlisted")
+    end
+  end
+
+  def parse(argv)
+    cwd = Dir.pwd
+    index = 0
+    while index < argv.length
+      case argv[index]
+      when "-C"
+        value = argv[index + 1] or deny(argv, "-C is missing its path")
+        cwd = File.expand_path(value, cwd)
+        index += 2
+      when "-c"
+        value = argv[index + 1] or deny(argv, "-c is missing its value")
+        deny(argv, "Git config override is not allowlisted") unless MANAGED_CONFIG.include?(value)
+        index += 2
+      when "--literal-pathspecs", "--no-pager"
+        index += 1
+      else
+        break
+      end
+    end
+    command = argv[index] or deny(argv, "Git command is missing")
+    {
+      cwd: cwd,
+      command: command,
+      arguments: argv.drop(index + 1)
+    }
+  end
+
+  def registry_clone(argv, arguments)
+    expected_prefix = ["--quiet", "--no-checkout", "--", OFFICIAL_REGISTRY]
+    destination = arguments[4]
+    unless arguments.take(4) == expected_prefix && arguments.length == 5 &&
+           destination && AsyncFixFixtureSupport.writable_within_root?(destination)
+      deny(argv, "only the exact immutable Honeycomb registry clone is allowed")
+    end
+
+    command = [
+      AsyncFixFixtureSupport.real_git,
+      "-c", "protocol.file.allow=always",
+      "clone", "--quiet", "--no-checkout", "--",
+      AsyncFixFixtureSupport.registry, destination
+    ]
+    execute(command, argv, route: "registry_clone")
+  end
+
+  def target_fetch(cwd, arguments, argv)
+    expected = [
+      "origin",
+      "+refs/heads/main:refs/remotes/origin/main"
+    ]
+    deny(argv, "unexpected fetch shape") unless arguments == expected
+    validate_target_repository!(cwd, "fetch", arguments, argv)
+
+    command = [
+      AsyncFixFixtureSupport.real_git,
+      "-c", "protocol.file.allow=always", "-C", cwd,
+      "fetch", AsyncFixFixtureSupport.target_bare, expected.last
+    ]
+    execute(command, argv, route: "target_fetch")
+  end
+
+  def target_ls_remote(cwd, arguments, argv)
+    unless arguments.length == 3 && arguments[0, 2] == ["--heads", "origin"]
+      deny(argv, "unexpected ls-remote shape")
+    end
+    branch = arguments.last.to_s.delete_prefix("refs/heads/")
+    validate_allowed_branch!(branch, argv)
+    validate_target_repository!(cwd, "ls-remote", arguments, argv)
+
+    command = [
+      AsyncFixFixtureSupport.real_git,
+      "-c", "protocol.file.allow=always", "-C", cwd,
+      "ls-remote", "--heads", AsyncFixFixtureSupport.target_bare,
+      "refs/heads/#{branch}"
+    ]
+    execute(command, argv, route: "target_ls_remote")
+  end
+
+  def target_push(cwd, arguments, argv)
+    unless arguments.length == 2 && arguments.first == "origin"
+      deny(argv, "unexpected push shape")
+    end
+    oid, target = arguments.last.to_s.split(":", 2)
+    branch = target.to_s.delete_prefix("refs/heads/")
+    unless FULL_OID.match?(oid.to_s) && target == "refs/heads/#{branch}" && branch != "main"
+      deny(argv, "push must publish one exact OID to one task branch")
+    end
+    validate_allowed_branch!(branch, argv)
+    validate_target_repository!(cwd, "push", arguments, argv)
+
+    command = [
+      AsyncFixFixtureSupport.real_git,
+      "-c", "protocol.file.allow=always", "-C", cwd,
+      "push", AsyncFixFixtureSupport.target_bare,
+      "#{oid}:refs/heads/#{branch}"
+    ]
+    execute(command, argv, route: "target_push", extra: {"branch" => branch, "oid" => oid})
+  end
+
+  def target_remote(cwd, arguments, argv)
+    allowed = [
+      ["get-url", "origin"],
+      ["get-url", "--all", "origin"],
+      ["get-url", "--push", "origin"],
+      ["get-url", "--push", "--all", "origin"]
+    ]
+    deny(argv, "unexpected remote shape") unless allowed.include?(arguments)
+    validate_target_repository!(cwd, "remote", arguments, argv)
+    execute([AsyncFixFixtureSupport.real_git, *argv], argv, route: "local")
+  end
+
+  def validate_local!(cwd, command, arguments, argv)
+    unless AsyncFixFixtureSupport.existing_within_root?(cwd)
+      deny(argv, "Git cwd is outside the disposable root")
+    end
+    validate_local_shape!(cwd, command, arguments, argv)
+    if arguments.any? { |argument| argument.include?("://") }
+      deny(argv, "local Git commands may not contain transport URLs")
+    end
+  end
+
+  def validate_local_shape!(cwd, command, arguments, argv)
+    unsafe = %w[--exec-path --ext-diff --textconv --upload-pack --receive-pack]
+    deny(argv, "Git execution-control option is not allowed") if (arguments & unsafe).any?
+
+    if command == "config"
+      allowed = [
+        ["init.defaultBranch"],
+        ["remote.origin.url"],
+        ["--bool", "--get", "commit.gpgsign"]
+      ]
+      deny(argv, "only exact read-only Git config probes are allowed") unless allowed.include?(arguments)
+    elsif command == "worktree"
+      path = case arguments.first
+             when "add" then arguments[-2]
+             when "remove" then arguments.last
+             end
+      if path && !AsyncFixFixtureSupport.writable_within_root?(File.expand_path(path, cwd))
+        deny(argv, "Git worktree path escaped the disposable root")
+      end
+    end
+  end
+
+  def validate_target_repository!(cwd, command, arguments, argv)
+    validate_local!(cwd, command, arguments, argv)
+    stdout, _stderr, status = Open3.capture3(
+      AsyncFixFixtureSupport.real_git, "-C", cwd,
+      "remote", "get-url", "--push", "--all", "origin"
+    )
+    unless status.success? && stdout.lines.map(&:strip).reject(&:empty?) == [TARGET_IDENTITY]
+      deny(argv, "target origin does not expose the synthetic GitHub identity")
+    end
+  end
+
+  def validate_allowed_branch!(branch, argv)
+    allowed = AsyncFixFixtureSupport.read_json(
+      File.join(AsyncFixFixtureSupport.state, "allowed-branches.json"),
+      []
+    )
+    valid = branch == "main" || (BRANCH.match?(branch) && allowed.include?(branch))
+    deny(argv, "branch is outside the exact smoke allowlist") unless valid
+  end
+
+  def execute(command, original, route:, extra: {})
+    AsyncFixFixtureSupport.append_log("git.jsonl", {
+      "fixture" => "git",
+      "route" => route,
+      "argv" => original,
+      **extra
+    })
+    exec(*command)
+  rescue SystemCallError => e
+    deny(original, "real Git execution failed: #{e.class}")
+  end
+
+  def deny(argv, message)
+    AsyncFixFixtureSupport.deny("git", argv, message: message)
+  end
+end
+
+AsyncFixGitShim.run(ARGV)
