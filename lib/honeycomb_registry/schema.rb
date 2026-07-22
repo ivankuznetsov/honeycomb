@@ -22,10 +22,12 @@ module HoneycombRegistry
     PERMISSION_KEYS = %w[
       risk capabilities network_hosts filesystem_read filesystem_write secrets
     ].freeze
-    HIVE_EXTENSION_KEYS = %w[tools prompt_assets optional_inputs].freeze
+    HIVE_EXTENSION_KEYS = %w[tools mapping_recommendations prompt_assets optional_inputs].freeze
     HIVE_TOOL_KEYS = %w[path].freeze
     HIVE_PROMPT_ASSET_KEYS = %w[path].freeze
     HIVE_INPUT_KEYS = %w[name authorized_slots].freeze
+    HIVE_MAPPING_RECOMMENDATION_KEYS = %w[slot effort].freeze
+    HIVE_MAPPING_RECOMMENDATION_EFFORTS = %w[low medium high].freeze
     HIVE_INPUT_NAME_PATTERN = /\A[A-Z][A-Z0-9_]*\z/
     HIVE_RESERVED_INPUT_NAMES = %w[
       BUNDLE_GEMFILE BUNDLE_PATH BUNDLE_WITH BUNDLE_WITHOUT
@@ -185,8 +187,42 @@ module HoneycombRegistry
       return unless validate_keys(value, path, %w[tools optional_inputs], HIVE_EXTENSION_KEYS, findings)
 
       validate_hive_tools(value["tools"], "#{path}.tools", findings)
+      validate_hive_mapping_recommendations(
+        value.fetch("mapping_recommendations", []), "#{path}.mapping_recommendations", findings
+      )
       validate_hive_prompt_assets(value.fetch("prompt_assets", []), "#{path}.prompt_assets", findings)
       validate_hive_inputs(value["optional_inputs"], "#{path}.optional_inputs", findings)
+    end
+
+    def validate_hive_mapping_recommendations(value, path, findings)
+      return invalid_type(findings, path, "mapping_recommendations", value, Array) unless value.is_a?(Array)
+
+      slots = []
+      value.each_with_index do |recommendation, index|
+        recommendation_path = "#{path}[#{index}]"
+        next unless validate_keys(
+          recommendation, recommendation_path, %w[slot], HIVE_MAPPING_RECOMMENDATION_KEYS, findings
+        )
+
+        slot = recommendation["slot"]
+        if slot.is_a?(String) && HIVE_SLOT_PATTERN.match?(slot)
+          slots << slot
+        else
+          findings.add("#{recommendation_path}.slot", "schema.invalid_hive_mapping_recommendation_slot",
+                       "slot must be a stable executable slot ID")
+        end
+
+        next unless recommendation.key?("effort")
+        next if HIVE_MAPPING_RECOMMENDATION_EFFORTS.include?(recommendation["effort"])
+
+        findings.add("#{recommendation_path}.effort", "schema.invalid_hive_mapping_recommendation_effort",
+                     "effort must be one of #{HIVE_MAPPING_RECOMMENDATION_EFFORTS.join(', ')}")
+      end
+
+      return if slots.length == value.length && slots == slots.uniq.sort
+
+      findings.add(path, "schema.noncanonical_hive_mapping_recommendations",
+                   "mapping_recommendations must have unique slots sorted lexicographically")
     end
 
     def validate_hive_prompt_assets(value, path, findings)
