@@ -10,11 +10,10 @@
   direct and compact plan/debug fixes, no-fix and blocked outcomes, auth
   failure, push/create recovery, secret quarantine, and unchanged source
   checkouts.
-- The current acceptance pin is Hive PR #831 head
-  `ee7c8cefd7da8f814170e37df727ab02009b05c3`; U7 remains at its prerequisite
-  merge checkpoint until an owner-approved merged Hive commit replaces that
-  pin. No package version, release, catalog entry, site publication, or
-  deployment was created.
+- The acceptance pin is merged Hive PR #831 commit
+  `57b52dca65c2b037f9bf09007cf523ff7859d855`, completing the U7 prerequisite
+  checkpoint. U8 remains a separate container-proof unit. No package version,
+  release, catalog entry, site publication, or deployment was created.
 - Synchronized the catalog and security-lint checkouts plus all exact-runtime
-  contract tests to that one provisional Hive head so the complete registry
+  contract tests to that one merged Hive runtime so the complete registry
   suite exercises a single clean runtime identity.
