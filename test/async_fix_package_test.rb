@@ -117,7 +117,7 @@ class AsyncFixPackageTest < Minitest::Test
     )
     assert_equal "registry-original", manifest.dig("x-provenance", "kind")
     assert_equal SOURCE_PATHS, manifest.dig("x-provenance", "source_paths")
-    assert git_success?("merge-base", "--is-ancestor", revision, "HEAD")
+    assert git_success?(ROOT, "merge-base", "--is-ancestor", revision, "HEAD")
 
     SOURCE_PATHS.each do |path|
       source, stderr, status = Open3.capture3(
@@ -155,7 +155,7 @@ class AsyncFixPackageTest < Minitest::Test
         HoneycombRegistry::CanonicalYAML.dump_manifest(manifest),
         File.binread(registry.package.manifest_path)
       )
-      assert async_fix_git_success?(
+      assert git_success?(
         registry.root,
         "merge-base", "--is-ancestor", registry.source_revision, registry.release_revision
       )
@@ -189,13 +189,8 @@ class AsyncFixPackageTest < Minitest::Test
     end
   end
 
-  def async_fix_git_success?(repository, *arguments)
+  def git_success?(repository, *arguments)
     _stdout, _stderr, status = Open3.capture3("git", "-C", repository, *arguments)
-    status.success?
-  end
-
-  def git_success?(*arguments)
-    _stdout, _stderr, status = Open3.capture3("git", *arguments, chdir: ROOT)
     status.success?
   end
 end

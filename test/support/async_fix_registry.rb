@@ -36,13 +36,20 @@ module AsyncFixRegistrySupport
     )
     FileUtils.mkdir_p(File.dirname(destination))
     FileUtils.cp_r(package_root, destination)
+    metadata = HoneycombRegistry::SafeYAML.load_file(File.join(destination, "manifest.yml"))
+    %w[permissions files release_sha256].each { |field| metadata.delete(field) }
     FileUtils.rm_f(File.join(destination, "manifest.yml"))
     async_fix_git!(root, "add", "packages")
     async_fix_git!(root, "commit", "-qm", "ephemeral async-fix behavior source")
     source_revision = async_fix_git!(root, "rev-parse", "HEAD").strip
 
     package = HoneycombRegistry::Package.new(destination, root: root)
-    File.write(package.manifest_path, Psych.dump(async_fix_manifest_metadata(source_revision)))
+    metadata.fetch("source").merge!(
+      "url" => "https://example.test/honeycomb/tree/#{source_revision}/" \
+               "packages/#{ASYNC_FIX_PACKAGE_NAME}/#{ASYNC_FIX_TEST_VERSION}",
+      "revision" => source_revision
+    )
+    File.write(package.manifest_path, Psych.dump(metadata))
     generated = HoneycombRegistry::Manifest.generate(package)
     raise generated.findings.to_h.inspect if generated.findings.errors?
 
@@ -76,47 +83,6 @@ module AsyncFixRegistrySupport
       release_revision: release_revision,
       catalog_commit: catalog_commit
     )
-  end
-
-  def async_fix_manifest_metadata(source_revision)
-    {
-      "schema" => "honeycomb-manifest/v1",
-      "name" => ASYNC_FIX_PACKAGE_NAME,
-      "version" => ASYNC_FIX_TEST_VERSION,
-      "description" => "Focused one-agent defect repair with a controller-owned draft PR handoff",
-      "author" => {
-        "name" => "Honeycomb Maintainers",
-        "url" => "https://github.com/ivankuznetsov/honeycomb"
-      },
-      "license" => "MIT",
-      "hive_min_version" => "0.6.7",
-      "source" => {
-        "url" => "https://example.test/honeycomb/tree/#{source_revision}/" \
-                 "packages/#{ASYNC_FIX_PACKAGE_NAME}/#{ASYNC_FIX_TEST_VERSION}",
-        "revision" => source_revision
-      },
-      "x-hive" => {
-        "tools" => [],
-        "prompt_assets" => [{"path" => "assets/fix-report-contract.md"}],
-        "optional_inputs" => [],
-        "mapping_recommendations" => [
-          {"slot" => "stages.fix", "effort" => "medium"}
-        ]
-      },
-      "x-security" => {
-        "network_host_reasons" => {},
-        "suppressions" => []
-      },
-      "x-provenance" => {
-        "kind" => "registry-original",
-        "source_paths" => [
-          "README.md",
-          "workflow.yml",
-          "instructions/fix.md",
-          "assets/fix-report-contract.md"
-        ]
-      }
-    }
   end
 
   def async_fix_catalog_entry(manifest, source_revision:, review_head:)
