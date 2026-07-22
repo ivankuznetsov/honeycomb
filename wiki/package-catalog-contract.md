@@ -127,6 +127,13 @@ depth, and requires no security-lint suppression requests.
   the canonical package scanner. Promotion into `packages/` must satisfy the
   complete contribution contract and still requires protected evidence before
   catalog inclusion.
+- Async Fix candidate: `candidates/async-fix/` has no version or manifest and
+  is invisible to package discovery, manifest-all, validation-all, and catalog
+  generation. Tests may copy it into a disposable `0.0.0` registry, generate
+  temporary provenance and a medium-effort mapping recommendation, and install
+  it through an exact Hive checkout. Those sandbox bytes and passing execution
+  evidence do not authorize a package version, canonical manifest, listing,
+  site publication, deployment, or Hive workflow removal.
 - Root Cause Repair: `packages/root-cause-repair/1.0.0` is an immutable package
   whose canonical manifest binds its registry-original behavior source. Package
   and disposable-registry tests are behavioral evidence; protected listing

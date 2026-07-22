@@ -94,6 +94,14 @@ catalog renderer.
   Manifest-free sources there are testable but cannot enter validation, catalog
   generation, or publication until an owner-authorized change promotes them
   into `packages/` under the complete contribution contract.
+- `candidates/async-fix/` is the first managed draft-PR candidate. Its inert
+  inbox and one high-risk development mapping produce `fix-report.md` from an
+  isolated worktree; Hive alone validates commits, reconciles the exact remote
+  branch, and opens or adopts a draft PR. Candidate tests materialize an
+  ephemeral `0.0.0` registry only under a temporary directory. Exact-Hive
+  acceptance uses deterministic agent/GitHub seams while retaining real Hive
+  installation, configuration, task, worktree, report, receipt, and handoff
+  code. The source remains manifest-free and absent from `catalog.json`.
 
 ## Intended Product Shape
 

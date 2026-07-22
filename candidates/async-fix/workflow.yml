@@ -1,0 +1,15 @@
+id: async-fix
+stages:
+  - name: inbox
+    kind: terminal
+    state_file: brief.md
+  - name: fix
+    kind: agent
+    state_file: fix-report.md
+    deliverable: fix-report.md
+    instruction: instructions/fix.md
+    mapping_role: development
+    mapping_contract: async-fix-fix-v1
+    permissions: yolo
+    workspace: worktree
+    handoff: draft_pr
