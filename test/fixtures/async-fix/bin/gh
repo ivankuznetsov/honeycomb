@@ -1,0 +1,173 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "fileutils"
+require "json"
+require "open3"
+require_relative "../lib/fixture_support"
+
+module AsyncFixGhFixture
+  REPOSITORY = "github.com/acme/widgets"
+  LIST_FIELDS = "url,number,state,isDraft,headRefName,headRefOid,body,baseRefName,baseRefOid,headRepository"
+
+  module_function
+
+  def run(argv)
+    AsyncFixFixtureSupport.assert_no_tokens!("gh")
+    case argv
+    when ["auth", "status", "--hostname", "github.com"]
+      log("auth", argv)
+      puts "github.com"
+    else
+      if argv.take(2) == ["pr", "list"]
+        list(argv)
+      elsif argv.take(2) == ["pr", "create"]
+        create(argv)
+      else
+        AsyncFixFixtureSupport.deny("gh", argv)
+      end
+    end
+  end
+
+  def list(argv)
+    options = parse_options(argv.drop(2), boolean: [])
+    expected = {
+      "--head" => options.fetch("--head"),
+      "--state" => "all",
+      "--json" => LIST_FIELDS,
+      "--repo" => REPOSITORY
+    }
+    unless options == expected && allowed_branches.include?(options.fetch("--head"))
+      AsyncFixFixtureSupport.deny("gh", argv, message: "unexpected PR lookup shape")
+    end
+
+    visible = AsyncFixFixtureSupport.read_json(state_path("visible-prs.json"), [])
+    matches = visible.select { |entry| entry.fetch("headRefName") == options.fetch("--head") }
+    log("pr_list", argv, "head" => options.fetch("--head"), "count" => matches.length)
+    puts JSON.generate(matches)
+  rescue KeyError
+    AsyncFixFixtureSupport.deny("gh", argv, message: "PR lookup is missing a required option")
+  end
+
+  def create(argv)
+    options = parse_options(argv.drop(2), boolean: ["--draft"])
+    required = %w[--repo --draft --head --base --title --body-file]
+    unless options.keys.sort == required.sort && options.fetch("--repo") == REPOSITORY &&
+           options.fetch("--draft") == true && options.fetch("--base") == "main" &&
+           allowed_branches.include?(options.fetch("--head"))
+      AsyncFixFixtureSupport.deny("gh", argv, message: "unexpected draft-PR creation shape")
+    end
+
+    body_path = File.expand_path(options.fetch("--body-file"))
+    tmp_root = File.realpath(ENV.fetch("TMPDIR", "/tmp"))
+    body_realpath = File.realpath(body_path)
+    unless AsyncFixFixtureSupport.existing_within_root?(body_path) &&
+           body_realpath.start_with?("#{tmp_root}/") && File.file?(body_realpath)
+      AsyncFixFixtureSupport.deny("gh", argv, message: "draft-PR body file is outside disposable tmp")
+    end
+    body = File.read(body_realpath)
+    unless %w[Reproduction Cause Changes Tests Risks].all? { |heading| body.include?("## #{heading}") }
+      AsyncFixFixtureSupport.deny("gh", argv, message: "draft-PR body is missing repair evidence")
+    end
+    if body.match?(/github_pat_|ghp_|Bearer\s|api[_-]?key/i)
+      AsyncFixFixtureSupport.deny("gh", argv, message: "draft-PR body contains credential-like text")
+    end
+
+    entry = pr_entry(options, body)
+    failing_head = File.exist?(state_path("fail-create-head")) ? File.read(state_path("fail-create-head")).strip : nil
+    destination = failing_head == options.fetch("--head") ? "pending-prs.json" : "visible-prs.json"
+    append_state(destination, entry)
+    log("pr_create", argv, "head" => entry.fetch("headRefName"), "visible" => destination == "visible-prs.json")
+
+    if destination == "pending-prs.json"
+      warn "synthetic PR create response failed before the PR became observable"
+      exit 1
+    end
+
+    puts entry.fetch("url")
+  rescue Errno::ENOENT, Errno::ELOOP, KeyError
+    AsyncFixFixtureSupport.deny("gh", argv, message: "draft-PR creation is missing a required option")
+  end
+
+  def pr_entry(options, body)
+    number = next_pr_number
+    head = options.fetch("--head")
+    {
+      "url" => "https://github.com/acme/widgets/pull/#{number}",
+      "number" => number,
+      "state" => "OPEN",
+      "isDraft" => true,
+      "headRefName" => head,
+      "headRefOid" => bare_oid("refs/heads/#{head}"),
+      "body" => body,
+      "baseRefName" => "main",
+      "baseRefOid" => bare_oid("refs/heads/main"),
+      "headRepository" => {"nameWithOwner" => "acme/widgets"}
+    }
+  end
+
+  def bare_oid(ref)
+    stdout, stderr, status = Open3.capture3(
+      AsyncFixFixtureSupport.real_git,
+      "--git-dir", AsyncFixFixtureSupport.target_bare,
+      "rev-parse", "--verify", ref
+    )
+    return stdout.strip if status.success? && stdout.strip.match?(/\A[0-9a-f]{40}\z/)
+
+    AsyncFixFixtureSupport.deny("gh", [ref], message: "bare ref is unavailable: #{stderr.strip}")
+  end
+
+  def next_pr_number
+    path = state_path("pr-counter")
+    number = File.exist?(path) ? Integer(File.read(path), 10) + 1 : 42
+    File.write(path, "#{number}\n", mode: "w", perm: 0o600)
+    number
+  rescue ArgumentError
+    AsyncFixFixtureSupport.deny("gh", [path], message: "PR counter is malformed")
+  end
+
+  def append_state(name, entry)
+    path = state_path(name)
+    entries = AsyncFixFixtureSupport.read_json(path, [])
+    AsyncFixFixtureSupport.write_json(path, entries + [entry])
+  end
+
+  def parse_options(arguments, boolean:)
+    options = {}
+    index = 0
+    while index < arguments.length
+      name = arguments.fetch(index)
+      raise KeyError, name if options.key?(name)
+
+      if boolean.include?(name)
+        options[name] = true
+        index += 1
+      else
+        value = arguments[index + 1] or raise KeyError, name
+        options[name] = value
+        index += 2
+      end
+    end
+    options
+  end
+
+  def allowed_branches
+    AsyncFixFixtureSupport.read_json(state_path("allowed-branches.json"), [])
+  end
+
+  def state_path(name)
+    FileUtils.mkdir_p(AsyncFixFixtureSupport.state, mode: 0o700)
+    File.join(AsyncFixFixtureSupport.state, name)
+  end
+
+  def log(route, argv, extra = {})
+    AsyncFixFixtureSupport.append_log("gh.jsonl", {
+      "fixture" => "gh",
+      "route" => route,
+      "argv" => argv,
+      **extra
+    })
+  end
+end
+
+AsyncFixGhFixture.run(ARGV)

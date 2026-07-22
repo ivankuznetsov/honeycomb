@@ -8,7 +8,6 @@ require "psych"
 module AsyncFixRegistrySupport
   ASYNC_FIX_PACKAGE_NAME = "async-fix"
   ASYNC_FIX_TEST_VERSION = "0.0.0"
-  ASYNC_FIX_CANDIDATE_ROOT = File.join(ROOT, "candidates", ASYNC_FIX_PACKAGE_NAME)
 
   AsyncFixRegistry = Data.define(
     :root, :package, :manifest, :source_revision, :release_revision, :catalog_commit
@@ -22,7 +21,10 @@ module AsyncFixRegistrySupport
     end
   end
 
-  def build_async_fix_registry(root)
+  def build_async_fix_registry(
+    root,
+    candidate_root: File.join(ROOT, "candidates", ASYNC_FIX_PACKAGE_NAME)
+  )
     async_fix_git!(root, "init", "-q", "-b", "main")
     async_fix_git!(root, "config", "user.email", "async-fix@example.test")
     async_fix_git!(root, "config", "user.name", "Async Fix fixture")
@@ -31,7 +33,7 @@ module AsyncFixRegistrySupport
       root, "packages", ASYNC_FIX_PACKAGE_NAME, ASYNC_FIX_TEST_VERSION
     )
     FileUtils.mkdir_p(File.dirname(destination))
-    FileUtils.cp_r(ASYNC_FIX_CANDIDATE_ROOT, destination)
+    FileUtils.cp_r(candidate_root, destination)
     FileUtils.rm_f(File.join(destination, "manifest.yml"))
     async_fix_git!(root, "add", "packages")
     async_fix_git!(root, "commit", "-qm", "ephemeral async-fix behavior source")

@@ -101,7 +101,20 @@ catalog renderer.
   ephemeral `0.0.0` registry only under a temporary directory. Exact-Hive
   acceptance uses deterministic agent/GitHub seams while retaining real Hive
   installation, configuration, task, worktree, report, receipt, and handoff
-  code. The source remains manifest-free and absent from `catalog.json`.
+  code. `test/docker/async_fix_smoke.sh` adds the U8 system boundary: it
+  materializes Git-tracked Honeycomb and Hive snapshots, mounts them read-only
+  into a disposable digest-pinned Ruby 3.4.5 container, installs Hive from an
+  offline gem cache, disables the container network, and routes only the exact
+  registry clone, target fetch, task-branch push, and draft-PR calls to local
+  fixtures. The bounded host wrapper forces the tracked entrypoint, proves
+  container cleanup, and accepts only one exact proof summary. Every other
+  provider, GitHub, Git transport, release, registry, or deployment call fails
+  closed.
+  The real daemon proves both a normal draft-PR handoff and a PR-create failure
+  that preserves one pushed branch until a manual `hive run` adopts the pending
+  PR without repeating either mutation. Source fingerprints are identical
+  before and after the run. The candidate remains manifest-free and absent from
+  `catalog.json`.
 
 ## Intended Product Shape
 
