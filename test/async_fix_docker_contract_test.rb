@@ -23,7 +23,7 @@ class AsyncFixDockerContractTest < Minitest::Test
     assert_includes source, "ruby@sha256:7a61aa7fe86768830f65d8e12571fc115f381a54557c7c88619a5368b92a0474"
     assert_match(%r{/inputs/honeycomb:ro}, source)
     assert_match(%r{/inputs/hive:ro}, source)
-    assert_includes source, "57b52dca65c2b037f9bf09007cf523ff7859d855"
+    assert_includes source, "af22485f9b2bee27a7497dc138e5e58ab9725bde"
   end
 
   def test_default_deny_fixtures_reject_unexpected_provider_github_and_git_calls

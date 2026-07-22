@@ -7,7 +7,7 @@ require "json"
 require "stringio"
 require "yaml"
 
-ASYNC_FIX_HIVE_REVISION = "57b52dca65c2b037f9bf09007cf523ff7859d855"
+ASYNC_FIX_HIVE_REVISION = "af22485f9b2bee27a7497dc138e5e58ab9725bde"
 async_fix_hive_source = ENV["HONEYCOMB_HIVE_SOURCE"].to_s
 ASYNC_FIX_HIVE_PRECHECK_ERROR = begin
   if async_fix_hive_source.empty?

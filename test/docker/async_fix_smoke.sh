@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly expected_hive_revision="57b52dca65c2b037f9bf09007cf523ff7859d855"
+readonly expected_hive_revision="af22485f9b2bee27a7497dc138e5e58ab9725bde"
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 readonly script_dir
 honeycomb_root="$(cd "$script_dir/../.." && pwd -P)"
