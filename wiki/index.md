@@ -78,8 +78,9 @@ Hive-template removal remain separate rollout gates.
 
 Async Fix remains an unversioned, manifest-free candidate under
 `candidates/async-fix/`; it is absent from `packages/` and `catalog.json`. Its
-U8 acceptance runs the real pinned Hive source at
-`57b52dca65c2b037f9bf09007cf523ff7859d855` inside a disposable Ruby 3.4.5
+U8 acceptance runs the real pinned Hive source from
+released Hive v0.6.7 commit
+`af22485f9b2bee27a7497dc138e5e58ab9725bde` inside a disposable Ruby 3.4.5
 container pinned by digest, with no network, read-only Git-tracked source
 snapshots, scrubbed credentials, bounded cleanup, an exact host-validated
 summary, and default-deny provider, GitHub, Git transport, release, registry,
