@@ -17,7 +17,7 @@ builder = Object.new.extend(AsyncFixRegistrySupport)
 FileUtils.mkdir_p(registry_root, mode: 0o700)
 registry = builder.build_async_fix_registry(
   registry_root,
-  candidate_root: File.join(honeycomb_root, "candidates", "async-fix")
+  package_root: File.join(honeycomb_root, "packages", "async-fix", "0.1.0")
 )
 puts JSON.generate({
   "root" => registry.root,

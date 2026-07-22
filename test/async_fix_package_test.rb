@@ -3,10 +3,10 @@
 require_relative "test_helper"
 require_relative "support/async_fix_registry"
 
-class AsyncFixCandidateTest < Minitest::Test
+class AsyncFixPackageTest < Minitest::Test
   include AsyncFixRegistrySupport
 
-  CANDIDATE_ROOT = File.join(ROOT, "candidates", "async-fix")
+  PACKAGE_ROOT = File.join(ROOT, "packages", "async-fix", "0.1.0")
   IDENTITY_KEYS = %w[agent model effort].freeze
   EXPECTED_FILES = %w[
     README.md
@@ -47,9 +47,9 @@ class AsyncFixCandidateTest < Minitest::Test
   end
 
   def test_instruction_is_self_contained_and_preserves_the_authority_boundary
-    instruction = File.read(File.join(CANDIDATE_ROOT, "instructions", "fix.md"))
+    instruction = File.read(File.join(PACKAGE_ROOT, "instructions", "fix.md"))
     report_contract = File.read(
-      File.join(CANDIDATE_ROOT, "assets", "fix-report-contract.md")
+      File.join(PACKAGE_ROOT, "assets", "fix-report-contract.md")
     )
     corpus = "#{instruction}\n#{report_contract}"
 
@@ -76,54 +76,27 @@ class AsyncFixCandidateTest < Minitest::Test
     refute_match(/package tool|tools\//i, corpus)
   end
 
-  def test_candidate_is_manifest_free_and_invisible_to_package_commands
-    relative_files = Dir.glob(File.join(CANDIDATE_ROOT, "**", "*"), File::FNM_DOTMATCH)
+  def test_versioned_source_is_manifest_free_until_canonicalization
+    relative_files = Dir.glob(File.join(PACKAGE_ROOT, "**", "*"), File::FNM_DOTMATCH)
                         .select { |path| File.file?(path) }
-                        .map { |path| path.delete_prefix("#{CANDIDATE_ROOT}/") }
+                        .map { |path| path.delete_prefix("#{PACKAGE_ROOT}/") }
                         .sort
     assert_equal EXPECTED_FILES, relative_files
-    refute File.exist?(File.join(CANDIDATE_ROOT, "manifest.yml"))
-    assert_empty Dir.glob(File.join(CANDIDATE_ROOT, "*", "manifest.yml"))
-    refute File.exist?(File.join(ROOT, "packages", "async-fix"))
+    refute File.exist?(File.join(PACKAGE_ROOT, "manifest.yml"))
+    refute File.exist?(File.join(ROOT, "candidates", "async-fix"))
     refute JSON.parse(File.read(File.join(ROOT, "catalog.json"))).fetch("entries")
                .any? { |entry| entry.fetch("name") == "async-fix" }
 
     discovery = HoneycombRegistry::Package.discover(ROOT)
     refute discovery.findings.errors?, discovery.findings.to_h.inspect
-    refute discovery.packages.any? { |package| package.path.start_with?(CANDIDATE_ROOT) }
-
-    in_tmpdir do |root|
-      FileUtils.mkdir_p(File.join(root, "packages"))
-      FileUtils.mkdir_p(File.join(root, "candidates"))
-      FileUtils.cp_r(CANDIDATE_ROOT, File.join(root, "candidates", "async-fix"))
-
-      temporary_discovery = HoneycombRegistry::Package.discover(root)
-      refute temporary_discovery.findings.errors?, temporary_discovery.findings.to_h.inspect
-      assert_empty temporary_discovery.packages,
-                   "package discovery must ignore copied unversioned candidates"
-
-      stdout, stderr, status = capture_command(
-        File.join(ROOT, "script", "honeycomb-manifest"), "--root", root, "--check", "--all"
-      )
-      assert status.success?, [stdout, stderr].join("\n")
-
-      catalog = File.join(root, "catalog.json")
-      stdout, stderr, status = capture_command(
-        File.join(ROOT, "script", "honeycomb-catalog"),
-        "--root", root,
-        "--output", catalog,
-        "--evidence", fixture_path("listing-evidence", "empty.json")
-      )
-      assert status.success?, [stdout, stderr].join("\n")
-      assert_empty JSON.parse(File.read(catalog)).fetch("entries")
-    end
+    assert discovery.packages.any? { |package| package.path == PACKAGE_ROOT }
   end
 
   def test_temporary_registry_derives_high_risk_medium_recommended_package
     with_async_fix_registry do |registry|
       manifest = registry.manifest
 
-      assert_equal "0.0.0", manifest.fetch("version")
+      assert_equal "0.1.0", manifest.fetch("version")
       assert_equal registry.source_revision, manifest.dig("source", "revision")
       assert_equal "high", manifest.dig("permissions", "risk")
       %w[network_hosts filesystem_read filesystem_write secrets].each do |field|
@@ -159,7 +132,7 @@ class AsyncFixCandidateTest < Minitest::Test
   private
 
   def load_workflow
-    HoneycombRegistry::SafeYAML.load_file(File.join(CANDIDATE_ROOT, "workflow.yml"))
+    HoneycombRegistry::SafeYAML.load_file(File.join(PACKAGE_ROOT, "workflow.yml"))
   end
 
   def stage(workflow, name)

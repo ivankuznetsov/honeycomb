@@ -7,7 +7,7 @@ require "psych"
 
 module AsyncFixRegistrySupport
   ASYNC_FIX_PACKAGE_NAME = "async-fix"
-  ASYNC_FIX_TEST_VERSION = "0.0.0"
+  ASYNC_FIX_TEST_VERSION = "0.1.0"
 
   AsyncFixRegistry = Data.define(
     :root, :package, :manifest, :source_revision, :release_revision, :catalog_commit
@@ -23,7 +23,9 @@ module AsyncFixRegistrySupport
 
   def build_async_fix_registry(
     root,
-    candidate_root: File.join(ROOT, "candidates", ASYNC_FIX_PACKAGE_NAME)
+    package_root: File.join(
+      ROOT, "packages", ASYNC_FIX_PACKAGE_NAME, ASYNC_FIX_TEST_VERSION
+    )
   )
     async_fix_git!(root, "init", "-q", "-b", "main")
     async_fix_git!(root, "config", "user.email", "async-fix@example.test")
@@ -33,7 +35,7 @@ module AsyncFixRegistrySupport
       root, "packages", ASYNC_FIX_PACKAGE_NAME, ASYNC_FIX_TEST_VERSION
     )
     FileUtils.mkdir_p(File.dirname(destination))
-    FileUtils.cp_r(candidate_root, destination)
+    FileUtils.cp_r(package_root, destination)
     FileUtils.rm_f(File.join(destination, "manifest.yml"))
     async_fix_git!(root, "add", "packages")
     async_fix_git!(root, "commit", "-qm", "ephemeral async-fix behavior source")
@@ -83,13 +85,14 @@ module AsyncFixRegistrySupport
       "version" => ASYNC_FIX_TEST_VERSION,
       "description" => "Focused one-agent defect repair with a controller-owned draft PR handoff",
       "author" => {
-        "name" => "Honeycomb maintainers",
-        "url" => "https://example.test/honeycomb"
+        "name" => "Honeycomb Maintainers",
+        "url" => "https://github.com/ivankuznetsov/honeycomb"
       },
       "license" => "MIT",
-      "hive_min_version" => "0.6.0",
+      "hive_min_version" => "0.6.7",
       "source" => {
-        "url" => "https://example.test/honeycomb/commit/#{source_revision}",
+        "url" => "https://example.test/honeycomb/tree/#{source_revision}/" \
+                 "packages/#{ASYNC_FIX_PACKAGE_NAME}/#{ASYNC_FIX_TEST_VERSION}",
         "revision" => source_revision
       },
       "x-hive" => {
@@ -103,6 +106,15 @@ module AsyncFixRegistrySupport
       "x-security" => {
         "network_host_reasons" => {},
         "suppressions" => []
+      },
+      "x-provenance" => {
+        "kind" => "registry-original",
+        "source_paths" => [
+          "README.md",
+          "workflow.yml",
+          "instructions/fix.md",
+          "assets/fix-report-contract.md"
+        ]
       }
     }
   end

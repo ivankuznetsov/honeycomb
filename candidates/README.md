@@ -5,12 +5,8 @@ package submissions. Candidate versions intentionally have no `manifest.yml`,
 are outside the canonical `packages/<name>/<version>` tree, and are ignored by
 catalog generation and package-wide validation.
 
-Current candidates:
-
-- [`async-fix/`](async-fix/) is a high-risk, one-agent repair workflow whose
-  successful controller-owned handoff is a focused draft pull request. Its
-  source contract recommends medium reasoning effort without embedding agent,
-  model, or effort identity.
+There are currently no unpublished workflow candidates. Async Fix moved into
+the separately versioned package flow after its owner authorized `0.1.0`.
 
 Moving a candidate into `packages/` begins the separately authorized
 publication flow. That change must satisfy `CONTRIBUTING.md`, including source

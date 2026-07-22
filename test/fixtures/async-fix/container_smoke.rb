@@ -10,7 +10,7 @@ require_relative "lib/fixture_support"
 
 class AsyncFixContainerSmoke
   SYNTHETIC_ORIGIN = "https://github.com/acme/widgets.git"
-  PACKAGE = "honeycomb/async-fix@0.0.0"
+  PACKAGE = "honeycomb/async-fix@0.1.0"
   SLOT = "stages.fix"
   WAIT_SECONDS = 60
   COMMAND_TIMEOUT_SECONDS = 45

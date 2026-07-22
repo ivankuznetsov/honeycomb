@@ -5,7 +5,7 @@ require "digest"
 require "json"
 require "yaml"
 
-REVIEWER_PANEL_HIVE_REVISION = "57b52dca65c2b037f9bf09007cf523ff7859d855"
+REVIEWER_PANEL_HIVE_REVISION = "af22485f9b2bee27a7497dc138e5e58ab9725bde"
 reviewer_panel_hive_source = ENV["HONEYCOMB_HIVE_SOURCE"].to_s
 REVIEWER_PANEL_HIVE_PRECHECK_ERROR = begin
   if reviewer_panel_hive_source.empty?

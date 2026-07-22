@@ -36,7 +36,7 @@ class SecurityLintWorkflowContractTest < Minitest::Test
     hive_checkout = steps.find { |step| step["name"] == "Check out compatible Hive source for analysis" }
     analysis = steps.find { |step| step["name"] == "Analyze the submitted honeycomb" }
     assert_equal "ivankuznetsov/hive", hive_checkout.dig("with", "repository")
-    assert_equal "57b52dca65c2b037f9bf09007cf523ff7859d855", hive_checkout.dig("with", "ref")
+    assert_equal "af22485f9b2bee27a7497dc138e5e58ab9725bde", hive_checkout.dig("with", "ref")
     assert_equal ".hive-runtime", hive_checkout.dig("with", "path")
     assert_equal false, hive_checkout.dig("with", "persist-credentials")
     assert_equal "${{ github.workspace }}/.hive-runtime/lib", analysis.dig("env", "RUBYLIB")
