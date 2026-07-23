@@ -1,0 +1,20 @@
+{
+  "approvals": [
+    {
+      "approved_suppressions": [],
+      "authority": "repository_owner",
+      "decision": "approved",
+      "evidence_digest": "8a947399b65ca96f9a377af886b76e2acc804e87b0882146aa4a1f531cb4c0d5",
+      "head_sha": "fb6a249ae06fec17850d2bb541a56535360d0e68",
+      "name": "async-fix",
+      "notes": "Repository-owner publication approval for Async Fix 0.1.0 after merged PR #35; accept the reviewed first-party broad permissions for asynchronous fixes.",
+      "path": "packages/async-fix/0.1.0",
+      "release_sha256": "2c2debc0cbf92a7a9bef05be24a2205ad3f7a70c8ebf0cf691722b619a69cebb",
+      "review_url": "https://github.com/ivankuznetsov/honeycomb/actions/runs/30014034522",
+      "reviewed_at": "2026-07-23T14:03:34Z",
+      "reviewer": "ivankuznetsov",
+      "version": "0.1.0"
+    }
+  ],
+  "schema": "honeycomb.listing-approval/v1"
+}
