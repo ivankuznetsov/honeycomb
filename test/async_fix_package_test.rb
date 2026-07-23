@@ -3,12 +3,12 @@
 require_relative "test_helper"
 require_relative "support/async_fix_registry"
 
-class AsyncFixCandidateTest < Minitest::Test
+class AsyncFixPackageTest < Minitest::Test
   include AsyncFixRegistrySupport
 
-  CANDIDATE_ROOT = File.join(ROOT, "candidates", "async-fix")
+  PACKAGE_ROOT = File.join(ROOT, "packages", "async-fix", "0.1.0")
   IDENTITY_KEYS = %w[agent model effort].freeze
-  EXPECTED_FILES = %w[
+  SOURCE_PATHS = %w[
     README.md
     assets/fix-report-contract.md
     instructions/fix.md
@@ -47,9 +47,9 @@ class AsyncFixCandidateTest < Minitest::Test
   end
 
   def test_instruction_is_self_contained_and_preserves_the_authority_boundary
-    instruction = File.read(File.join(CANDIDATE_ROOT, "instructions", "fix.md"))
+    instruction = File.read(File.join(PACKAGE_ROOT, "instructions", "fix.md"))
     report_contract = File.read(
-      File.join(CANDIDATE_ROOT, "assets", "fix-report-contract.md")
+      File.join(PACKAGE_ROOT, "assets", "fix-report-contract.md")
     )
     corpus = "#{instruction}\n#{report_contract}"
 
@@ -76,54 +76,66 @@ class AsyncFixCandidateTest < Minitest::Test
     refute_match(/package tool|tools\//i, corpus)
   end
 
-  def test_candidate_is_manifest_free_and_invisible_to_package_commands
-    relative_files = Dir.glob(File.join(CANDIDATE_ROOT, "**", "*"), File::FNM_DOTMATCH)
+  def test_canonical_manifest_binds_the_versioned_source_and_stays_unlisted
+    relative_files = Dir.glob(File.join(PACKAGE_ROOT, "**", "*"), File::FNM_DOTMATCH)
                         .select { |path| File.file?(path) }
-                        .map { |path| path.delete_prefix("#{CANDIDATE_ROOT}/") }
+                        .map { |path| path.delete_prefix("#{PACKAGE_ROOT}/") }
                         .sort
-    assert_equal EXPECTED_FILES, relative_files
-    refute File.exist?(File.join(CANDIDATE_ROOT, "manifest.yml"))
-    assert_empty Dir.glob(File.join(CANDIDATE_ROOT, "*", "manifest.yml"))
-    refute File.exist?(File.join(ROOT, "packages", "async-fix"))
+    assert_equal (SOURCE_PATHS + ["manifest.yml"]).sort, relative_files
+    refute File.exist?(File.join(ROOT, "candidates", "async-fix"))
     refute JSON.parse(File.read(File.join(ROOT, "catalog.json"))).fetch("entries")
                .any? { |entry| entry.fetch("name") == "async-fix" }
 
     discovery = HoneycombRegistry::Package.discover(ROOT)
     refute discovery.findings.errors?, discovery.findings.to_h.inspect
-    refute discovery.packages.any? { |package| package.path.start_with?(CANDIDATE_ROOT) }
+    package = discovery.packages.find { |item| item.path == PACKAGE_ROOT }
+    refute_nil package
 
-    in_tmpdir do |root|
-      FileUtils.mkdir_p(File.join(root, "packages"))
-      FileUtils.mkdir_p(File.join(root, "candidates"))
-      FileUtils.cp_r(CANDIDATE_ROOT, File.join(root, "candidates", "async-fix"))
+    manifest = HoneycombRegistry::SafeYAML.load_file(package.manifest_path)
+    revision = manifest.dig("source", "revision")
+    assert_equal "honeycomb-manifest/v1", manifest.fetch("schema")
+    assert_equal "async-fix", manifest.fetch("name")
+    assert_equal "0.1.0", manifest.fetch("version")
+    assert_equal "0.6.7", manifest.fetch("hive_min_version")
+    assert_equal "high", manifest.dig("permissions", "risk")
+    assert_match(/\A[0-9a-f]{40}\z/, revision)
+    assert_equal(
+      "https://github.com/ivankuznetsov/honeycomb/tree/#{revision}/" \
+      "packages/async-fix/0.1.0",
+      manifest.dig("source", "url")
+    )
+    assert_match(/\A[0-9a-f]{64}\z/, manifest.fetch("release_sha256"))
+    assert_equal [], manifest.dig("x-hive", "tools")
+    assert_equal [], manifest.dig("x-hive", "optional_inputs")
+    assert_equal(
+      [{"path" => "assets/fix-report-contract.md"}],
+      manifest.dig("x-hive", "prompt_assets")
+    )
+    assert_equal(
+      [{"slot" => "stages.fix", "effort" => "medium"}],
+      manifest.dig("x-hive", "mapping_recommendations")
+    )
+    assert_equal "registry-original", manifest.dig("x-provenance", "kind")
+    assert_equal SOURCE_PATHS, manifest.dig("x-provenance", "source_paths")
+    assert git_success?(ROOT, "merge-base", "--is-ancestor", revision, "HEAD")
 
-      temporary_discovery = HoneycombRegistry::Package.discover(root)
-      refute temporary_discovery.findings.errors?, temporary_discovery.findings.to_h.inspect
-      assert_empty temporary_discovery.packages,
-                   "package discovery must ignore copied unversioned candidates"
-
-      stdout, stderr, status = capture_command(
-        File.join(ROOT, "script", "honeycomb-manifest"), "--root", root, "--check", "--all"
+    SOURCE_PATHS.each do |path|
+      source, stderr, status = Open3.capture3(
+        "git", "show", "#{revision}:packages/async-fix/0.1.0/#{path}", chdir: ROOT
       )
-      assert status.success?, [stdout, stderr].join("\n")
-
-      catalog = File.join(root, "catalog.json")
-      stdout, stderr, status = capture_command(
-        File.join(ROOT, "script", "honeycomb-catalog"),
-        "--root", root,
-        "--output", catalog,
-        "--evidence", fixture_path("listing-evidence", "empty.json")
-      )
-      assert status.success?, [stdout, stderr].join("\n")
-      assert_empty JSON.parse(File.read(catalog)).fetch("entries")
+      assert status.success?, "#{path}: #{stderr}"
+      assert_equal File.binread(File.join(PACKAGE_ROOT, path)), source.b, path
     end
+
+    checked = HoneycombRegistry::Manifest.check(package)
+    refute checked.findings.errors?, checked.findings.to_h.inspect
   end
 
   def test_temporary_registry_derives_high_risk_medium_recommended_package
     with_async_fix_registry do |registry|
       manifest = registry.manifest
 
-      assert_equal "0.0.0", manifest.fetch("version")
+      assert_equal "0.1.0", manifest.fetch("version")
       assert_equal registry.source_revision, manifest.dig("source", "revision")
       assert_equal "high", manifest.dig("permissions", "risk")
       %w[network_hosts filesystem_read filesystem_write secrets].each do |field|
@@ -143,7 +155,7 @@ class AsyncFixCandidateTest < Minitest::Test
         HoneycombRegistry::CanonicalYAML.dump_manifest(manifest),
         File.binread(registry.package.manifest_path)
       )
-      assert async_fix_git_success?(
+      assert git_success?(
         registry.root,
         "merge-base", "--is-ancestor", registry.source_revision, registry.release_revision
       )
@@ -159,7 +171,7 @@ class AsyncFixCandidateTest < Minitest::Test
   private
 
   def load_workflow
-    HoneycombRegistry::SafeYAML.load_file(File.join(CANDIDATE_ROOT, "workflow.yml"))
+    HoneycombRegistry::SafeYAML.load_file(File.join(PACKAGE_ROOT, "workflow.yml"))
   end
 
   def stage(workflow, name)
@@ -177,7 +189,7 @@ class AsyncFixCandidateTest < Minitest::Test
     end
   end
 
-  def async_fix_git_success?(repository, *arguments)
+  def git_success?(repository, *arguments)
     _stdout, _stderr, status = Open3.capture3("git", "-C", repository, *arguments)
     status.success?
   end

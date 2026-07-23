@@ -74,21 +74,21 @@ sync and public-install acceptance against released Hive are complete,
 including managed task creation. Provider-backed live-run evidence and any
 Hive-template removal remain separate rollout gates.
 
-## Async Fix Candidate Status
+## Async Fix Package Status
 
-Async Fix remains an unversioned, manifest-free candidate under
-`candidates/async-fix/`; it is absent from `packages/` and `catalog.json`. Its
-U8 acceptance runs the real pinned Hive source from
-released Hive v0.6.7 commit
-`af22485f9b2bee27a7497dc138e5e58ab9725bde` inside a disposable Ruby 3.4.5
-container pinned by digest, with no network, read-only Git-tracked source
-snapshots, scrubbed credentials, bounded cleanup, an exact host-validated
-summary, and default-deny provider, GitHub, Git transport, release, registry,
-and deployment seams. The proof covers suggested medium effort, an explicit
-mapping override, daemon-driven draft-PR creation, terminal idempotency,
-recoverable PR-create failure, and mutation-free manual adoption. Package
-promotion, release, listing, site publication, deployment, and Hive-template
-removal remain separate owner-authorized gates.
+Async Fix 0.1.0 is an immutable package under `packages/async-fix/0.1.0`.
+Its canonical manifest binds the behavior bytes to the preserved registry
+source commit, requires released Hive 0.6.7, and retains the medium-effort
+recommendation without embedding agent identity. Its default-deny Docker
+acceptance runs the exact v0.6.7 tag commit inside a digest-pinned Ruby 3.4.5
+container with no network, read-only Git-tracked source snapshots, scrubbed
+credentials, bounded cleanup, an exact host-validated summary, and denied
+provider, GitHub, Git transport, release, registry, and deployment seams. The
+proof covers an explicit mapping override, daemon draft-PR creation, terminal
+idempotency, recoverable PR-create failure, and mutation-free manual adoption.
+The package is absent from `catalog.json`; protected listing evidence, site
+publication, deployment, public-install acceptance, provider-backed execution,
+and any Hive-template removal remain separate owner-authorized gates.
 
 ## Video Production Candidate Status
 

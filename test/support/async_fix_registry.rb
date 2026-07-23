@@ -7,7 +7,7 @@ require "psych"
 
 module AsyncFixRegistrySupport
   ASYNC_FIX_PACKAGE_NAME = "async-fix"
-  ASYNC_FIX_TEST_VERSION = "0.0.0"
+  ASYNC_FIX_TEST_VERSION = "0.1.0"
 
   AsyncFixRegistry = Data.define(
     :root, :package, :manifest, :source_revision, :release_revision, :catalog_commit
@@ -23,7 +23,9 @@ module AsyncFixRegistrySupport
 
   def build_async_fix_registry(
     root,
-    candidate_root: File.join(ROOT, "candidates", ASYNC_FIX_PACKAGE_NAME)
+    package_root: File.join(
+      ROOT, "packages", ASYNC_FIX_PACKAGE_NAME, ASYNC_FIX_TEST_VERSION
+    )
   )
     async_fix_git!(root, "init", "-q", "-b", "main")
     async_fix_git!(root, "config", "user.email", "async-fix@example.test")
@@ -33,14 +35,21 @@ module AsyncFixRegistrySupport
       root, "packages", ASYNC_FIX_PACKAGE_NAME, ASYNC_FIX_TEST_VERSION
     )
     FileUtils.mkdir_p(File.dirname(destination))
-    FileUtils.cp_r(candidate_root, destination)
+    FileUtils.cp_r(package_root, destination)
+    metadata = HoneycombRegistry::SafeYAML.load_file(File.join(destination, "manifest.yml"))
+    %w[permissions files release_sha256].each { |field| metadata.delete(field) }
     FileUtils.rm_f(File.join(destination, "manifest.yml"))
     async_fix_git!(root, "add", "packages")
     async_fix_git!(root, "commit", "-qm", "ephemeral async-fix behavior source")
     source_revision = async_fix_git!(root, "rev-parse", "HEAD").strip
 
     package = HoneycombRegistry::Package.new(destination, root: root)
-    File.write(package.manifest_path, Psych.dump(async_fix_manifest_metadata(source_revision)))
+    metadata.fetch("source").merge!(
+      "url" => "https://example.test/honeycomb/tree/#{source_revision}/" \
+               "packages/#{ASYNC_FIX_PACKAGE_NAME}/#{ASYNC_FIX_TEST_VERSION}",
+      "revision" => source_revision
+    )
+    File.write(package.manifest_path, Psych.dump(metadata))
     generated = HoneycombRegistry::Manifest.generate(package)
     raise generated.findings.to_h.inspect if generated.findings.errors?
 
@@ -74,37 +83,6 @@ module AsyncFixRegistrySupport
       release_revision: release_revision,
       catalog_commit: catalog_commit
     )
-  end
-
-  def async_fix_manifest_metadata(source_revision)
-    {
-      "schema" => "honeycomb-manifest/v1",
-      "name" => ASYNC_FIX_PACKAGE_NAME,
-      "version" => ASYNC_FIX_TEST_VERSION,
-      "description" => "Focused one-agent defect repair with a controller-owned draft PR handoff",
-      "author" => {
-        "name" => "Honeycomb maintainers",
-        "url" => "https://example.test/honeycomb"
-      },
-      "license" => "MIT",
-      "hive_min_version" => "0.6.0",
-      "source" => {
-        "url" => "https://example.test/honeycomb/commit/#{source_revision}",
-        "revision" => source_revision
-      },
-      "x-hive" => {
-        "tools" => [],
-        "prompt_assets" => [{"path" => "assets/fix-report-contract.md"}],
-        "optional_inputs" => [],
-        "mapping_recommendations" => [
-          {"slot" => "stages.fix", "effort" => "medium"}
-        ]
-      },
-      "x-security" => {
-        "network_host_reasons" => {},
-        "suppressions" => []
-      }
-    }
   end
 
   def async_fix_catalog_entry(manifest, source_revision:, review_head:)

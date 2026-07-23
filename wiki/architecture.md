@@ -94,27 +94,29 @@ catalog renderer.
   Manifest-free sources there are testable but cannot enter validation, catalog
   generation, or publication until an owner-authorized change promotes them
   into `packages/` under the complete contribution contract.
-- `candidates/async-fix/` is the first managed draft-PR candidate. Its inert
+- `packages/async-fix/0.1.0` is the immutable managed draft-PR package. Its inert
   inbox and one high-risk development mapping produce `fix-report.md` from an
   isolated worktree; Hive alone validates commits, reconciles the exact remote
-  branch, and opens or adopts a draft PR. Candidate tests materialize an
-  ephemeral `0.0.0` registry only under a temporary directory. Exact-Hive
-  acceptance uses deterministic agent/GitHub seams while retaining real Hive
-  installation, configuration, task, worktree, report, receipt, and handoff
-  code. `test/docker/async_fix_smoke.sh` adds the U8 system boundary: it
-  materializes Git-tracked Honeycomb and Hive snapshots, mounts them read-only
-  into a disposable digest-pinned Ruby 3.4.5 container, installs Hive from an
-  offline gem cache, disables the container network, and routes only the exact
-  registry clone, target fetch, task-branch push, and draft-PR calls to local
-  fixtures. The bounded host wrapper forces the tracked entrypoint, proves
-  container cleanup, and accepts only one exact proof summary. Every other
-  provider, GitHub, Git transport, release, registry, or deployment call fails
-  closed.
+  branch, and opens or adopts a draft PR. Package tests also materialize an
+  ephemeral two-commit registry under a temporary directory. Exact-Hive
+  acceptance uses released Hive 0.6.7 with deterministic agent/GitHub seams
+  while retaining real installation, configuration, task, worktree, report,
+  receipt, and handoff code. `test/docker/async_fix_smoke.sh` adds the system
+  boundary: it materializes Git-tracked Honeycomb and Hive snapshots, mounts
+  them read-only into a disposable digest-pinned Ruby 3.4.5 container, installs
+  Hive from an offline gem cache, disables the container network, and routes
+  only the exact registry clone, target fetch, task-branch push, and draft-PR
+  calls to local fixtures. Docker's init reaper owns PID 1 so Hive's detached
+  attempt children cannot remain as zombies and delay durable completion. The
+  bounded host wrapper forces the tracked entrypoint, proves container cleanup,
+  and accepts only one exact proof summary. Every other provider, GitHub, Git
+  transport, release, registry, or deployment call fails closed.
   The real daemon proves both a normal draft-PR handoff and a PR-create failure
   that preserves one pushed branch until a manual `hive run` adopts the pending
   PR without repeating either mutation. Source fingerprints are identical
-  before and after the run. The candidate remains manifest-free and absent from
-  `catalog.json`.
+  before and after the run. The canonical manifest binds its registry-original
+  behavior source, while protected evidence remains absent and therefore keeps
+  the package out of `catalog.json`.
 
 ## Intended Product Shape
 

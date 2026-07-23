@@ -134,6 +134,7 @@ trap 'exit 143' TERM
 set +e
 container_output="$(/usr/bin/timeout --signal=TERM --kill-after=10s "${docker_timeout_seconds}s" \
 docker run --rm \
+  --init \
   --name "$container_name" \
   --cidfile "$cid_file" \
   --network none \

@@ -1,4 +1,4 @@
-# Async Fix candidate
+# Async Fix 0.1.0
 
 Async Fix is a one-agent asynchronous fast lane for a small-to-medium UI or
 backend defect. The mapped development agent may fix directly or use a compact
@@ -37,14 +37,14 @@ choice and are not part of workflow identity.
 
 ## Local acceptance
 
-`test/async_fix_candidate_test.rb` proves the source topology, authority
-boundary, temporary manifest shape, and package/catalog invisibility.
+`test/async_fix_package_test.rb` proves the source topology, authority
+boundary, canonical manifest shape, and package/catalog separation.
 `test/async_fix_hive_execution_test.rb` requires the exact clean Hive revision
-declared in that test and exercises real install, configuration, task creation,
-managed worktree execution, report validation, and draft-PR recovery with
-deterministic local agent and GitHub transports. It covers direct and compact
-plan/debug paths, remapping, no-fix, blocked, auth failure, push/create retry,
-and secret quarantine while preserving both source checkouts.
+for released Hive 0.6.7 and exercises real install, configuration, task
+creation, managed worktree execution, report validation, and draft-PR recovery
+with deterministic local agent and GitHub transports. It covers direct and
+compact plan/debug paths, remapping, no-fix, blocked, auth failure, push/create
+retry, and secret quarantine while preserving both source checkouts.
 
 Run the exact-Hive gate with:
 
@@ -53,11 +53,10 @@ HONEYCOMB_HIVE_SOURCE=/path/to/exact-clean-hive \
   ruby -Itest test/async_fix_hive_execution_test.rb
 ```
 
-## Candidate status
+## Package status
 
-This directory is unversioned source, not a package release. It intentionally
-contains no `manifest.yml`, version directory, listing evidence, catalog entry,
-or deployment metadata. Tests may copy these bytes into a temporary `0.0.0`
-registry fixture inside a sandbox. Passing candidate or Hive acceptance does
-not authorize promotion into `packages/`, a release/version choice, catalog or
+This `0.1.0` directory is immutable package source. Its canonical manifest
+binds the behavior bytes to the preserved registry source commit and declares
+released Hive 0.6.7 as the minimum compatible runtime. Package presence and
+local acceptance do not authorize protected listing evidence, a catalog entry,
 site publication, deployment, or removal of a workflow shipped by Hive.

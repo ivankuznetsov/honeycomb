@@ -504,7 +504,7 @@ class AsyncFixHiveExecutionTest < Minitest::Test
   def install(registry, project, agent:, allow_escalation:)
     client = Hive::WorkflowPackage::RegistryClient.new(repository: registry.root)
     Hive::Commands::Workflow::Install.new(
-      "honeycomb/async-fix@0.0.0",
+      "honeycomb/async-fix@#{ASYNC_FIX_TEST_VERSION}",
       project_root: project,
       json: true,
       yes: true,

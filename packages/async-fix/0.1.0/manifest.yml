@@ -1,0 +1,53 @@
+schema: "honeycomb-manifest/v1"
+name: "async-fix"
+version: "0.1.0"
+description: "Focused one-agent defect repair with a controller-owned draft PR handoff"
+author:
+  name: "Honeycomb Maintainers"
+  url: "https://github.com/ivankuznetsov/honeycomb"
+license: "MIT"
+hive_min_version: "0.6.7"
+source:
+  url: "https://github.com/ivankuznetsov/honeycomb/tree/5aef740e19071edb28f57c3f44f34fb7b1b1a997/packages/async-fix/0.1.0"
+  revision: "5aef740e19071edb28f57c3f44f34fb7b1b1a997"
+permissions:
+  risk: "high"
+  capabilities:
+    - "filesystem-read"
+    - "filesystem-write"
+    - "network"
+    - "shell"
+  network_hosts:
+    - "*"
+  filesystem_read:
+    - "*"
+  filesystem_write:
+    - "*"
+  secrets:
+    - "*"
+files:
+  "packages/async-fix/0.1.0/README.md": "68c85e6a14646c38bf305d9497e9a9479cec08b72e8e36e7f26328931a95f249"
+  "packages/async-fix/0.1.0/assets/fix-report-contract.md": "f25fd9776ac412655e79679a3982177f0348e22eee41fff9f4e8788a4abf5d45"
+  "packages/async-fix/0.1.0/instructions/fix.md": "a8671d5b399855f4bbd40a192a2a3b2817ee8f59d3b34c72e54c9024d9487a37"
+  "packages/async-fix/0.1.0/workflow.yml": "3aa2778ad1f8ddc2ff2d56d1df2e97d625db0cb2981e51fbd2da8f51fa56cf4a"
+release_sha256: "2c2debc0cbf92a7a9bef05be24a2205ad3f7a70c8ebf0cf691722b619a69cebb"
+x-hive:
+  tools: []
+  prompt_assets:
+    -
+      path: "assets/fix-report-contract.md"
+  optional_inputs: []
+  mapping_recommendations:
+    -
+      slot: "stages.fix"
+      effort: "medium"
+x-provenance:
+  kind: "registry-original"
+  source_paths:
+    - "README.md"
+    - "assets/fix-report-contract.md"
+    - "instructions/fix.md"
+    - "workflow.yml"
+x-security:
+  network_host_reasons: {}
+  suppressions: []
