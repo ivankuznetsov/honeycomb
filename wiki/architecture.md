@@ -148,7 +148,13 @@ The shared library has three main flows:
    authority, status, artifact, release, and head identities before appending
    records on a separate evidence ref. Independent review can finalize exact
    requested suppressions from preliminary failure to a proven pass; the
-   repository-owner lane requires a clean pass and cannot suppress. Offline
+   repository-owner lane requires a clean pass and cannot suppress. It may
+   operate on the open exact head or, after merge, only when the pull request
+   merged into the default branch, its merge is an ancestor of the workflow's
+   pinned default-branch SHA, and regenerating the package manifest from that
+   trusted snapshot reproduces the reviewed release digest. Registry-original
+   packages additionally prove their source revision remains on that snapshot
+   and their declared source paths remain byte-identical. Offline
    export explicitly selects lint snapshots, requires prior normalized
    evidence, preserves durable lifecycle state and unselected records, projects
    the latest decision per reviewer, and adapts matching approvals to the

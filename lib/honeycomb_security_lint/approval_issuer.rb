@@ -18,16 +18,18 @@ module HoneycombSecurityLint
     class Invalid < StandardError; end
 
     def initialize(event:, client:, store:, repository:, artifact_loader: nil, root: nil,
-                   approval_run_id: nil)
+                   approval_run_id: nil, default_branch_sha: nil)
       @event = event
       @client = client
       @store = store
       @repository = repository
       @approval_run_id = approval_run_id
-      @renderer = Renderer.new(max_items: root ? policy_limits(root).fetch("max_rendered_items") : 50)
+      @root = File.expand_path(root) if root
+      @default_branch_sha = default_branch_sha
+      @renderer = Renderer.new(max_items: @root ? policy_limits(@root).fetch("max_rendered_items") : 50)
       @artifact_loader = artifact_loader || begin
-        raise Invalid, "trusted repository root is required" unless root
-        policy = Policy.load(File.join(File.expand_path(root), "policy", "security-lint.yml"))
+        raise Invalid, "trusted repository root is required" unless @root
+        policy = Policy.load(File.join(@root, "policy", "security-lint.yml"))
         EvidenceArtifact.new(client: client, policy: policy).method(:load)
       end
     end
@@ -44,12 +46,13 @@ module HoneycombSecurityLint
 
       pull = @client.pull(pull_number)
       validate_reviewer!(reviewer, pull, authority)
-      validate_pull!(pull, inputs.fetch("head_sha"))
+      pull_state = validate_pull!(pull, inputs.fetch("head_sha"), authority)
       validate_protected_paths!(pull_number, pull)
       status = validate_status!(inputs.fetch("head_sha"), run_id)
 
       evidence = @artifact_loader.call(run_id)
       package = validate_evidence!(evidence, inputs, pull_number, run_id)
+      validate_merged_package!(package, inputs) if pull_state == :merged
       suppressions = parse_suppressions(inputs.fetch("approved_suppressions"), package)
       if inputs.fetch("decision") == "denied" && !suppressions.empty?
         raise Invalid, "a denied review cannot approve suppressions"
@@ -120,10 +123,25 @@ module HoneycombSecurityLint
       end
     end
 
-    def validate_pull!(pull, head_sha)
-      unless pull.is_a?(Hash) && pull["state"] == "open" && pull.dig("head", "sha") == head_sha
-        raise Invalid, "pull request is closed or its head SHA is stale"
+    def validate_pull!(pull, head_sha, authority)
+      unless pull.is_a?(Hash) && pull.dig("head", "sha") == head_sha
+        raise Invalid, "pull request head SHA is stale"
       end
+      return :open if pull["state"] == "open"
+
+      default_branch = @event.dig("repository", "default_branch")
+      merge_sha = pull["merge_commit_sha"]
+      validate_sha!(@default_branch_sha, "default branch SHA")
+      validate_sha!(merge_sha, "merge commit SHA")
+      unless authority == "repository_owner" &&
+             pull["state"] == "closed" && pull["merged"] == true &&
+             pull["merged_at"].is_a?(String) &&
+             default_branch.is_a?(String) && !default_branch.empty? &&
+             pull.dig("base", "ref") == default_branch &&
+             present_on_default_branch?(merge_sha)
+        raise Invalid, "pull request is not an exact merge on the trusted default-branch snapshot"
+      end
+      :merged
     end
 
     def validate_protected_paths!(pull_number, pull)
@@ -232,6 +250,47 @@ module HoneycombSecurityLint
       end
       raise Invalid, "honeycomb identity does not match security lint evidence" unless package
       package
+    end
+
+    def validate_merged_package!(package, inputs)
+      raise Invalid, "trusted default-branch checkout is required for merged publication" unless @root
+
+      path = package.fetch("identity").fetch("path")
+      current = HoneycombRegistry::Package.new(path, root: @root)
+      result = HoneycombRegistry::Manifest.check(current)
+      unless !result.findings.errors? && result.document &&
+             result.document["release_sha256"] == inputs.fetch("release_sha256")
+        raise Invalid, "merged honeycomb bytes do not match the reviewed release"
+      end
+      validate_registry_original_provenance!(current, result.document)
+    rescue SystemCallError, IOError, ArgumentError
+      raise Invalid, "merged honeycomb bytes do not match the reviewed release"
+    end
+
+    def validate_registry_original_provenance!(package, manifest)
+      provenance = manifest["x-provenance"]
+      return unless provenance.is_a?(Hash) && provenance["kind"] == "registry-original"
+
+      revision = manifest.dig("source", "revision")
+      paths = provenance["source_paths"]
+      validate_sha!(revision, "registry-original source revision")
+      unless present_on_default_branch?(revision) &&
+             paths.is_a?(Array) && !paths.empty? && paths.uniq.length == paths.length &&
+             paths.all? { |path| path.is_a?(String) && !path.empty? }
+        raise Invalid, "registry-original provenance is not preserved on the trusted default-branch snapshot"
+      end
+
+      paths.each do |path|
+        current = File.binread(package.absolute_path(package.repository_path(path)))
+        source = @client.content(package.repository_path(path), ref: revision)
+        unless source == current
+          raise Invalid, "registry-original provenance is not preserved on the trusted default-branch snapshot"
+        end
+      end
+    end
+
+    def present_on_default_branch?(sha)
+      sha == @default_branch_sha || @client.commit_ancestor?(sha, @default_branch_sha)
     end
 
     def finalize_evidence!(evidence, package, approval, status)

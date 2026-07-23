@@ -2,6 +2,7 @@
 
 require_relative "../test_helper"
 require "honeycomb_security_lint"
+require "stringio"
 
 class SecurityLintListingApprovalCliTest < Minitest::Test
   SCRIPT = File.join(ROOT, "script", "honeycomb-listing-approval")
@@ -64,6 +65,44 @@ class SecurityLintListingApprovalCliTest < Minitest::Test
       loaded = HoneycombRegistry::ListingEvidence.load(output)
       refute loaded.findings.errors?, loaded.findings.to_h.inspect
       assert HoneycombRegistry::ListingEvidence.eligible?(loaded.records.first)
+    end
+  end
+
+  def test_issue_passes_the_pinned_default_branch_sha_to_the_issuer
+    load SCRIPT
+
+    in_tmpdir do |root|
+      event_path = File.join(root, "event.json")
+      File.write(event_path, JSON.generate({
+        "repository" => {"full_name" => "hive-sh/honeycomb", "default_branch" => "main"}
+      }))
+      captured = nil
+      fake_issuer = Object.new
+      fake_issuer.define_singleton_method(:issue) { {"name" => "example"} }
+      environment = {
+        "GITHUB_REPOSITORY" => "hive-sh/honeycomb",
+        "GITHUB_TOKEN" => "token",
+        "GITHUB_RUN_ID" => "88",
+        "DEFAULT_BRANCH_SHA" => "f" * 40
+      }
+
+      status = HoneycombSecurityLint::ListingApprovalCLI.run(
+        ["issue", "--event", event_path, "--root", root],
+        out: StringIO.new,
+        err: StringIO.new,
+        env: environment,
+        default_root: ROOT,
+        client_factory: ->(**) { Object.new },
+        store_factory: ->(**) { Object.new },
+        issuer_factory: lambda do |**arguments|
+          captured = arguments
+          fake_issuer
+        end
+      )
+
+      assert_equal 0, status
+      assert_equal "f" * 40, captured.fetch(:default_branch_sha)
+      assert_equal File.expand_path(root), captured.fetch(:root)
     end
   end
 end

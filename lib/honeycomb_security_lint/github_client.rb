@@ -60,6 +60,13 @@ module HoneycombSecurityLint
       raise Error, "workflow run ID is invalid"
     end
 
+    def commit_ancestor?(ancestor, descendant)
+      base = URI.encode_www_form_component(ancestor.to_s)
+      head = URI.encode_www_form_component(descendant.to_s)
+      comparison = get_json(repo_path("compare/#{base}...#{head}"))
+      %w[ahead identical].include?(comparison["status"])
+    end
+
     def collaborator_permission(login)
       encoded = URI.encode_www_form_component(login.to_s)
       get_json(repo_path("collaborators/#{encoded}/permission")).fetch("permission")

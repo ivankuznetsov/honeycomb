@@ -9,7 +9,10 @@ class SecurityLintListingApprovalWorkflowTest < Minitest::Test
 
   def test_dispatch_runs_only_trusted_code_with_confined_write_permissions
     workflow = File.read(WORKFLOW)
-    YAML.safe_load(workflow, aliases: true)
+    document = YAML.safe_load(workflow, aliases: true)
+    steps = document.fetch("jobs").fetch("issue").fetch("steps")
+    checkout = steps.find { |step| step["name"] == "Check out trusted approval issuer" }
+    approval = steps.find { |step| step["name"] == "Append exact-SHA listing evidence" }
 
     assert_includes workflow, "workflow_dispatch:"
     assert_includes workflow, "environment: honeycomb-listing-approval"
@@ -21,8 +24,12 @@ class SecurityLintListingApprovalWorkflowTest < Minitest::Test
     refute_match(/^\s{2}pull_request:/, workflow)
     refute_includes workflow, "pull_request_target"
     refute_includes workflow, "secrets."
-    assert_includes workflow, "persist-credentials: false"
-    assert_includes workflow, "ruby script/honeycomb-listing-approval issue"
+    assert_equal false, checkout.dig("with", "persist-credentials")
+    assert_equal "${{ github.event.repository.default_branch }}", checkout.dig("with", "ref")
+    assert_includes approval.fetch("run"),
+                    'DEFAULT_BRANCH_SHA="$(git -C "$GITHUB_WORKSPACE" rev-parse HEAD)"'
+    assert_includes approval.fetch("run"), "ruby script/honeycomb-listing-approval issue"
+    assert_equal "${{ github.token }}", approval.dig("env", "GITHUB_TOKEN")
     assert_includes workflow, "options: [independent, repository_owner]"
     assert_includes workflow, HoneycombSecurityLint::ApprovalIssuer::OWNER_ACKNOWLEDGEMENT
     assert_match(/review_id:\n(?:.*\n){0,4}\s+default: ""/, workflow)

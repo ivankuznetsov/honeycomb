@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       pull_request:
-        description: Open pull-request number
+        description: Package pull request (open, or merged for repository-owner publication)
         required: true
         type: string
       head_sha:
@@ -87,4 +87,6 @@ jobs:
       - name: Append exact-SHA listing evidence
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ruby script/honeycomb-listing-approval issue --event "$GITHUB_EVENT_PATH" --root "$GITHUB_WORKSPACE"
+        run: |
+          DEFAULT_BRANCH_SHA="$(git -C "$GITHUB_WORKSPACE" rev-parse HEAD)" \
+            ruby script/honeycomb-listing-approval issue --event "$GITHUB_EVENT_PATH" --root "$GITHUB_WORKSPACE"

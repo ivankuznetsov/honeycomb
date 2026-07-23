@@ -67,14 +67,19 @@ maintainer's latest decisive GitHub review bound to the exact head.
 Repository-owner authority requires the admin namespace owner to author and
 dispatch a canonical-repository pull request, passing lint without suppressions,
 the exact responsibility acknowledgement, audit notes, and an Actions-run audit
-URL. Both require the exact authoritative status/run, redacted artifact, and
-matching release/head identities. Exact requested suppressions remain available
-only to independent reviewers. The issuer appends canonical records under
+URL. It accepts an open exact head or an exact merged pull request only when the
+merge is on the pinned default-branch snapshot and the current package bytes
+regenerate the reviewed release digest. Registry-original packages must also
+retain source ancestry and exact declared source bytes. Both authorities
+require the exact authoritative status/run, redacted artifact, and matching
+release/head identities. Exact requested suppressions remain available only to
+independent reviewers. The issuer appends canonical records under
 `honeycomb-evidence`; renewed
 reviewer decisions use distinct immutable records, and export selects the latest
 decision per reviewer. The offline exporter still selects exact lint snapshots.
 Workflow contract coverage parses the listing-approval YAML before asserting
-its protected trigger, permissions, and pinned-action invariants.
+its protected trigger, permissions, pinned default-branch SHA, and pinned-action
+invariants.
 The issuer normalizes omitted optional dispatch fields to empty strings before
 applying authority-specific validation, matching GitHub's event payload shape.
 
