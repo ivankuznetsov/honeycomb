@@ -83,4 +83,21 @@ class SecurityLintGitHubClientTest < Minitest::Test
     assert_equal "https://api.github.test/repos/hive-sh/honeycomb/actions/runs/88",
                  client.requests.first[1]
   end
+
+  def test_checks_exact_commit_ancestry_with_github_compare
+    client = StubClient.new
+    client.responses = [
+      response(Net::HTTPOK, body: JSON.generate({"status" => "ahead"})),
+      response(Net::HTTPOK, body: JSON.generate({"status" => "identical"})),
+      response(Net::HTTPOK, body: JSON.generate({"status" => "diverged"}))
+    ]
+
+    assert client.commit_ancestor?("a" * 40, "b" * 40)
+    assert client.commit_ancestor?("a" * 40, "a" * 40)
+    refute client.commit_ancestor?("a" * 40, "c" * 40)
+    assert_equal(
+      "https://api.github.test/repos/hive-sh/honeycomb/compare/#{"a" * 40}...#{"b" * 40}",
+      client.requests.first[1]
+    )
+  end
 end

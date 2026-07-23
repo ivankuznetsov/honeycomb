@@ -123,6 +123,29 @@ without pretending independence, while forks and community publishers retain
 the existing one/two-reviewer gates. Protected evidence records the authority;
 historical records without the field remain independent.
 
+## 2026-07-23: Owner Publication May Follow an Exact Merge
+
+Context: package presence and catalog listing are separate gates. A repository
+owner may intentionally merge a fully linted first-party package while
+withholding the separate publication decision, but the original issuer accepted
+only an open pull request and therefore made that later decision impossible.
+
+Decision: keep independent approval open-PR-only. Permit
+`repository_owner` publication after merge only when the canonical owner
+authored and dispatches the original pull request, its exact reviewed head
+matches, the pull request merged into the default branch, the merge commit is an
+ancestor of the workflow's pinned default-branch SHA, and the immutable package
+bytes in that snapshot regenerate the reviewed `release_sha256`. For
+registry-original packages, also require the declared source revision to remain
+an ancestor of that snapshot and every declared source path to remain
+byte-identical. Continue to reject suppressions and require the exact
+responsibility acknowledgement and audit notes.
+
+Consequence: merging does not silently list a release, and the sole owner can
+make the later protected publication decision without reverting or replaying
+the package. Closed-unmerged, reverted, changed, provenance-broken, forked,
+stale-head, and independent submissions still fail closed.
+
 ## 2026-07-21: Video Capture Uses Detached Owner Receipts
 
 Context: an agent-writable checkbox cannot establish that a repository owner

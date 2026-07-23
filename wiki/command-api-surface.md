@@ -106,7 +106,12 @@ suppression against failing preliminary evidence only under independent
 authority when trusted finalization produces a complete passing result. The
 repository-owner authority is limited to a canonical first-party pull request,
 requires an already-passing result and explicit responsibility acknowledgement,
-and rejects every suppression.
+and rejects every suppression. It accepts either the current open head or an
+exact merged pull request on the pinned default-branch snapshot. The merged
+path additionally proves merge ancestry and regenerates the immutable package
+manifest so missing, reverted, or changed release bytes fail closed.
+Registry-original packages also prove source ancestry and exact source-path
+bytes before evidence is appended.
 
 Local Hive absence is a warning; `--require-hive` makes absence an error. Strict
 mode is explicit and never inferred from environment variables.

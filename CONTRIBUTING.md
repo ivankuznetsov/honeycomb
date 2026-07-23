@@ -87,11 +87,20 @@ The fork-safe pull-request flow is:
    submitted bytes, and emits redacted `honeycomb.security-lint/v1` evidence.
 4. Default-branch reporter code verifies the artifact, current pull-request
    head, workflow run, and digest before publishing the authoritative status.
-5. An eligible maintainer reads the complete security-relevant diff and submits
-   a GitHub pull-request review on the same head.
+5. For independent authority, an eligible maintainer reads the complete
+   security-relevant diff and submits a GitHub pull-request review on the same
+   open head. A canonical first-party repository owner may instead make the
+   explicit publication decision while that pull request is open or after it
+   has merged into the default branch.
 6. The protected listing-approval workflow re-verifies maintainer eligibility,
-   the current review, authoritative status/run, release identity, head SHA,
-   and evidence digest. It appends immutable approval evidence on the protected
+   the current review when independent authority is used, authoritative
+   status/run, release identity, head SHA, and evidence digest. Post-merge
+   repository-owner publication additionally requires the exact merge to be an
+   ancestor of the workflow's pinned default-branch snapshot and the package
+   bytes in that snapshot to validate against the reviewed `release_sha256`.
+   Registry-original packages must also retain their declared source commit on
+   that snapshot and reproduce every declared source path byte-for-byte.
+   It appends immutable approval evidence on the protected
    `honeycomb-evidence` branch.
 7. The production listing-evidence exporter and catalog reader include the
    version only when lint passes and the complete current approval set agrees
@@ -147,9 +156,13 @@ display-name or URL metadata.
   issuer requires the dispatching identity to be the admin namespace owner and
   pull-request author, requires current passing lint, rejects every suppression,
   requires the exact responsibility acknowledgement plus non-empty audit notes,
-  and records the trusted Actions run URL. One such owner record satisfies the
-  Community listing count at any permission risk. It is an explicit publication
-  decision, not independent review or a safety endorsement.
+  and records the trusted Actions run URL. The owner may dispatch before merge
+  or against an exact merged pull request whose merge is present in the pinned
+  default-branch snapshot and whose current immutable package bytes still match
+  the reviewed release and registry-original provenance. One such owner record
+  satisfies the Community listing count at any permission risk. It is an
+  explicit publication decision, not independent review or a safety
+  endorsement.
 - `repository_owner` authority is not available to forks, community publishers,
   non-admin collaborators, denials, suppression approvals, or Verified
   promotion requirements.

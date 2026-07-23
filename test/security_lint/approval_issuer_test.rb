@@ -10,8 +10,9 @@ class SecurityLintApprovalIssuerTest < Minitest::Test
 
   class FakeClient
     attr_accessor :permission, :pull_data, :files, :statuses, :review, :reviews, :comment_data,
-                  :workflow_run_data
-    attr_reader :created_statuses, :created_comments, :updated_comments
+                  :workflow_run_data, :commit_is_ancestor, :ancestry_error
+    attr_reader :created_statuses, :created_comments, :updated_comments, :ancestry_checks,
+                :contents, :ancestry_results
 
     def initialize
       @permission = "maintain"
@@ -46,6 +47,10 @@ class SecurityLintApprovalIssuerTest < Minitest::Test
       @created_statuses = []
       @created_comments = []
       @updated_comments = []
+      @commit_is_ancestor = true
+      @ancestry_checks = []
+      @ancestry_results = {}
+      @contents = {}
     end
 
     def collaborator_permission(_login) = permission
@@ -58,6 +63,13 @@ class SecurityLintApprovalIssuerTest < Minitest::Test
     def pull_review(_number, _review_id) = review
     def pull_reviews(_number) = reviews
     def workflow_run(_run_id) = workflow_run_data
+    def commit_ancestor?(ancestor, descendant)
+      ancestry_checks << [ancestor, descendant]
+      raise ancestry_error if ancestry_error
+
+      ancestry_results.fetch([ancestor, descendant], commit_is_ancestor)
+    end
+    def content(path, ref:) = contents.fetch([path, ref])
     def create_status(sha, attributes) = created_statuses << [sha, attributes]
     def comments(_number) = comment_data
     def create_comment(number, body) = created_comments << [number, body]
@@ -76,7 +88,7 @@ class SecurityLintApprovalIssuerTest < Minitest::Test
     def append_approval(record) = approval_records << record
   end
 
-  def evidence
+  def evidence(release: RELEASE)
     HoneycombSecurityLint::Evidence.finalize({
       "schema" => "honeycomb.security-lint/v1",
       "event" => {"action" => "labeled", "gate" => "applied", "label_sha" => SHA},
@@ -89,7 +101,7 @@ class SecurityLintApprovalIssuerTest < Minitest::Test
       "packages" => [{
         "identity" => {
           "name" => "example", "version" => "1.0.0",
-          "path" => "packages/example/1.0.0", "release_sha256" => RELEASE
+          "path" => "packages/example/1.0.0", "release_sha256" => release
         },
         "validator_findings" => [], "requested_permissions" => {"risk" => "low"},
         "scanned_files" => [], "commands" => [], "hosts" => [], "findings" => [],
@@ -102,12 +114,13 @@ class SecurityLintApprovalIssuerTest < Minitest::Test
   end
 
   def event(record = evidence)
+    release = record.dig("packages", 0, "identity", "release_sha256")
     {
       "repository" => {"full_name" => "hive-sh/honeycomb", "default_branch" => "main"},
       "sender" => {"login" => "maintainer"},
       "inputs" => {
         "pull_request" => "42", "head_sha" => SHA, "lint_run_id" => "7",
-        "name" => "example", "version" => "1.0.0", "release_sha256" => RELEASE,
+        "name" => "example", "version" => "1.0.0", "release_sha256" => release,
         "evidence_digest" => record.fetch("artifact_digest"), "review_id" => "99",
         "decision" => "approved", "notes" => "Reviewed the complete honeycomb diff",
         "publication_authority" => "independent", "owner_acknowledgement" => "",
@@ -116,11 +129,13 @@ class SecurityLintApprovalIssuerTest < Minitest::Test
     }
   end
 
-  def issuer(client: FakeClient.new, store: FakeStore.new, record: evidence, event_data: nil)
+  def issuer(client: FakeClient.new, store: FakeStore.new, record: evidence, event_data: nil,
+             root: nil, default_branch_sha: nil)
     event_data ||= event(record)
     HoneycombSecurityLint::ApprovalIssuer.new(
       event: event_data, client: client, store: store,
-      repository: "hive-sh/honeycomb", artifact_loader: ->(_run_id) { record }
+      repository: "hive-sh/honeycomb", artifact_loader: ->(_run_id) { record },
+      root: root, default_branch_sha: default_branch_sha
     )
   end
 
@@ -143,12 +158,52 @@ class SecurityLintApprovalIssuerTest < Minitest::Test
     end
   end
 
-  def owner_issuer(client: owner_client, event_data: owner_event, approval_run_id: "88")
+  def owner_issuer(client: owner_client, event_data: owner_event, approval_run_id: "88",
+                   record: evidence, root: nil, default_branch_sha: nil, store: FakeStore.new)
     HoneycombSecurityLint::ApprovalIssuer.new(
-      event: event_data, client: client, store: FakeStore.new,
-      repository: "hive-sh/honeycomb", artifact_loader: ->(_run_id) { evidence },
-      approval_run_id: approval_run_id
+      event: event_data, client: client, store: store,
+      repository: "hive-sh/honeycomb", artifact_loader: ->(_run_id) { record },
+      approval_run_id: approval_run_id, root: root, default_branch_sha: default_branch_sha
     )
+  end
+
+  def with_merged_owner_context(registry_original: false)
+    in_tmpdir do |root|
+      FileUtils.cp_r(File.join(ROOT, "policy"), root)
+      package = HoneycombRegistry::Package.new(install_valid_fixture(root), root: root)
+      source_revision = "b" * 40
+      source_paths = ["workflow.yml"]
+      if registry_original
+        metadata = HoneycombRegistry::SafeYAML.load_file(package.manifest_path)
+        metadata["source"] = {
+          "url" => "https://github.com/hive-sh/honeycomb/tree/#{source_revision}/#{package.relative_path}",
+          "revision" => source_revision
+        }
+        metadata["x-provenance"] = {
+          "kind" => "registry-original",
+          "source_paths" => source_paths
+        }
+        File.binwrite(package.manifest_path, HoneycombRegistry::CanonicalYAML.dump(metadata))
+      end
+      generated = HoneycombRegistry::Manifest.generate(package)
+      refute generated.findings.errors?, generated.findings.to_h.inspect
+      record = evidence(release: generated.document.fetch("release_sha256"))
+      client = owner_client
+      client.pull_data.merge!(
+        "state" => "closed",
+        "merged" => true,
+        "merged_at" => "2026-07-23T12:53:54Z",
+        "merge_commit_sha" => "e" * 40,
+        "base" => {"ref" => "main"}
+      )
+      if registry_original
+        source_paths.each do |path|
+          client.contents[[package.repository_path(path), source_revision]] =
+            File.binread(package.absolute_path(package.repository_path(path)))
+        end
+      end
+      yield root, record, client, owner_event(record)
+    end
   end
 
   def evidence_with_requested_suppression
@@ -196,6 +251,156 @@ class SecurityLintApprovalIssuerTest < Minitest::Test
     assert_equal "2026-07-19T06:00:00Z", approval.fetch("reviewed_at")
     assert_equal "https://github.com/hive-sh/honeycomb/actions/runs/88", approval.fetch("review_url")
     assert_equal [approval], store.approval_records
+  end
+
+  def test_repository_owner_can_publish_an_exact_merged_first_party_release
+    with_merged_owner_context do |root, record, client, input|
+      approval = owner_issuer(
+        client: client,
+        event_data: input,
+        record: record,
+        root: root,
+        default_branch_sha: "f" * 40
+      ).issue
+
+      assert_equal "repository_owner", approval.fetch("authority")
+      assert_equal SHA, approval.fetch("head_sha")
+      assert_equal [["e" * 40, "f" * 40]], client.ancestry_checks
+    end
+  end
+
+  def test_exact_default_branch_merge_does_not_request_an_ancestry_comparison
+    with_merged_owner_context do |root, record, client, input|
+      client.pull_data["merge_commit_sha"] = "f" * 40
+
+      owner_issuer(
+        client: client,
+        event_data: input,
+        record: record,
+        root: root,
+        default_branch_sha: "f" * 40
+      ).issue
+
+      assert_empty client.ancestry_checks
+    end
+  end
+
+  def test_merged_registry_original_release_preserves_source_ancestry_and_bytes
+    with_merged_owner_context(registry_original: true) do |root, record, client, input|
+      owner_issuer(
+        client: client,
+        event_data: input,
+        record: record,
+        root: root,
+        default_branch_sha: "f" * 40
+      ).issue
+
+      assert_includes client.ancestry_checks, ["b" * 40, "f" * 40]
+    end
+  end
+
+  def test_merged_registry_original_release_rejects_unreachable_or_changed_source
+    [
+      ->(client) { client.ancestry_results[["b" * 40, "f" * 40]] = false },
+      lambda do |client|
+        client.contents[["packages/example/1.0.0/workflow.yml", "b" * 40]] = "changed"
+      end
+    ].each do |mutation|
+      with_merged_owner_context(registry_original: true) do |root, record, client, input|
+        mutation.call(client)
+        assert_raises(HoneycombSecurityLint::ApprovalIssuer::Invalid) do
+          owner_issuer(
+            client: client,
+            event_data: input,
+            record: record,
+            root: root,
+            default_branch_sha: "f" * 40
+          ).issue
+        end
+      end
+    end
+  end
+
+  def test_merged_publication_rejects_a_valid_changed_release_digest
+    with_merged_owner_context do |root, record, client, input|
+      package = HoneycombRegistry::Package.new("packages/example/1.0.0", root: root)
+      File.open(File.join(package.path, "README.md"), "a") { |file| file << "\nchanged\n" }
+      regenerated = HoneycombRegistry::Manifest.generate(package)
+      refute regenerated.findings.errors?, regenerated.findings.to_h.inspect
+      refute_equal record.dig("packages", 0, "identity", "release_sha256"),
+                   regenerated.document.fetch("release_sha256")
+      store = FakeStore.new
+
+      assert_raises(HoneycombSecurityLint::ApprovalIssuer::Invalid) do
+        owner_issuer(
+          client: client,
+          event_data: input,
+          record: record,
+          root: root,
+          default_branch_sha: "f" * 40,
+          store: store
+        ).issue
+      end
+      assert_empty store.approval_records
+      assert_empty store.lint_records
+    end
+  end
+
+  def test_merged_publication_fails_closed_when_ancestry_lookup_errors
+    with_merged_owner_context do |root, record, client, input|
+      client.ancestry_error = HoneycombSecurityLint::GitHubClient::Error.new("compare unavailable")
+      store = FakeStore.new
+
+      assert_raises(HoneycombSecurityLint::ApprovalIssuer::Invalid) do
+        owner_issuer(
+          client: client,
+          event_data: input,
+          record: record,
+          root: root,
+          default_branch_sha: "f" * 40,
+          store: store
+        ).issue
+      end
+      assert_empty store.approval_records
+      assert_empty store.lint_records
+    end
+  end
+
+  def test_merged_publication_rejects_non_owner_stale_branch_and_changed_package
+    with_merged_owner_context do |root, record, client, _input|
+      assert_raises(HoneycombSecurityLint::ApprovalIssuer::Invalid) do
+        issuer(
+          client: client,
+          record: record,
+          event_data: event(record),
+          root: root,
+          default_branch_sha: "f" * 40
+        ).issue
+      end
+    end
+
+    [
+      ->(_root, _record, client, _input) { client.pull_data["merged"] = false },
+      ->(_root, _record, client, _input) { client.pull_data["base"]["ref"] = "release" },
+      ->(_root, _record, client, _input) { client.pull_data["merge_commit_sha"] = "invalid" },
+      ->(_root, _record, client, _input) { client.commit_is_ancestor = false },
+      lambda do |root, _record, _client, _input|
+        File.open(File.join(root, "packages", "example", "1.0.0", "README.md"), "a") { |file| file << "\nchanged\n" }
+      end
+    ].each do |mutation|
+      with_merged_owner_context do |root, record, client, input|
+        mutation.call(root, record, client, input)
+        assert_raises(HoneycombSecurityLint::ApprovalIssuer::Invalid) do
+          owner_issuer(
+            client: client,
+            event_data: input,
+            record: record,
+            root: root,
+            default_branch_sha: "f" * 40
+          ).issue
+        end
+      end
+    end
   end
 
   def test_repository_owner_publication_rejects_non_owner_fork_ambiguity_and_incomplete_acknowledgement

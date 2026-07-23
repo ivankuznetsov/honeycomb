@@ -9,11 +9,18 @@ module HoneycombSecurityLint
   module ListingApprovalCLI
     module_function
 
-    def run(argv, out: $stdout, err: $stderr, env: ENV, default_root: nil)
+    def run(argv, out: $stdout, err: $stderr, env: ENV, default_root: nil,
+            client_factory: GitHubClient.method(:new),
+            store_factory: EvidenceStore.method(:new),
+            issuer_factory: ApprovalIssuer.method(:new))
       command = argv.shift
       case command
       when "issue"
-        issue(argv, out: out, env: env, default_root: default_root)
+        issue(
+          argv, out: out, env: env, default_root: default_root,
+          client_factory: client_factory, store_factory: store_factory,
+          issuer_factory: issuer_factory
+        )
       when "export"
         export(argv, out: out, default_root: default_root)
       when "-h", "--help", nil
@@ -32,7 +39,7 @@ module HoneycombSecurityLint
       1
     end
 
-    def issue(argv, out:, env:, default_root:)
+    def issue(argv, out:, env:, default_root:, client_factory:, store_factory:, issuer_factory:)
       options = {root: default_root}
       parser = OptionParser.new do |opts|
         opts.banner = "Usage: honeycomb-listing-approval issue --event PATH [--root PATH]"
@@ -46,16 +53,17 @@ module HoneycombSecurityLint
       root = File.expand_path(options[:root] || Dir.pwd)
       event = Contracts.parse_json(File.binread(options.fetch(:event)))
       repository = env.fetch("GITHUB_REPOSITORY")
-      client = GitHubClient.new(
+      client = client_factory.call(
         repository: repository, token: env.fetch("GITHUB_TOKEN"),
         api_url: env.fetch("GITHUB_API_URL", "https://api.github.com")
       )
-      store = EvidenceStore.new(
+      store = store_factory.call(
         client: client, base_branch: event.dig("repository", "default_branch")
       )
-      approval = ApprovalIssuer.new(
+      approval = issuer_factory.call(
         event: event, client: client, store: store, repository: repository, root: root,
-        approval_run_id: env.fetch("GITHUB_RUN_ID")
+        approval_run_id: env.fetch("GITHUB_RUN_ID"),
+        default_branch_sha: env["DEFAULT_BRANCH_SHA"]
       ).issue
       out.write(Contracts.canonical_json({"schema" => Contracts::APPROVAL_SCHEMA, "approvals" => [approval]}))
       0
@@ -95,6 +103,8 @@ module HoneycombSecurityLint
   end
 end
 
-exit HoneycombSecurityLint::ListingApprovalCLI.run(
-  ARGV, default_root: File.expand_path("..", __dir__)
-)
+if $PROGRAM_NAME == __FILE__
+  exit HoneycombSecurityLint::ListingApprovalCLI.run(
+    ARGV, default_root: File.expand_path("..", __dir__)
+  )
+end
