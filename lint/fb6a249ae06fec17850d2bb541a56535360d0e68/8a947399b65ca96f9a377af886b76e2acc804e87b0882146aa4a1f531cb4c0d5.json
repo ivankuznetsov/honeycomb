@@ -1,0 +1,169 @@
+{
+  "artifact_digest": "8a947399b65ca96f9a377af886b76e2acc804e87b0882146aa4a1f531cb4c0d5",
+  "base_sha": "b777675fc025bb4f2254837742123af4e62b1389",
+  "event": {
+    "action": "labeled",
+    "gate": "applied",
+    "label_sha": "fb6a249ae06fec17850d2bb541a56535360d0e68"
+  },
+  "head_sha": "fb6a249ae06fec17850d2bb541a56535360d0e68",
+  "packages": [
+    {
+      "commands": [
+        {
+          "column": 68,
+          "kind": "inline",
+          "line": 18,
+          "path": "packages/async-fix/0.1.0/README.md",
+          "redacted": "gh"
+        },
+        {
+          "column": 1,
+          "kind": "fenced",
+          "line": 52,
+          "path": "packages/async-fix/0.1.0/README.md",
+          "redacted": "HONEYCOMB_HIVE_SOURCE=/path/to/exact-clean-hive \\"
+        },
+        {
+          "column": 3,
+          "kind": "fenced",
+          "line": 53,
+          "path": "packages/async-fix/0.1.0/README.md",
+          "redacted": "  ruby -Itest test/async_fix_hive_execution_test.rb"
+        },
+        {
+          "column": 69,
+          "kind": "inline",
+          "line": 10,
+          "path": "packages/async-fix/0.1.0/assets/fix-report-contract.md",
+          "redacted": "gh"
+        },
+        {
+          "column": 40,
+          "kind": "inline",
+          "line": 6,
+          "path": "packages/async-fix/0.1.0/instructions/fix.md",
+          "redacted": "gh"
+        }
+      ],
+      "counts": {
+        "advisory": 4,
+        "downgraded": 0,
+        "hard": 0
+      },
+      "findings": [
+        {
+          "approval": null,
+          "category": "permission",
+          "column": 1,
+          "disposition": "advisory",
+          "fingerprint": "57bd77e9287255f8f9c35c11589f82f2806dc26e96e7b94c21366b149cf31cbb",
+          "line": 1,
+          "message": "Broad declared permissions require human review",
+          "original_severity": "advisory",
+          "path": "manifest.yml",
+          "redacted_evidence": "Broad permissions declared",
+          "request": null,
+          "rule_id": "permission.broad-declaration"
+        }
+      ],
+      "hosts": [],
+      "identity": {
+        "name": "async-fix",
+        "path": "packages/async-fix/0.1.0",
+        "release_sha256": "2c2debc0cbf92a7a9bef05be24a2205ad3f7a70c8ebf0cf691722b619a69cebb",
+        "version": "0.1.0"
+      },
+      "requested_permissions": {
+        "capabilities": [
+          "filesystem-read",
+          "filesystem-write",
+          "network",
+          "shell"
+        ],
+        "filesystem_read": [
+          "*"
+        ],
+        "filesystem_write": [
+          "*"
+        ],
+        "network_hosts": [
+          "*"
+        ],
+        "risk": "high",
+        "secrets": [
+          "*"
+        ]
+      },
+      "scanned_files": [
+        {
+          "bytes": 3075,
+          "kind": "text",
+          "path": "packages/async-fix/0.1.0/README.md",
+          "sha256": "68c85e6a14646c38bf305d9497e9a9479cec08b72e8e36e7f26328931a95f249"
+        },
+        {
+          "bytes": 2329,
+          "kind": "text",
+          "path": "packages/async-fix/0.1.0/assets/fix-report-contract.md",
+          "sha256": "f25fd9776ac412655e79679a3982177f0348e22eee41fff9f4e8788a4abf5d45"
+        },
+        {
+          "bytes": 3964,
+          "kind": "text",
+          "path": "packages/async-fix/0.1.0/instructions/fix.md",
+          "sha256": "a8671d5b399855f4bbd40a192a2a3b2817ee8f59d3b34c72e54c9024d9487a37"
+        },
+        {
+          "bytes": 1666,
+          "kind": "text",
+          "path": "packages/async-fix/0.1.0/manifest.yml",
+          "sha256": "a208e43833a532fff18a7646704e53c5ef396c181f852443f1edfa26a951a11e"
+        },
+        {
+          "bytes": 347,
+          "kind": "text",
+          "path": "packages/async-fix/0.1.0/workflow.yml",
+          "sha256": "3aa2778ad1f8ddc2ff2d56d1df2e97d625db0cb2981e51fbd2da8f51fa56cf4a"
+        }
+      ],
+      "suppressions": [],
+      "validator_findings": [
+        {
+          "code": "hive.compatible",
+          "message": "descriptor parsed with Hive 0.6.7",
+          "path": "packages/async-fix/0.1.0/workflow.yml",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/async-fix/0.1.0/workflow.yml.stages[1] contributes yolo permissions",
+          "path": "packages/async-fix/0.1.0/workflow.yml.stages[1].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/async-fix/0.1.0/workflow.yml.stages[1] requests unbounded access",
+          "path": "packages/async-fix/0.1.0/workflow.yml.stages[1].permissions",
+          "severity": "warning"
+        }
+      ],
+      "verdict": "pass"
+    }
+  ],
+  "pull_request": 35,
+  "run": {
+    "attempt": 1,
+    "id": 29960999841,
+    "repository": "ivankuznetsov/honeycomb",
+    "workflow": "Security lint"
+  },
+  "schema": "honeycomb.security-lint/v1",
+  "state": "pass",
+  "totals": {
+    "advisory": 4,
+    "downgraded": 0,
+    "hard": 0
+  },
+  "verdict": "Security lint passed"
+}
