@@ -24,6 +24,7 @@ class RootCauseRepairCandidateRepositoryStateTest < Minitest::Test
       git!(repository, "branch", "concurrent-task")
       git!(repository, "branch", "-D", "task-to-remove")
       git!(repository, "update-ref", "refs/remotes/origin/observed", "HEAD")
+      git!(repository, "update-ref", "refs/llm-wiki/sources/concurrent", "HEAD")
 
       comparison = run_tool!(task_folder, "compare", "--expect", digest)
       assert_equal "continue", comparison.fetch("verdict")
@@ -32,6 +33,7 @@ class RootCauseRepairCandidateRepositoryStateTest < Minitest::Test
         refs/heads/concurrent-task
         refs/heads/hive/state
         refs/heads/task-to-remove
+        refs/llm-wiki/sources/concurrent
         refs/remotes/origin/observed
       ], comparison.dig("changes", "unrelated", "records").map { |entry| entry.fetch("name") }
       removed = comparison.dig("changes", "unrelated", "records").find do |entry|

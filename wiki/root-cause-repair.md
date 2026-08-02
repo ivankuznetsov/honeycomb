@@ -32,8 +32,9 @@ Ref changes are compared by the union of checkpoint and current names, so
 creation, update, and deletion are equivalent drift events:
 
 - the pinned symbolic branch and per-worktree namespaces are relevant;
-- other local branches and remote-tracking refs are unrelated to the pinned
-  checked-out target;
+- other local branches, remote-tracking refs, and managed
+  `refs/llm-wiki/sources/` snapshot refs are unrelated to the pinned checked-out
+  target;
 - tags, stash, and unknown namespaces are ambiguous.
 
 Relevant and ambiguous changes block. Unrelated changes continue and are
@@ -49,6 +50,13 @@ advancement. Certificate performs a terminal comparison after any decisive
 command and checks the checkpoint chain without advancing. Measurement races retry
 once; repeated authority movement blocks, while unrelated ref movement is
 recorded without consuming the retry.
+
+Repair and verification use explicit one-hour stage bounds after a live repair
+reached the former implicit 30-minute default during its final evidence review.
+The longer bound does not authorize recovery of partial target bytes. If a
+failed attempt stops before checkpoint advancement, the next attempt cannot
+distinguish its edits from concurrent owner work and blocks until the owner
+reconciles the worktree or starts from a fresh baseline.
 
 The candidate certificate also opts into Hive's semantic terminal contract:
 `verified` and `not-reproduced` complete the task, while `blocked` becomes a

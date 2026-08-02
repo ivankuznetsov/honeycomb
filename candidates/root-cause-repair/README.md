@@ -16,8 +16,9 @@ This candidate separates full repository observation from the authority
 verdict. A task-local, content-blind checkpoint pins target HEAD, symbolic
 branch, index, tracked and untracked bytes, and relevant refs. Individual ref
 deltas are classified: the current target and per-worktree refs block;
-non-current branches and remote-tracking refs are recorded and continue; tags,
-stash, and unknown namespaces fail closed as ambiguous. Each stage compares
+non-current branches, remote-tracking refs, and managed LLM Wiki source-snapshot
+refs are recorded and continue; tags, stash, and unknown namespaces fail closed
+as ambiguous. Each stage compares
 before acting, captures an exact content-blind digest after inventorying its
 worktree effects, and advances only if a fresh capture still matches that
 accepted delta. Checkpoints also bind a sequence and previous digest so the
@@ -54,6 +55,13 @@ agent.
    rounds to challenge the causal claim.
 5. `certificate` performs a final comparison and produces exactly one outcome:
    `verified`, `not-reproduced`, or `blocked`.
+
+Repair and verification have explicit one-hour bounds because they include the
+implementation, focused regression, adjacent checks, and independent evidence
+review. If a failed mutating attempt stops before it advances its checkpoint,
+its partial bytes remain unattributed and the next attempt blocks safely; the
+owner must reconcile them or begin from a fresh baseline rather than letting a
+retry silently adopt them.
 
 The terminal descriptor declares `verified` and `not-reproduced` as completing
 outcomes and `blocked` as a blocking outcome. A compatible Hive runtime

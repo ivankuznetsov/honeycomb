@@ -53,8 +53,9 @@ updates, and deletions all count as changes. Classification is deterministic:
 
 - the pinned symbolic branch and `refs/bisect/`, `refs/worktree/`, and
   `refs/rewritten/` are relevant;
-- any non-current local branch and every remote-tracking ref are unrelated to
-  the pinned checked-out target;
+- any non-current local branch, every remote-tracking ref, and managed
+  `refs/llm-wiki/sources/` snapshot ref are unrelated to the pinned checked-out
+  target;
 - tags, stash, and every other namespace are ambiguous.
 
 Relevant and ambiguous changes block. Only unrelated changes continue. The
@@ -94,6 +95,13 @@ uncoordinated mutation; it is not a MAC and cannot authenticate the sidecar or a
 Markdown digest against a hostile process running with the same filesystem
 authority. Stronger hostile-agent custody requires a separate privileged Hive
 boundary and is not claimed by this candidate.
+
+A failed target-writing attempt may leave partial worktree bytes that were not
+inventoried and advanced before the process stopped. A later attempt cannot
+distinguish those bytes from a concurrent owner mutation, so it must continue
+to fail closed until the owner reconciles the worktree or starts from a fresh
+baseline. The repair and verification stages use explicit one-hour bounds to
+reduce avoidable timeouts; those bounds do not weaken target attribution.
 
 This is current local-state evidence, not an operation ledger. It cannot prove
 that a commit, push, or other remote action did not occur and was later hidden

@@ -18,7 +18,7 @@ end
 module RepositoryAuthority
   CLASSIFICATIONS = %w[relevant unrelated ambiguous].freeze
   RELEVANT_PREFIXES = %w[refs/bisect/ refs/worktree/ refs/rewritten/].freeze
-  UNRELATED_PREFIXES = %w[refs/remotes/].freeze
+  UNRELATED_PREFIXES = %w[refs/remotes/ refs/llm-wiki/sources/].freeze
 
   module_function
 
