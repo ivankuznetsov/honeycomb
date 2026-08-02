@@ -143,6 +143,11 @@ depth, and requires no security-lint suppression requests.
   intended target mutations uncommitted. `verified`, `not-reproduced`, and
   `blocked` are semantic terminal outcomes, not catalog trust or publication
   states.
+- Root Cause Repair correction: `candidates/root-cause-repair/` is manifest-free
+  and invisible to package validation and catalog resolution. Its temporary
+  test registry synthesizes a manifest only outside the repository. Passing
+  linked-worktree tests or opening a pull request does not choose a successor
+  SemVer, authorize promotion, alter 1.0.0, or confer publication authority.
 - Reviewer Panel: `packages/reviewer-panel/1.0.0` is also an immutable package
   whose canonical manifest binds its registry-original behavior source.
   Correctness, security,

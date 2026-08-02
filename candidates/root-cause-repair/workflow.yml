@@ -1,0 +1,59 @@
+id: root-cause-repair
+stages:
+  - name: inbox
+    kind: terminal
+    state_file: brief.md
+  - name: reproduce
+    kind: agent
+    state_file: reproduce.md
+    instruction: instructions/reproduce.md
+    mapping_role: development
+    mapping_contract: root-cause-repair-reproduce-v1
+    permissions: yolo
+  - name: diagnose
+    kind: agent
+    state_file: diagnose.md
+    instruction: instructions/diagnose.md
+    mapping_role: development
+    mapping_contract: root-cause-repair-diagnose-v1
+    permissions: yolo
+  - name: repair
+    kind: agent
+    state_file: repair.md
+    instruction: instructions/repair.md
+    mapping_role: development
+    mapping_contract: root-cause-repair-repair-v1
+    permissions: yolo
+  - name: verification
+    kind: council
+    state_file: verification.md
+    input: repair.md
+    mapping_role: reviewer
+    mapping_contract: root-cause-repair-verification-council-v1
+    permissions: yolo
+    council:
+      quorum: 1
+      max_rounds: 3
+      exit_rule: consensus
+      on_max_rounds: complete
+      triage_output: reviews/triage.md
+      revise:
+        instruction: instructions/revise-repair.md
+        mapping_role: development
+        mapping_contract: root-cause-repair-revise-v1
+        permissions: yolo
+    reviewers:
+      - name: causal-verifier
+        instruction: instructions/verify.md
+        output_basename: causal-verifier
+        mapping_role: reviewer
+        mapping_contract: root-cause-repair-causal-verifier-v1
+        permissions: yolo
+  - name: certificate
+    kind: agent
+    state_file: repair-certificate.md
+    deliverable: repair-certificate.md
+    instruction: instructions/certificate.md
+    mapping_role: reviewer
+    mapping_contract: root-cause-repair-certificate-v1
+    permissions: yolo

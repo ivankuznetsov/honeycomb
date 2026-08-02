@@ -13,6 +13,8 @@ change.
 - [[dependencies]] - runtime, development, and service dependencies.
 - [[package-catalog-contract]] - shipped package, manifest, evidence, and catalog
   contracts.
+- [[root-cause-repair]] - immutable release behavior, corrected unpublished
+  repository-authority candidate, and promotion boundary.
 - [[video-production]] - reusable approval-gated capture package, evidence
   contract, trusted-owner boundary, and current publication gaps.
 - [[security-review-contract]] - identity binding and boundary with listing CI.
@@ -58,8 +60,18 @@ projects this release into `catalog.json`; site sync and public-install
 acceptance against released Hive are complete, including managed task creation.
 Provider-backed live-run evidence and any Hive-template removal remain separate
 rollout gates. See
-[[architecture]], [[command-api-surface]], [[package-catalog-contract]], and
-[[gaps]] for the runtime, publication, evidence, and uncertainty boundaries.
+[[root-cause-repair]], [[architecture]], [[command-api-surface]],
+[[package-catalog-contract]], and [[gaps]] for the runtime, publication,
+evidence, and uncertainty boundaries.
+
+The manifest-free `candidates/root-cause-repair/` corrects a concurrency defect
+without rewriting 1.0.0 or choosing a successor version. The released tool
+folds every Git ref into one authority digest, so a linked `.hive-state` commit
+can block diagnosis while the target is unchanged. The candidate stores a
+content-blind phase checkpoint in the task folder, compares refs individually,
+continues across non-current branch and remote-tracking movement, and blocks
+target-relevant or ambiguous drift. Promotion, release, catalog, site, and
+deployment remain separate owner-authorized actions.
 
 Reviewer Panel 1.0.0 is an immutable package under
 `packages/reviewer-panel/1.0.0`, with a canonical manifest that preserves its
