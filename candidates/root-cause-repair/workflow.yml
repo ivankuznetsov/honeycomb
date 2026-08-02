@@ -53,6 +53,9 @@ stages:
     kind: agent
     state_file: repair-certificate.md
     deliverable: repair-certificate.md
+    terminal_outcomes:
+      complete: [verified, not-reproduced]
+      blocked: [blocked]
     instruction: instructions/certificate.md
     mapping_role: reviewer
     mapping_contract: root-cause-repair-certificate-v1

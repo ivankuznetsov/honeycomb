@@ -50,6 +50,16 @@ command and checks the checkpoint chain without advancing. Measurement races ret
 once; repeated authority movement blocks, while unrelated ref movement is
 recorded without consuming the retry.
 
+The candidate certificate also opts into Hive's semantic terminal contract:
+`verified` and `not-reproduced` complete the task, while `blocked` becomes a
+durable active error. Compatible Hive runtimes validate the exact first line
+before committing completion, present the task as `Blocked`, retain guarded
+explicit retry, and do not archive or automatically retry it. The immutable
+1.0.0 package remains unchanged and does not carry this descriptor field.
+The candidate-only execution gate runs in a separate Ruby process against Hive
+commit `ca0c429c0f7cbf3c912f2ffdd01b04a7890374b0`; released-package gates retain
+their existing immutable runtime pin.
+
 ## Evidence and boundary
 
 Focused tests cover checkpoint integrity, bounded evidence, ref creation and

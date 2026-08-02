@@ -55,6 +55,16 @@ agent.
 5. `certificate` performs a final comparison and produces exactly one outcome:
    `verified`, `not-reproduced`, or `blocked`.
 
+The terminal descriptor declares `verified` and `not-reproduced` as completing
+outcomes and `blocked` as a blocking outcome. A compatible Hive runtime
+validates the certificate's exact first line before its completion commit, so
+`Outcome: blocked` remains an active, visibly blocked, explicitly retryable
+task instead of being archived as successful completion.
+
+The candidate execution regression runs separately against Hive commit
+`ca0c429c0f7cbf3c912f2ffdd01b04a7890374b0`. Released package compatibility
+tests continue to run against their immutable Hive 0.6.7 pin.
+
 Intermediate artifacts use `Workflow-Status`. A `not-reproduced` or `blocked`
 artifact makes downstream stages no-op and propagate that condition. Reviewer
 `Verdict` values control the council loop; they are not package outcomes.

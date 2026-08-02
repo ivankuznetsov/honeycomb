@@ -80,6 +80,13 @@ class RootCauseRepairCandidateTest < Minitest::Test
     executable = stages.reject { |stage| stage.fetch("kind") == "terminal" }
     assert executable.all? { |stage| stage.fetch("permissions") == "yolo" }
     assert_equal "repair-certificate.md", stages.last.fetch("deliverable")
+    assert_equal(
+      {
+        "complete" => %w[verified not-reproduced],
+        "blocked" => [ "blocked" ]
+      },
+      stages.last.fetch("terminal_outcomes")
+    )
   end
 
   def test_candidate_readme_states_unpublished_boundary
