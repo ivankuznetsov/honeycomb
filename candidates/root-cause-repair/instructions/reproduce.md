@@ -21,12 +21,13 @@ conceal them.
 
 After the attempts, inspect all target worktree changes and confirm that none is
 an implementation or test edit. Run
-`tools/repository-state.rb advance --allow-worktree --expect <checkpoint-digest>`
-with the exact digest from `create`. The tool may authorize only the inventoried
-tracked or untracked byproducts and unrelated ref changes. If its verdict is
-blocked, if it reports target HEAD, index, relevant-ref, or ambiguous-ref drift,
-or if it returns `state_changed` after its one retry, stop blocked and preserve
-the evidence. Never restore or hide the drift.
+`tools/repository-state.rb inventory --expect <checkpoint-digest>`, reconcile its
+worktree-change keys and digest with the complete path-level inventory, then run
+`tools/repository-state.rb advance --allow-worktree <worktree-change-digest> --expect <checkpoint-digest>`.
+Advancement recaptures the target and succeeds only when its exact content-blind
+worktree delta still matches the inventoried digest. An extra or changed mutation,
+target HEAD or index drift, relevant or ambiguous ref drift, or repeated
+`state_changed` is blocked and leaves the prior checkpoint intact.
 
 Never reset, clean, stash, revert, commit, push, open or update a PR, merge,
 tag, release, publish, or deploy. Do not invoke an equivalent operation under
@@ -38,7 +39,8 @@ Return `reproduce.md` with:
 - the normalized symptom and acceptance condition;
 - environment and repository facts relevant to reproduction;
 - exact commands, exit statuses, and concise observed output;
-- the `create` and `advance` JSON lines, including old and new checkpoint digest;
+- the `create`, `inventory`, and `advance` JSON lines, including sequence,
+  previous digest, and old and new checkpoint digest;
 - every unrelated ref delta and the complete worktree-byproduct inventory;
 - remaining uncertainty and the reason for a non-continuing status.
 

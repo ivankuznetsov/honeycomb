@@ -2,23 +2,34 @@
 
 `tools/repository-state.rb` emits one canonical JSON line and uses schema
 `honeycomb-repository-state/v2`. Run it from the current Hive task folder. It
-supports three operations:
+supports four operations:
 
 - `create` captures the first phase-scoped checkpoint in the task-local
   `repository-authority.json` sidecar;
 - `compare --expect <digest>` validates that sidecar against the checkpoint
   digest bound into the preceding stage artifact, then compares current state;
-- `advance --allow-worktree --expect <digest>` performs the same comparison and
-  atomically replaces the checkpoint only when the only target changes are the
-  stage's inventoried tracked or untracked worktree effects.
+- `inventory --expect <digest>` observes the exact content-blind worktree delta
+  after stage work without changing the checkpoint;
+- `advance --allow-worktree <worktree-change-digest> --expect <digest>` recaptures
+  the target and atomically replaces the checkpoint only when the delta still
+  exactly matches the stage's accepted inventory.
 
 The sidecar moves with the task folder between stages. It contains no target
 file bytes, secrets, environment values, or timestamps. It stores content-blind
 individual ref records so comparison does not have to put an unbounded ref list
-in a prompt. Missing, corrupt, root-mismatched, or digest-mismatched sidecars
-fail closed. Checkpoint writes use a mode-0600 temporary file, file and directory
-sync, and atomic rename. Only this excluded Hive-state sidecar is written; the
-tool never changes target bytes, the index, `HEAD`, or a Git ref.
+in a prompt. Checkpoint schema `honeycomb-repository-authority-checkpoint/v2`
+also binds a monotonic sequence and previous checkpoint digest. Missing, corrupt,
+root-mismatched, or digest-mismatched sidecars fail closed. Checkpoint reads are
+bounded before allocation and do not follow symlinks. Writes use a complete-write
+loop, a mode-0600 temporary file, file sync, atomic rename, and best-effort
+directory sync. Only this excluded Hive-state sidecar is written; the tool never
+changes target bytes, the index, `HEAD`, or a Git ref.
+
+The worktree-change digest covers the checkpoint and current tracked and
+untracked aggregate identities. A stage first reconciles that digest with its
+path-level Git inventory. Advancement takes the accepted digest as a capability
+for one fresh capture; an extra file, a later edit to an inventoried file, or a
+missing file changes the digest and blocks without replacing the checkpoint.
 
 ## Target authority
 
@@ -53,8 +64,11 @@ observations; they are not the authority verdict.
 ## Output and failure semantics
 
 Successful output has `verdict: continue|blocked`. Its `reason` is one of
-`unchanged`, `unrelated_refs`, `target_changed`, `ambiguous_refs`,
-`checkpoint_created`, `checkpoint_existing`, or `checkpoint_advanced`.
+`unchanged`, `unrelated_refs`, `worktree_changes`, `target_changed`, `ambiguous_refs`,
+`checkpoint_created`, `checkpoint_existing`, `checkpoint_advanced`, or
+`checkpoint_recovered`. Recovery is limited to the immediately previous digest
+linked by checkpoint v2, so a process interruption after atomic rename can be
+reconciled without treating an arbitrary older baseline as current.
 Comparison classifies every changed ref before bounding evidence. Each
 classification reports its exact count, digest, truncation flag, and at most 50
 changed-ref records ordered by name.
@@ -73,6 +87,13 @@ aggregate entry or byte limits, Git commands exceeding 60 seconds, and dirty,
 uninitialized, commit-mismatched, or recursively dirty submodules. It disables
 Git optional locking, does not refresh the index, does not follow worktree
 symlinks, and invokes no network client.
+
+Workflow agents that receive target write authority are part of the trusted
+computing base. The sidecar digest detects corruption, stale evidence, and
+uncoordinated mutation; it is not a MAC and cannot authenticate the sidecar or a
+Markdown digest against a hostile process running with the same filesystem
+authority. Stronger hostile-agent custody requires a separate privileged Hive
+boundary and is not claimed by this candidate.
 
 This is current local-state evidence, not an operation ledger. It cannot prove
 that a commit, push, or other remote action did not occur and was later hidden

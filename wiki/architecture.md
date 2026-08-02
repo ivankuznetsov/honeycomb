@@ -70,9 +70,10 @@ catalog renderer.
   evidence exposes only bounded deltas. The pinned branch and per-worktree refs
   are relevant, non-current branches and remote-tracking refs are unrelated,
   and tags, stash, and unknown namespaces are ambiguous. Each active stage
-  compares against the preceding digest before acting and advances the
-  checkpoint only after inventorying authorized worktree effects; certificate
-  compares without advancing. A temporary registry test uses a real linked
+  compares against the preceding digest before acting, inventories an exact
+  content-blind worktree delta, and advances only when a fresh capture matches
+  that accepted digest. Checkpoint sequence/previous-digest links and a terminal
+  certificate comparison make the phase chain explicit. A temporary registry test uses a real linked
   `.hive-state` worktree and native Hive Agent stages to prove normal state
   commits and concurrent branch creation reach diagnosis.
 - `packages/reviewer-panel/1.0.0` is another immutable high-risk package with a

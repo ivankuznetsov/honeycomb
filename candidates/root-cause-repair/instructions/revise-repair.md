@@ -27,11 +27,13 @@ claim resolution without command and repository evidence. If a requested edit
 is unsafe or incorrect, preserve the repair and document the evidence-backed
 disagreement for the next round.
 
-Inspect the complete uncommitted diff, then run
-`tools/repository-state.rb advance --allow-worktree --expect <checkpoint-digest>`.
-Advancement authorizes only the inventoried revision and test byproducts. HEAD,
-index, relevant-ref, or ambiguous-ref drift and any blocked verdict remain
-blocked. Preserve the previous checkpoint on error.
+Inspect the complete uncommitted diff, run
+`tools/repository-state.rb inventory --expect <checkpoint-digest>`, and reconcile
+its worktree-change keys and digest with the path-level revision inventory. Then
+run `tools/repository-state.rb advance --allow-worktree <worktree-change-digest> --expect <checkpoint-digest>`.
+The fresh capture must match the inventoried delta. Extra mutations, HEAD or
+index drift, relevant or ambiguous refs, and any blocked verdict remain blocked.
+Preserve the previous checkpoint on error.
 
 Never reset, clean, stash, revert, commit, push, open or update a PR, merge,
 tag, release, publish, or deploy. Do not hide or restore unexpected drift.
@@ -43,7 +45,8 @@ Return a complete replacement `repair.md` with:
 - the current causal claim, changed-path rationale, and regression proof;
 - exact commands and results from this revision round;
 - a complete inventory of uncommitted target changes;
-- compare and advance JSON, old and new checkpoint digest, and unrelated refs;
+- compare, inventory, and advance JSON, checkpoint sequence, previous digest,
+  old and new checkpoint digest, and unrelated refs;
 - unresolved findings, residual risk, and any blocking reason.
 
 Do not emit an `Outcome:` field.

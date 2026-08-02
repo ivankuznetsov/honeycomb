@@ -28,12 +28,13 @@ commands and results.
 
 Inspect the complete uncommitted diff for scope, secrets, generated debris, and
 unintended changes. Run
-`tools/repository-state.rb advance --allow-worktree --expect <checkpoint-digest>`
-with the pre-repair digest. Advancement authorizes the inventoried repair,
-regression test, and test byproducts as the next phase-scoped checkpoint. It
-never authorizes HEAD, index, relevant-ref, or ambiguous-ref drift. A blocked
-verdict or error leaves the previous checkpoint intact and makes the stage
-blocked.
+`tools/repository-state.rb inventory --expect <checkpoint-digest>`, reconcile its
+worktree-change keys and digest with the complete path-level inventory, then run
+`tools/repository-state.rb advance --allow-worktree <worktree-change-digest> --expect <checkpoint-digest>`.
+The fresh advancement capture must match that exact delta before the repair,
+regression, and test byproducts become the next phase checkpoint. It never
+authorizes an extra mutation, HEAD or index drift, or relevant or ambiguous ref
+drift. A blocked verdict or error leaves the previous checkpoint intact.
 
 The repair remains uncommitted. Never reset, clean, stash, revert, commit, push,
 open or update a PR, merge, tag, release, publish, or deploy. Do not rewrite
@@ -46,7 +47,8 @@ Return `repair.md` with:
 - the focused regression's before/after causal evidence;
 - exact reproduction, regression, and adjacent check results;
 - an inventory of every uncommitted target change, including pre-existing work;
-- compare and advance JSON, old and new checkpoint digest, and unrelated refs;
+- compare, inventory, and advance JSON, checkpoint sequence, previous digest,
+  old and new checkpoint digest, and unrelated refs;
 - limitations, residual risk, and the reason for any non-continuing status.
 
 Use `continue` only when the repair is ready for independent causal

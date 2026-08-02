@@ -41,20 +41,24 @@ class RootCauseRepairCandidateTest < Minitest::Test
       assert_match(/repository-state\.rb`?\s+`?compare\s+--expect/i, source, name)
     end
     instructions.each do |name, source|
-      assert_match(/repository-state\.rb`?\s+`?advance\s+--allow-worktree\s+--expect/i, source, name)
+      assert_match(/repository-state\.rb`?\s+`?inventory\s+--expect/i, source, name)
+      assert_match(/repository-state\.rb`?\s+`?advance\s+--allow-worktree\s+<worktree-change-digest>\s+--expect/i, source, name)
       assert_match(/checkpoint digest/i, source, name)
       assert_match(/verdict.*blocked|blocked.*verdict/i, source, name)
       assert_match(/unrelated.*ref/i, source, name)
     end
 
     certificate = File.read(File.join(ROOT_CAUSE_CANDIDATE, "instructions", "certificate.md"))
-    assert_match(/repository-state\.rb`?\s+`?compare\s+--expect/i, certificate)
+    assert_operator certificate.scan(/repository-state\.rb`?\s+`?compare\s+--expect/i).length, :>=, 2
     refute_match(/repository-state\.rb`?\s+`?advance/i, certificate)
   end
 
   def test_candidate_contract_pins_verdicts_bounds_and_terminal_outcomes
     contract = File.read(File.join(ROOT_CAUSE_CANDIDATE, "assets", "evidence-contract.md"))
-    %w[unchanged unrelated_refs target_changed ambiguous_refs state_changed].each do |reason|
+    %w[
+      unchanged unrelated_refs worktree_changes target_changed ambiguous_refs
+      state_changed checkpoint_recovered
+    ].each do |reason|
       assert_includes contract, reason
     end
     assert_match(/50\s+changed-ref records/i, contract)

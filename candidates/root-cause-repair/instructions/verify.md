@@ -24,16 +24,18 @@ test by itself is not causal proof. Inspect the diff and ensure it matches the
 repair inventory without unrelated edits.
 
 After decisive checks, inventory any new test byproducts and run
-`tools/repository-state.rb advance --allow-worktree --expect <checkpoint-digest>`.
-Advancement may authorize those inventoried worktree effects and unrelated ref
-changes only. A blocked verdict, HEAD or index movement, relevant or ambiguous
-ref drift, or repeated `state_changed` requires changes_requested and leaves the
-old checkpoint intact. Include the new checkpoint digest in the review artifact
-so a revision or certificate can validate it.
+`tools/repository-state.rb inventory --expect <checkpoint-digest>`. Reconcile its
+worktree-change keys and digest with the complete path-level inventory, then run
+`tools/repository-state.rb advance --allow-worktree <worktree-change-digest> --expect <checkpoint-digest>`.
+Advancement recaptures and authorizes only that exact delta. An extra mutation,
+HEAD or index movement, relevant or ambiguous ref drift, or repeated
+`state_changed` requires changes_requested and leaves the old checkpoint intact.
+Include the new sequence, previous digest, and checkpoint digest in the review.
 
 For continuing work return `Verdict: ready|changes_requested`. `Verdict`
 controls the council and is never an `Outcome`. Include compare and advance
-JSON, old and new checkpoint digest, unrelated ref evidence, exact check
+JSON for compare, inventory, and advance, old and new checkpoint digest,
+unrelated ref evidence, exact check
 results, causal findings, and remaining uncertainty.
 
 The target repair stays uncommitted. Never reset, clean, stash, revert, commit,

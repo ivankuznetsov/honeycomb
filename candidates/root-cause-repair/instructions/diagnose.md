@@ -25,10 +25,12 @@ edit implementation or test sources.
 
 After the probes, inspect all target worktree changes and confirm none edits
 implementation or tests. Run
-`tools/repository-state.rb advance --allow-worktree --expect <checkpoint-digest>`
-with the same pre-stage digest. The tool may authorize only inventoried probe
-byproducts and unrelated ref changes. A blocked verdict, relevant or ambiguous
-ref change, unexpected target mutation, or repeated `state_changed` is blocked.
+`tools/repository-state.rb inventory --expect <checkpoint-digest>`, reconcile its
+worktree-change keys and digest with the complete path-level inventory, then run
+`tools/repository-state.rb advance --allow-worktree <worktree-change-digest> --expect <checkpoint-digest>`.
+The second command recaptures the target and authorizes only the exact delta that
+was inventoried. An extra or changed mutation, relevant or ambiguous ref change,
+HEAD or index drift, or repeated `state_changed` is blocked.
 
 Never reset, clean, stash, revert, commit, push, open or update a PR, merge,
 tag, release, publish, or deploy. Do not conceal or reverse unexpected drift.
@@ -40,8 +42,8 @@ Return `diagnose.md` with:
 - a symptom-to-cause chain tied to repository locations and command evidence;
 - considered alternatives and the evidence that rejects them;
 - repair constraints, regression surface, and the focused test needed;
-- compare and advance JSON, old and new checkpoint digest, unrelated ref deltas,
-  and the complete probe-byproduct inventory;
+- compare, inventory, and advance JSON, checkpoint sequence, old and new digest,
+  unrelated ref deltas, and the complete probe-byproduct inventory;
 - uncertainty and the reason for any non-continuing status.
 
 Use `continue` only for a diagnosis strong enough to guide a minimal repair.

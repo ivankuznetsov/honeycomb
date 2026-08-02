@@ -223,15 +223,27 @@ class RootCauseRepairCandidateHiveExecutionTest < Minitest::Test
   def run_deterministic_agent(stage, task, cwd:, log_label:, **_kwargs)
     raise "unexpected stage #{log_label}" unless log_label == stage.to_s
 
-    tool = task.managed_runtime_context("stages.#{stage}").fetch(:tools).find do |path|
+    context = task.managed_runtime_context("stages.#{stage}")
+    tool = context.fetch(:tools).find do |path|
       File.basename(path) == "repository-state.rb"
     end
+    instruction = File.read(File.join(context.fetch(:package_root), "instructions", "#{stage}.md"))
     output = if stage == :reproduce
-               run_tool!(tool, task.folder, "create")
+               assert_match(/repository-state\.rb`?\s+`?create/i, instruction)
+               created = run_tool!(tool, task.folder, "create")
+               digest = created.dig("checkpoint", "digest")
+               inventoried = run_tool!(tool, task.folder, "inventory", "--expect", digest)
+               run_tool!(
+                 tool, task.folder, "advance", "--allow-worktree",
+                 inventoried.dig("worktree_changes", "digest"), "--expect", digest
+               )
              else
+               assert_match(/repository-state\.rb`?\s+`?compare\s+--expect/i, instruction)
                digest = File.read(File.join(task.folder, "reproduce.md"))[/Checkpoint-Digest: (sha256:[0-9a-f]{64})/, 1]
                run_tool!(tool, task.folder, "compare", "--expect", digest)
              end
+    assert_match(/repository-state\.rb`?\s+`?inventory\s+--expect/i, instruction)
+    assert_match(/repository-state\.rb`?\s+`?advance\s+--allow-worktree/i, instruction)
     status = output.fetch("verdict") == "continue" ? "continue" : "blocked"
     body = <<~MD
       Workflow-Status: #{status}

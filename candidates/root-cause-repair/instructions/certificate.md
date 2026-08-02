@@ -28,6 +28,13 @@ certificate, without changing the target. If that check creates a byproduct the
 current checkpoint did not authorize, issue blocked rather than advance during
 certificate.
 
+After every optional command, run a terminal
+`tools/repository-state.rb compare --expect <same-checkpoint-digest>`. This second
+comparison is the final repository-authority evidence. Require `status: ok` and
+`verdict: continue`; any target or ambiguous drift is blocked. Verify that each
+stage's checkpoint sequence increments by one and its `previous_digest` equals
+the checkpoint digest recorded by the preceding continuing stage.
+
 Issue verified only when evidence proves: the symptom was reproduced before
 repair; the diagnosis causally explains it; a focused regression failed before
 and passes after; the original reproduction and adjacent checks pass; the
@@ -46,6 +53,7 @@ Return `repair-certificate.md` with exactly one first-line
 - reproduction-before and verification-after command evidence;
 - focused regression and adjacent-check results;
 - causal-verifier consensus or unresolved findings;
-- final compare JSON, checkpoint digest, and unrelated ref deltas;
+- terminal compare JSON, checkpoint sequence and chain, checkpoint digest, and
+  unrelated ref deltas;
 - the inventory of uncommitted target changes;
 - limitations, residual risk, and owner-controlled next steps.

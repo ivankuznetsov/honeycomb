@@ -24,7 +24,8 @@ the immutable release or select a successor package version.
 The candidate writes `repository-authority.json` in the current task folder.
 The sidecar moves with the task and is excluded from target byte authority. It
 stores full content-blind ref records, target/root identities, HEAD, index, and
-tracked/untracked digests. Stage artifacts bind only its schema and digest plus
+tracked/untracked digests. Checkpoint v2 also stores a monotonic sequence and
+previous digest. Stage artifacts bind only its schema, sequence, and digest plus
 bounded comparison evidence.
 
 Ref changes are compared by the union of checkpoint and current names, so
@@ -41,9 +42,11 @@ recorded. Evidence classification covers every delta before output is capped at
 
 Reproduce creates the first checkpoint. Diagnose, repair, revision, and
 verification compare before acting and atomically advance only after they
-inventory authorized worktree effects. HEAD, index, relevant-ref, or
-ambiguous-ref drift cannot be authorized by advancement. Certificate performs a
-final comparison without advancing. Measurement races in target authority retry
+inventory worktree effects, obtain the exact content-blind delta digest, and
+accept that digest for one fresh advancement capture. A late or extra mutation,
+HEAD, index, relevant-ref, or ambiguous-ref drift cannot be authorized by
+advancement. Certificate performs a terminal comparison after any decisive
+command and checks the checkpoint chain without advancing. Measurement races retry
 once; repeated authority movement blocks, while unrelated ref movement is
 recorded without consuming the retry.
 
@@ -55,6 +58,12 @@ races. A temporary registry test installs the candidate into exact pinned Hive
 bytes, uses a real linked `.hive-state` worktree, commits normal Hive state,
 creates another task branch, and proves diagnosis continues. It also proves a
 target branch move remains blocked.
+
+This evidence boundary assumes workflow agents with target-write authority obey
+their governing instructions. A self-digest can detect corruption and stale
+evidence but is not a MAC against a hostile same-user actor that can rewrite
+both the sidecar and Markdown evidence. Privilege-separated custody remains a
+Hive runtime concern.
 
 The temporary manifest and catalog exist only in the test sandbox. Candidate
 source, tests, or a pull request do not authorize a package version, canonical

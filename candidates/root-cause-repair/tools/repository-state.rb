@@ -16,6 +16,7 @@ class RepositoryStateError < StandardError
 end
 
 module RepositoryAuthority
+  CLASSIFICATIONS = %w[relevant unrelated ambiguous].freeze
   RELEVANT_PREFIXES = %w[refs/bisect/ refs/worktree/ refs/rewritten/].freeze
   UNRELATED_PREFIXES = %w[refs/remotes/].freeze
 
@@ -49,6 +50,41 @@ module RepositoryAuthority
   def ref_identity(record)
     {"oid" => record.fetch("oid"), "type" => record.fetch("type")}
   end
+
+  def canonical_json(value)
+    JSON.generate(canonicalize(value))
+  end
+
+  def canonicalize(value)
+    case value
+    when Hash
+      value.keys.sort.each_with_object({}) do |key, result|
+        result[key] = canonicalize(value.fetch(key))
+      end
+    when Array
+      value.map { |item| canonicalize(item) }
+    else
+      value
+    end
+  end
+
+  def write_all(io, bytes)
+    offset = 0
+    while offset < bytes.bytesize
+      written = io.write(bytes.byteslice(offset, bytes.bytesize - offset))
+      unless written&.positive?
+        raise RepositoryStateError.new("checkpoint_write_failed", "checkpoint write made no progress")
+      end
+
+      offset += written
+    end
+    offset
+  end
+
+  def same_file_state?(left, right)
+    left.dev == right.dev && left.ino == right.ino && left.mode == right.mode &&
+      left.size == right.size && left.mtime == right.mtime && left.ctime == right.ctime
+  end
 end
 
 class RepositoryStateCapture
@@ -68,8 +104,9 @@ class RepositoryStateCapture
     "LC_ALL" => "C"
   }.freeze
 
-  def initialize(start_directory)
+  def initialize(start_directory, capture_boundary: nil)
     @start_directory = start_directory
+    @capture_boundary = capture_boundary
     @total_bytes = 0
     @measurement_ref_changes = []
   end
@@ -81,6 +118,7 @@ class RepositoryStateCapture
     index, index_entries = capture_index(target_root)
     tracked = capture_worktree_entries(target_root, index_entries)
     untracked = capture_untracked(target_root, index_entries)
+    @capture_boundary&.call
 
     # Re-read repository authority after the filesystem walk. A moving ref or
     # index would otherwise let one report describe two different states.
@@ -111,11 +149,9 @@ class RepositoryStateCapture
       "measurement_ref_changes" => @measurement_ref_changes.uniq.sort
     }
     identity = report.reject { |key, _value| key == "measurement_ref_changes" }
-    report["fingerprint"] = "sha256:#{Digest::SHA256.hexdigest(canonical_json(identity))}"
-    canonicalize(report)
+    report["fingerprint"] = "sha256:#{Digest::SHA256.hexdigest(RepositoryAuthority.canonical_json(identity))}"
+    RepositoryAuthority.canonicalize(report)
   end
-
-  private
 
   def resolve_roots
     state_root = git_toplevel(@start_directory, "state_root_invalid", "invocation is not inside a Git-backed .hive-state")
@@ -131,6 +167,8 @@ class RepositoryStateCapture
 
     [state_root, target_git_root]
   end
+
+  private
 
   def capture_head(root)
     commit = git!(root, "rev-parse", "--verify", "HEAD^{commit}",
@@ -546,8 +584,7 @@ class RepositoryStateCapture
   end
 
   def same_file_state?(left, right)
-    left.dev == right.dev && left.ino == right.ino && left.mode == right.mode &&
-      left.size == right.size && left.mtime == right.mtime && left.ctime == right.ctime
+    RepositoryAuthority.same_file_state?(left, right)
   end
 
   def safe_text(bytes)
@@ -559,39 +596,30 @@ class RepositoryStateCapture
     raise RepositoryStateError.new("state_changed", "repository changed during capture")
   end
 
-  def canonical_json(value)
-    JSON.generate(canonicalize(value))
-  end
-
-  def canonicalize(value)
-    case value
-    when Hash
-      value.keys.sort.each_with_object({}) { |key, result| result[key] = canonicalize(value.fetch(key)) }
-    when Array
-      value.map { |item| canonicalize(item) }
-    else
-      value
-    end
-  end
 end
 
 class RepositoryAuthorityController
-  CHECKPOINT_SCHEMA = "honeycomb-repository-authority-checkpoint/v1"
+  CHECKPOINT_SCHEMA = "honeycomb-repository-authority-checkpoint/v2"
   CHECKPOINT_NAME = "repository-authority.json"
+  MAX_CHECKPOINT_BYTES = RepositoryStateCapture::MAX_GIT_STDOUT_BYTES
   MAX_CHANGED_REF_RECORDS = 50
   EXPECTED_DIGEST = /\Asha256:[0-9a-f]{64}\z/
+  TARGET_STATE_KEYS = %w[target head index tracked_worktree untracked_worktree].freeze
+  WORKTREE_STATE_KEYS = %w[tracked_worktree untracked_worktree].freeze
 
-  def initialize(start_directory, arguments)
+  def initialize(start_directory, arguments, capture_boundary: nil)
     @start_directory = File.realpath(start_directory)
     @arguments = arguments.dup
+    @capture_boundary = capture_boundary
+    @recovered_checkpoint_digest = nil
   rescue SystemCallError
     raise RepositoryStateError.new("state_root_invalid", "invocation directory cannot be resolved")
   end
 
   def call
     operation = @arguments.shift
-    unless %w[create compare advance].include?(operation)
-      raise RepositoryStateError.new("usage", "operation must be create, compare, or advance")
+    unless %w[create compare inventory advance].include?(operation)
+      raise RepositoryStateError.new("usage", "operation must be create, compare, inventory, or advance")
     end
 
     options = parse_options(operation)
@@ -601,20 +629,22 @@ class RepositoryAuthorityController
       create(checkpoint_path)
     when "compare"
       compare(checkpoint_path, options.fetch(:expect))
+    when "inventory"
+      inventory(checkpoint_path, options.fetch(:expect))
     when "advance"
-      advance(checkpoint_path, options.fetch(:expect), options.fetch(:allow_worktree))
+      advance(checkpoint_path, options.fetch(:expect), options.fetch(:worktree_digest))
     end
   end
 
   private
 
   def parse_options(operation)
-    options = {allow_worktree: false, expect: nil}
+    options = {expect: nil, worktree_digest: nil}
     until @arguments.empty?
       argument = @arguments.shift
       case argument
       when "--allow-worktree"
-        options[:allow_worktree] = true
+        options[:worktree_digest] = @arguments.shift
       when "--expect"
         options[:expect] = @arguments.shift
       else
@@ -622,13 +652,18 @@ class RepositoryAuthorityController
       end
     end
     if operation == "create"
-      raise RepositoryStateError.new("usage", "create does not accept comparison options") if options[:allow_worktree] || options[:expect]
+      if options[:worktree_digest] || options[:expect]
+        raise RepositoryStateError.new("usage", "create does not accept comparison options")
+      end
     else
       unless options[:expect]&.match?(EXPECTED_DIGEST)
-        raise RepositoryStateError.new("usage", "compare and advance require --expect sha256:<digest>")
+        raise RepositoryStateError.new("usage", "compare, inventory, and advance require --expect sha256:<digest>")
       end
-      if operation == "compare" && options[:allow_worktree]
+      if operation != "advance" && options[:worktree_digest]
         raise RepositoryStateError.new("usage", "--allow-worktree is valid only for advance")
+      end
+      if options[:worktree_digest] && !options[:worktree_digest].match?(EXPECTED_DIGEST)
+        raise RepositoryStateError.new("usage", "--allow-worktree requires sha256:<digest>")
       end
     end
     options
@@ -638,7 +673,7 @@ class RepositoryAuthorityController
     current, retries = capture_with_retry
     if File.exist?(path) || File.symlink?(path)
       checkpoint = load_checkpoint(path, expected_digest: nil, current: current)
-      comparison = compare_snapshots(checkpoint.fetch("snapshot"), current, allow_worktree: false)
+      comparison = compare_snapshots(checkpoint.fetch("snapshot"), current)
       unless comparison.fetch("verdict") == "continue"
         raise RepositoryStateError.new("checkpoint_exists", "existing checkpoint does not match target authority")
       end
@@ -659,19 +694,28 @@ class RepositoryAuthorityController
   def compare(path, expected_digest)
     current, retries = capture_with_retry
     checkpoint = load_checkpoint(path, expected_digest: expected_digest, current: current)
-    comparison = compare_snapshots(checkpoint.fetch("snapshot"), current, allow_worktree: false)
+    comparison = compare_snapshots(checkpoint.fetch("snapshot"), current)
     result("compare", current, checkpoint, comparison, retries)
   end
 
-  def advance(path, expected_digest, allow_worktree)
+  def inventory(path, expected_digest)
     current, retries = capture_with_retry
     checkpoint = load_checkpoint(path, expected_digest: expected_digest, current: current)
     comparison = compare_snapshots(
-      checkpoint.fetch("snapshot"), current, allow_worktree: allow_worktree
+      checkpoint.fetch("snapshot"), current, observe_worktree: true
+    )
+    result("inventory", current, checkpoint, comparison, retries)
+  end
+
+  def advance(path, expected_digest, worktree_digest)
+    current, retries = capture_with_retry
+    checkpoint = load_checkpoint(path, expected_digest: expected_digest, current: current)
+    comparison = compare_snapshots(
+      checkpoint.fetch("snapshot"), current, worktree_digest: worktree_digest
     )
     return result("advance", current, checkpoint, comparison, retries) unless comparison.fetch("verdict") == "continue"
 
-    advanced = build_checkpoint(current)
+    advanced = build_checkpoint(current, previous: checkpoint)
     write_checkpoint(path, advanced)
     result(
       "advance", current, advanced,
@@ -685,7 +729,7 @@ class RepositoryAuthorityController
   def capture_with_retry
     retries = 0
     begin
-      [RepositoryStateCapture.new(@start_directory).call, retries]
+      [RepositoryStateCapture.new(@start_directory, capture_boundary: @capture_boundary).call, retries]
     rescue RepositoryStateError => error
       raise unless error.code == "state_changed" && retries.zero?
 
@@ -694,21 +738,25 @@ class RepositoryAuthorityController
     end
   end
 
-  def compare_snapshots(checkpoint, current, allow_worktree:)
-    target_changes = %w[target head index tracked_worktree untracked_worktree].filter_map do |key|
+  def compare_snapshots(checkpoint, current, worktree_digest: nil, observe_worktree: false)
+    changed_worktree_keys = WORKTREE_STATE_KEYS.select do |key|
+      checkpoint.fetch(key) != current.fetch(key)
+    end
+    worktree_changes = summarize_worktree_changes(checkpoint, current, changed_worktree_keys)
+    worktree_digest_matches = worktree_digest &&
+                              worktree_digest == worktree_changes.fetch("digest")
+    worktree_permitted = changed_worktree_keys.empty? || worktree_digest_matches
+    target_changes = TARGET_STATE_KEYS.filter_map do |key|
       next if checkpoint.fetch(key) == current.fetch(key)
-      next if allow_worktree && %w[tracked_worktree untracked_worktree].include?(key)
+      next if WORKTREE_STATE_KEYS.include?(key) && (observe_worktree || worktree_permitted)
 
       key
-    end
-    authorized_worktree_changes = %w[tracked_worktree untracked_worktree].filter do |key|
-      checkpoint.fetch(key) != current.fetch(key)
     end
     pinned_branch = checkpoint.dig("head", "symbolic")
     classified = RepositoryAuthority.ref_deltas(
       checkpoint.dig("refs", "records"), current.dig("refs", "records")
     ).group_by { |change| RepositoryAuthority.classify_ref(change.fetch("name"), pinned_branch) }
-    changes = %w[relevant unrelated ambiguous].to_h do |classification|
+    changes = RepositoryAuthority::CLASSIFICATIONS.to_h do |classification|
       [classification, summarize_ref_changes(classified.fetch(classification, []))]
     end
     blocked_reason = if target_changes.any? || changes.dig("relevant", "count").positive?
@@ -716,13 +764,36 @@ class RepositoryAuthorityController
                      elsif changes.dig("ambiguous", "count").positive?
                        "ambiguous_refs"
                      end
-    reason = blocked_reason || (changes.dig("unrelated", "count").positive? ? "unrelated_refs" : "unchanged")
+    reason = if blocked_reason
+               blocked_reason
+             elsif changes.dig("unrelated", "count").positive?
+               "unrelated_refs"
+             elsif changed_worktree_keys.any?
+               "worktree_changes"
+             else
+               "unchanged"
+             end
     {
-      "authorized_worktree_changes" => authorized_worktree_changes,
+      "authorized_worktree_changes" => worktree_digest_matches ? changed_worktree_keys : [],
       "changes" => changes,
       "reason" => reason,
       "target_changes" => target_changes,
-      "verdict" => blocked_reason ? "blocked" : "continue"
+      "verdict" => blocked_reason ? "blocked" : "continue",
+      "worktree_changes" => worktree_changes.merge(
+        "authorized" => !!worktree_digest_matches && !observe_worktree,
+        "observed" => observe_worktree
+      )
+    }
+  end
+
+  def summarize_worktree_changes(checkpoint, current, changed_keys)
+    identities = changed_keys.to_h do |key|
+      [key, {"after" => current.fetch(key), "before" => checkpoint.fetch(key)}]
+    end
+    {
+      "count" => changed_keys.length,
+      "digest" => digest_value(identities),
+      "keys" => changed_keys
     }
   end
 
@@ -739,34 +810,41 @@ class RepositoryAuthorityController
   def empty_comparison(reason)
     {
       "authorized_worktree_changes" => [],
-      "changes" => %w[relevant unrelated ambiguous].to_h do |classification|
+      "changes" => RepositoryAuthority::CLASSIFICATIONS.to_h do |classification|
         [classification, summarize_ref_changes([])]
       end,
       "reason" => reason,
       "target_changes" => [],
-      "verdict" => "continue"
+      "verdict" => "continue",
+      "worktree_changes" => {
+        "authorized" => false,
+        "count" => 0,
+        "digest" => digest_value({}),
+        "keys" => [],
+        "observed" => false
+      }
     }
   end
 
-  def build_checkpoint(snapshot)
+  def build_checkpoint(snapshot, previous: nil)
     body = {
+      "previous_digest" => previous&.fetch("digest"),
       "schema" => CHECKPOINT_SCHEMA,
+      "sequence" => previous ? previous.fetch("sequence") + 1 : 0,
       "snapshot" => snapshot
     }
     body.merge("digest" => digest_value(body))
   end
 
   def load_checkpoint(path, expected_digest:, current:)
-    stat = File.lstat(path)
-    unless stat.file? && !stat.symlink?
-      raise RepositoryStateError.new("checkpoint_invalid", "checkpoint must be a regular file")
-    end
-    bytes = File.binread(path)
-    raise RepositoryStateError.new("checkpoint_invalid", "checkpoint exceeds the size limit") if bytes.bytesize > RepositoryStateCapture::MAX_GIT_STDOUT_BYTES
+    bytes = read_checkpoint(path)
 
     checkpoint = JSON.parse(bytes)
     unless checkpoint.is_a?(Hash) && checkpoint["schema"] == CHECKPOINT_SCHEMA &&
-           checkpoint["snapshot"].is_a?(Hash) && checkpoint["digest"].is_a?(String)
+           checkpoint["snapshot"].is_a?(Hash) && checkpoint["digest"].is_a?(String) &&
+           checkpoint["sequence"].is_a?(Integer) && checkpoint["sequence"] >= 0 &&
+           (checkpoint["sequence"].zero? ? checkpoint["previous_digest"].nil? :
+             checkpoint["previous_digest"]&.match?(EXPECTED_DIGEST))
       raise RepositoryStateError.new("checkpoint_invalid", "checkpoint structure is invalid")
     end
     body = checkpoint.reject { |key, _value| key == "digest" }
@@ -774,7 +852,11 @@ class RepositoryAuthorityController
       raise RepositoryStateError.new("checkpoint_invalid", "checkpoint digest is invalid")
     end
     if expected_digest && checkpoint.fetch("digest") != expected_digest
-      raise RepositoryStateError.new("checkpoint_mismatch", "checkpoint does not match stage evidence")
+      if checkpoint.fetch("previous_digest") == expected_digest
+        @recovered_checkpoint_digest = expected_digest
+      else
+        raise RepositoryStateError.new("checkpoint_mismatch", "checkpoint does not match stage evidence")
+      end
     end
     unless checkpoint.dig("snapshot", "target") == current.fetch("target")
       raise RepositoryStateError.new("checkpoint_invalid", "checkpoint belongs to another target")
@@ -788,11 +870,34 @@ class RepositoryAuthorityController
     raise RepositoryStateError.new("checkpoint_invalid", "checkpoint JSON is invalid")
   end
 
-  def resolve_checkpoint_path
-    state_root = git_toplevel(@start_directory)
-    unless File.basename(state_root) == ".hive-state"
-      raise RepositoryStateError.new("state_root_invalid", "nested Git root is not .hive-state")
+
+  def read_checkpoint(path)
+    flags = File::RDONLY
+    flags |= File::NOFOLLOW if defined?(File::NOFOLLOW)
+    File.open(path, flags) do |file|
+      before = file.stat
+      unless before.file? && !before.symlink?
+        raise RepositoryStateError.new("checkpoint_invalid", "checkpoint must be a regular file")
+      end
+      if before.size > MAX_CHECKPOINT_BYTES
+        raise RepositoryStateError.new("checkpoint_invalid", "checkpoint exceeds the size limit")
+      end
+
+      bytes = file.read(MAX_CHECKPOINT_BYTES + 1)
+      if bytes.bytesize > MAX_CHECKPOINT_BYTES
+        raise RepositoryStateError.new("checkpoint_invalid", "checkpoint exceeds the size limit")
+      end
+      unless RepositoryAuthority.same_file_state?(before, file.stat)
+        raise RepositoryStateError.new("checkpoint_invalid", "checkpoint changed while being read")
+      end
+      bytes
     end
+  rescue Errno::ELOOP
+    raise RepositoryStateError.new("checkpoint_invalid", "checkpoint must be a regular file")
+  end
+
+  def resolve_checkpoint_path
+    state_root, = RepositoryStateCapture.new(@start_directory).resolve_roots
     unless @start_directory.start_with?("#{state_root}#{File::SEPARATOR}")
       raise RepositoryStateError.new("checkpoint_path_invalid", "run from a task folder inside .hive-state")
     end
@@ -800,36 +905,35 @@ class RepositoryAuthorityController
     File.join(@start_directory, CHECKPOINT_NAME)
   end
 
-  def git_toplevel(directory)
-    stdout, _stderr, status = Open3.capture3(
-      RepositoryStateCapture::GIT_ENV,
-      "git", "--no-optional-locks", "-c", "core.fsmonitor=false",
-      "-C", directory, "rev-parse", "--show-toplevel"
-    )
-    unless status.success?
-      raise RepositoryStateError.new("state_root_invalid", "invocation is not inside a Git-backed .hive-state")
-    end
-    File.realpath(stdout.strip)
-  rescue Errno::ENOENT, Errno::EACCES, Errno::EPERM
-    raise RepositoryStateError.new("state_root_invalid", "invocation is not inside a Git-backed .hive-state")
-  end
-
   def write_checkpoint(path, checkpoint)
     temporary = "#{path}.tmp.#{Process.pid}"
+    bytes = "#{RepositoryAuthority.canonical_json(checkpoint)}\n"
     File.open(temporary, File::WRONLY | File::CREAT | File::EXCL, 0o600) do |file|
-      file.write(canonical_json(checkpoint), "\n")
+      RepositoryAuthority.write_all(file, bytes)
       file.flush
+      unless file.stat.size == bytes.bytesize
+        raise RepositoryStateError.new("checkpoint_write_failed", "checkpoint write is incomplete")
+      end
       file.fsync
     end
     File.rename(temporary, path)
-    File.open(File.dirname(path), File::RDONLY) { |directory| directory.fsync }
+    sync_directory(File.dirname(path))
   rescue Errno::EEXIST, Errno::EACCES, Errno::EPERM, Errno::ENOENT
     raise RepositoryStateError.new("checkpoint_write_failed", "checkpoint cannot be written atomically")
   ensure
     FileUtils.rm_f(temporary) if temporary
   end
 
+  def sync_directory(path)
+    File.open(path, File::RDONLY) { |directory| directory.fsync }
+  rescue SystemCallError
+    nil
+  end
+
   def result(operation, snapshot, checkpoint, comparison, retries)
+    if @recovered_checkpoint_digest && comparison.fetch("verdict") == "continue"
+      comparison = comparison.merge("reason" => "checkpoint_recovered")
+    end
     public_snapshot = snapshot.reject { |key, _value| key == "measurement_ref_changes" || key == "refs" }
     public_snapshot["refs"] = snapshot.fetch("refs").reject { |key, _value| key == "records" }
     measurement = snapshot.fetch("measurement_ref_changes").map do |name|
@@ -840,6 +944,8 @@ class RepositoryAuthorityController
       "changes" => comparison.fetch("changes"),
       "checkpoint" => {
         "digest" => checkpoint.fetch("digest"),
+        "previous_digest" => checkpoint.fetch("previous_digest"),
+        "sequence" => checkpoint.fetch("sequence"),
         "schema" => checkpoint.fetch("schema")
       },
       "measurement" => summarize_ref_changes(measurement),
@@ -850,52 +956,39 @@ class RepositoryAuthorityController
       "status" => "ok",
       "target_changes" => comparison.fetch("target_changes"),
       "authorized_worktree_changes" => comparison.fetch("authorized_worktree_changes"),
-      "verdict" => comparison.fetch("verdict")
+      "verdict" => comparison.fetch("verdict"),
+      "worktree_changes" => comparison.fetch("worktree_changes")
     }.tap do |output|
       previous = comparison["previous_checkpoint_digest"]
       output["previous_checkpoint_digest"] = previous if previous
+      output["recovered_checkpoint_digest"] = @recovered_checkpoint_digest if @recovered_checkpoint_digest
     end
   end
 
   def digest_value(value)
-    "sha256:#{Digest::SHA256.hexdigest(canonical_json(value))}"
-  end
-
-  def canonical_json(value)
-    JSON.generate(canonicalize(value))
-  end
-
-  def canonicalize(value)
-    case value
-    when Hash
-      value.keys.sort.each_with_object({}) do |key, result|
-        result[key] = canonicalize(value.fetch(key))
-      end
-    when Array
-      value.map { |item| canonicalize(item) }
-    else
-      value
-    end
+    "sha256:#{Digest::SHA256.hexdigest(RepositoryAuthority.canonical_json(value))}"
   end
 end
 
-begin
-  result = RepositoryAuthorityController.new(Dir.pwd, ARGV).call
-  STDOUT.write(JSON.generate(result), "\n")
-rescue RepositoryStateError => error
-  result = {
-    "error" => {"code" => error.code, "message" => error.message},
-    "schema" => RepositoryStateCapture::SCHEMA,
-    "status" => "error"
-  }
-  STDOUT.write(JSON.generate(result), "\n")
-  exit 1
-rescue StandardError
-  result = {
-    "error" => {"code" => "capture_failed", "message" => "repository state cannot be captured exactly"},
-    "schema" => RepositoryStateCapture::SCHEMA,
-    "status" => "error"
-  }
-  STDOUT.write(JSON.generate(result), "\n")
-  exit 1
+if $PROGRAM_NAME == __FILE__
+  begin
+    result = RepositoryAuthorityController.new(Dir.pwd, ARGV).call
+    STDOUT.write(JSON.generate(result), "\n")
+  rescue RepositoryStateError => error
+    result = {
+      "error" => {"code" => error.code, "message" => error.message},
+      "schema" => RepositoryStateCapture::SCHEMA,
+      "status" => "error"
+    }
+    STDOUT.write(JSON.generate(result), "\n")
+    exit 1
+  rescue StandardError
+    result = {
+      "error" => {"code" => "capture_failed", "message" => "repository state cannot be captured exactly"},
+      "schema" => RepositoryStateCapture::SCHEMA,
+      "status" => "error"
+    }
+    STDOUT.write(JSON.generate(result), "\n")
+    exit 1
+  end
 end

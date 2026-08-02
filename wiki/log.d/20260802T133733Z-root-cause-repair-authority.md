@@ -8,6 +8,11 @@
   kept target, per-worktree, tag, stash, and unknown drift fail-closed.
 - Added bounded evidence, one measurement retry, authorized stage checkpoint
   advancement, and structured blocked semantics for repeated authority races.
+- Hardened advancement with a separately inventoried exact worktree-delta
+  digest, checkpoint sequence/previous-digest links, bounded complete-write I/O,
+  and a terminal certificate comparison after any decisive command.
+- Documented that yolo target-writing agents are trusted by the current package
+  model; self-digests do not claim hostile same-user authentication.
 - Added real linked-worktree and native Hive regressions proving Hive state
   commits plus concurrent branch creation reach diagnosis while target movement
   still blocks.

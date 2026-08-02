@@ -18,8 +18,10 @@ branch, index, tracked and untracked bytes, and relevant refs. Individual ref
 deltas are classified: the current target and per-worktree refs block;
 non-current branches and remote-tracking refs are recorded and continue; tags,
 stash, and unknown namespaces fail closed as ambiguous. Each stage compares
-before acting and advances the checkpoint only after inventorying its authorized
-worktree effects.
+before acting, captures an exact content-blind digest after inventorying its
+worktree effects, and advances only if a fresh capture still matches that
+accepted delta. Checkpoints also bind a sequence and previous digest so the
+certificate can verify the continuing stage chain.
 
 ## High-risk execution boundary
 
@@ -29,6 +31,13 @@ preset. Install and run it only under the sole repository owner authority, in a
 worktree whose current changes and recovery needs the owner understands. The
 workflow may execute project code, tests, build tools, and hooks; repository
 content and their output are treated as untrusted.
+
+Agents with `yolo` target-write authority are part of this workflow's trusted
+computing base. Checkpoint self-digests detect accidental corruption, stale
+stage evidence, and uncoordinated writes; they cannot authenticate state against
+a hostile same-user process that can rewrite both the sidecar and stage
+artifacts. That stronger custody boundary belongs in privileged Hive runtime
+infrastructure, not in a self-signed workflow file.
 
 Actors keep target changes uncommitted. They must not reset, clean, stash,
 revert, commit, push, open or update a PR, merge, tag, release, publish, or
