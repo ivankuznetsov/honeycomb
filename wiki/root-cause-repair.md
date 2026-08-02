@@ -65,7 +65,7 @@ before committing completion, present the task as `Blocked`, retain guarded
 explicit retry, and do not archive or automatically retry it. The immutable
 1.0.0 package remains unchanged and does not carry this descriptor field.
 The candidate-only execution gate runs in a separate Ruby process against Hive
-commit `ca0c429c0f7cbf3c912f2ffdd01b04a7890374b0`; released-package gates retain
+commit `83ac363cb761a41345798ca05ad5f704c60b9795`; released-package gates retain
 their existing immutable runtime pin.
 
 ## Evidence and boundary
