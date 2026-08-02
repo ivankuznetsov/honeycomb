@@ -21,7 +21,7 @@ stages:
     kind: agent
     state_file: repair.md
     instruction: instructions/repair.md
-    timeout_sec: 3600
+    timeout_sec: 7200
     mapping_role: development
     mapping_contract: root-cause-repair-repair-v1
     permissions: yolo
@@ -29,7 +29,7 @@ stages:
     kind: council
     state_file: verification.md
     input: repair.md
-    timeout_sec: 3600
+    timeout_sec: 7200
     mapping_role: reviewer
     mapping_contract: root-cause-repair-verification-council-v1
     permissions: yolo

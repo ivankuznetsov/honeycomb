@@ -51,7 +51,7 @@ command and checks the checkpoint chain without advancing. Measurement races ret
 once; repeated authority movement blocks, while unrelated ref movement is
 recorded without consuming the retry.
 
-Repair and verification use explicit one-hour stage bounds after a live repair
+Repair and verification use explicit two-hour stage bounds after a live repair
 reached the former implicit 30-minute default during its final evidence review.
 The longer bound does not authorize recovery of partial target bytes. If a
 failed attempt stops before checkpoint advancement, the next attempt cannot

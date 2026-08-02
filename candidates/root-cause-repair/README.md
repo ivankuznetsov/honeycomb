@@ -56,7 +56,7 @@ agent.
 5. `certificate` performs a final comparison and produces exactly one outcome:
    `verified`, `not-reproduced`, or `blocked`.
 
-Repair and verification have explicit one-hour bounds because they include the
+Repair and verification have explicit two-hour bounds because they include the
 implementation, focused regression, adjacent checks, and independent evidence
 review. If a failed mutating attempt stops before it advances its checkpoint,
 its partial bytes remain unattributed and the next attempt blocks safely; the

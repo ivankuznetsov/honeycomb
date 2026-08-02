@@ -79,8 +79,8 @@ class RootCauseRepairCandidateTest < Minitest::Test
                  stages.map { |stage| stage.fetch("name") }
     executable = stages.reject { |stage| stage.fetch("kind") == "terminal" }
     assert executable.all? { |stage| stage.fetch("permissions") == "yolo" }
-    assert_equal 3600, stages.find { |stage| stage.fetch("name") == "repair" }.fetch("timeout_sec")
-    assert_equal 3600,
+    assert_equal 7200, stages.find { |stage| stage.fetch("name") == "repair" }.fetch("timeout_sec")
+    assert_equal 7200,
                  stages.find { |stage| stage.fetch("name") == "verification" }.fetch("timeout_sec")
     assert_equal "repair-certificate.md", stages.last.fetch("deliverable")
     assert_equal(

@@ -100,7 +100,7 @@ A failed target-writing attempt may leave partial worktree bytes that were not
 inventoried and advanced before the process stopped. A later attempt cannot
 distinguish those bytes from a concurrent owner mutation, so it must continue
 to fail closed until the owner reconciles the worktree or starts from a fresh
-baseline. The repair and verification stages use explicit one-hour bounds to
+baseline. The repair and verification stages use explicit two-hour bounds to
 reduce avoidable timeouts; those bounds do not weaken target attribution.
 
 This is current local-state evidence, not an operation ledger. It cannot prove
