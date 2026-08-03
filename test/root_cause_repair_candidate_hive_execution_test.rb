@@ -6,7 +6,6 @@ require "json"
 require "stringio"
 require "yaml"
 
-ROOT_CAUSE_CANDIDATE_HIVE_REVISION = "eba67e8b8ded57abac149be0ee37e839f0b418a6"
 root_cause_candidate_hive_source = ENV["HONEYCOMB_HIVE_SOURCE"].to_s
 ROOT_CAUSE_CANDIDATE_HIVE_ERROR = begin
   if root_cause_candidate_hive_source.empty?
