@@ -76,15 +76,25 @@ class AsyncFixPackageTest < Minitest::Test
     refute_match(/package tool|tools\//i, corpus)
   end
 
-  def test_canonical_manifest_binds_the_versioned_source_and_stays_unlisted
+  def test_canonical_manifest_binds_the_versioned_source_and_catalog_listing
     relative_files = Dir.glob(File.join(PACKAGE_ROOT, "**", "*"), File::FNM_DOTMATCH)
                         .select { |path| File.file?(path) }
                         .map { |path| path.delete_prefix("#{PACKAGE_ROOT}/") }
                         .sort
     assert_equal (SOURCE_PATHS + ["manifest.yml"]).sort, relative_files
     refute File.exist?(File.join(ROOT, "candidates", "async-fix"))
-    refute JSON.parse(File.read(File.join(ROOT, "catalog.json"))).fetch("entries")
-               .any? { |entry| entry.fetch("name") == "async-fix" }
+    catalog_entry = JSON.parse(File.read(File.join(ROOT, "catalog.json"))).fetch("entries")
+                        .find do |entry|
+                          entry.fetch("name") == "async-fix" &&
+                            entry.fetch("version") == "0.1.0"
+                        end
+    refute_nil catalog_entry
+    assert_equal "0.1.0", catalog_entry.fetch("version")
+    assert_equal "high", catalog_entry.fetch("permission_risk")
+    assert_equal(
+      ["repository_owner"],
+      catalog_entry.dig("listing_approval", "reviews").map { |review| review.fetch("authority") }
+    )
 
     discovery = HoneycombRegistry::Package.discover(ROOT)
     refute discovery.findings.errors?, discovery.findings.to_h.inspect
@@ -98,6 +108,8 @@ class AsyncFixPackageTest < Minitest::Test
     assert_equal "0.1.0", manifest.fetch("version")
     assert_equal "0.6.7", manifest.fetch("hive_min_version")
     assert_equal "high", manifest.dig("permissions", "risk")
+    assert_equal manifest.fetch("release_sha256"),
+                 catalog_entry.dig("listing_approval", "release_sha256")
     assert_match(/\A[0-9a-f]{40}\z/, revision)
     assert_equal(
       "https://github.com/ivankuznetsov/honeycomb/tree/#{revision}/" \
