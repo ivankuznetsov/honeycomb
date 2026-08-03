@@ -75,7 +75,7 @@ validates the certificate's exact first line before its completion commit, so
 task instead of being archived as successful completion.
 
 The candidate execution regression runs separately against Hive commit
-`eba67e8b8ded57abac149be0ee37e839f0b418a6`. That runtime both exposes the
+`5c7a324b4ec2d1f3482fca41f7329ceb604c19c9`. That runtime both exposes the
 registered project root and keeps the generic managed prompt aligned with the
 stage's declared target-write authority. Released package compatibility
 tests continue to run against their immutable Hive 0.6.7 pin.

@@ -7,7 +7,7 @@ require "rbconfig"
 require "tmpdir"
 
 ROOT = File.expand_path("..", __dir__)
-ROOT_CAUSE_CANDIDATE_HIVE_REVISION = "eba67e8b8ded57abac149be0ee37e839f0b418a6"
+ROOT_CAUSE_CANDIDATE_HIVE_REVISION = "5c7a324b4ec2d1f3482fca41f7329ceb604c19c9"
 $LOAD_PATH.unshift(File.join(ROOT, "lib"))
 
 require "honeycomb_registry"
