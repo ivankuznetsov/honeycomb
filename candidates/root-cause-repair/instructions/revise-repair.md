@@ -13,8 +13,12 @@ target. Return a replacement `repair.md` that preserves the same first-line
 status, reason, and checkpoint evidence, and records that revision was skipped.
 
 Otherwise, take the latest checkpoint digest from the most recent continuing
-repair or verification artifact. From the current task folder, run
-`tools/repository-state.rb compare --expect <checkpoint-digest>` before editing.
+repair or verification artifact. Use the exact absolute
+`<repository-state-tool>` path printed after `Declared package tools:` in the
+Hive-managed host preamble; never invoke a relative
+`tools/repository-state.rb` path. From the current task
+folder, run
+`<repository-state-tool> compare --expect <checkpoint-digest>` before editing.
 Require `status: ok` and `verdict: continue`. Record unrelated ref changes and
 continue; a blocked verdict or tool error, including repeated `state_changed`,
 stops blocked without restoration.
@@ -28,9 +32,9 @@ is unsafe or incorrect, preserve the repair and document the evidence-backed
 disagreement for the next round.
 
 Inspect the complete uncommitted diff, run
-`tools/repository-state.rb inventory --expect <checkpoint-digest>`, and reconcile
+`<repository-state-tool> inventory --expect <checkpoint-digest>`, and reconcile
 its worktree-change keys and digest with the path-level revision inventory. Then
-run `tools/repository-state.rb advance --allow-worktree <worktree-change-digest> --expect <checkpoint-digest>`.
+run `<repository-state-tool> advance --allow-worktree <worktree-change-digest> --expect <checkpoint-digest>`.
 The fresh capture must match the inventoried delta. Extra mutations, HEAD or
 index drift, relevant or ambiguous refs, and any blocked verdict remain blocked.
 Preserve the previous checkpoint on error.

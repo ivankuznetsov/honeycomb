@@ -11,9 +11,12 @@ If an upstream artifact says `Workflow-Status: not-reproduced` or
 target. Return `repair.md` with the same first-line `Workflow-Status`, cite the
 originating artifact and reason, and state that no repair was attempted.
 
-Otherwise, take the latest checkpoint digest from `diagnose.md`. From the
+Otherwise, take the latest checkpoint digest from `diagnose.md`. Use the exact
+absolute `<repository-state-tool>` path printed after `Declared package tools:`
+in the Hive-managed host preamble; never invoke a relative
+`tools/repository-state.rb` path. From the
 current task folder, run
-`tools/repository-state.rb compare --expect <checkpoint-digest>` before editing.
+`<repository-state-tool> compare --expect <checkpoint-digest>` before editing.
 Require `status: ok` and `verdict: continue`. Record unrelated ref changes and
 continue. A blocked verdict or tool error, including repeated `state_changed`,
 stops the stage without restoration.
@@ -28,9 +31,9 @@ commands and results.
 
 Inspect the complete uncommitted diff for scope, secrets, generated debris, and
 unintended changes. Run
-`tools/repository-state.rb inventory --expect <checkpoint-digest>`, reconcile its
+`<repository-state-tool> inventory --expect <checkpoint-digest>`, reconcile its
 worktree-change keys and digest with the complete path-level inventory, then run
-`tools/repository-state.rb advance --allow-worktree <worktree-change-digest> --expect <checkpoint-digest>`.
+`<repository-state-tool> advance --allow-worktree <worktree-change-digest> --expect <checkpoint-digest>`.
 The fresh advancement capture must match that exact delta before the repair,
 regression, and test byproducts become the next phase checkpoint. It never
 authorizes an extra mutation, HEAD or index drift, or relevant or ambiguous ref

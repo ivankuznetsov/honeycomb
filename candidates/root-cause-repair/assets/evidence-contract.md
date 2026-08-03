@@ -1,8 +1,11 @@
 # Repository Authority Evidence Contract
 
-`tools/repository-state.rb` emits one canonical JSON line and uses schema
-`honeycomb-repository-state/v2`. Run it from the current Hive task folder. It
-supports four operations:
+The Hive-managed host preamble lists one exact absolute path after `Declared
+package tools:`. Bind that path as `<repository-state-tool>` for every command
+in this contract. Never invoke a relative `tools/repository-state.rb` path: the
+process runs from the current task folder while package tools live under the
+immutable package root. `<repository-state-tool>` emits one canonical JSON line
+and uses schema `honeycomb-repository-state/v2`. It supports four operations:
 
 - `create` captures the first phase-scoped checkpoint in the task-local
   `repository-authority.json` sidecar;

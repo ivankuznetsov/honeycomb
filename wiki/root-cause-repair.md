@@ -70,6 +70,11 @@ registered project root to managed `yolo` actors and no longer contradicts that
 authority with an unconditional task-folder-only prompt. Released-package gates
 retain their existing immutable runtime pin.
 
+Stage instructions resolve repository authority through the absolute executable
+listed in Hive's `Declared package tools:` preamble. They explicitly reject the
+relative `tools/repository-state.rb` spelling, which is not rooted at the
+immutable package when an actor's working directory is its task folder.
+
 ## Evidence and boundary
 
 Focused tests cover checkpoint integrity, bounded evidence, ref creation and

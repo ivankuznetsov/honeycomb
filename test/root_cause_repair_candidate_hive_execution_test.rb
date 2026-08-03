@@ -243,7 +243,7 @@ class RootCauseRepairCandidateHiveExecutionTest < Minitest::Test
     Hive::Stages::Base.define_singleton_method(:spawn_agent, original) if original
   end
 
-  def run_deterministic_agent(stage, task, cwd:, log_label:, **_kwargs)
+  def run_deterministic_agent(stage, task, cwd:, log_label:, prompt:, **_kwargs)
     raise "unexpected stage #{log_label}" unless log_label == stage.to_s
 
     context = task.managed_runtime_context("stages.#{stage}")
@@ -251,8 +251,11 @@ class RootCauseRepairCandidateHiveExecutionTest < Minitest::Test
       File.basename(path) == "repository-state.rb"
     end
     instruction = File.read(File.join(context.fetch(:package_root), "instructions", "#{stage}.md"))
+    assert_includes prompt, "Declared package tools: #{tool}"
+    assert_includes instruction, "<repository-state-tool>"
+    refute_match(/`tools\/repository-state\.rb (?:create|compare|inventory|advance)/, instruction)
     output = if stage == :reproduce
-               assert_match(/repository-state\.rb`?\s+`?create/i, instruction)
+               assert_match(/<repository-state-tool> create/i, instruction)
                created = run_tool!(tool, task.folder, "create")
                digest = created.dig("checkpoint", "digest")
                inventoried = run_tool!(tool, task.folder, "inventory", "--expect", digest)
@@ -261,12 +264,12 @@ class RootCauseRepairCandidateHiveExecutionTest < Minitest::Test
                  inventoried.dig("worktree_changes", "digest"), "--expect", digest
                )
              else
-               assert_match(/repository-state\.rb`?\s+`?compare\s+--expect/i, instruction)
+               assert_match(/<repository-state-tool> compare\s+--expect/i, instruction)
                digest = File.read(File.join(task.folder, "reproduce.md"))[/Checkpoint-Digest: (sha256:[0-9a-f]{64})/, 1]
                run_tool!(tool, task.folder, "compare", "--expect", digest)
              end
-    assert_match(/repository-state\.rb`?\s+`?inventory\s+--expect/i, instruction)
-    assert_match(/repository-state\.rb`?\s+`?advance\s+--allow-worktree/i, instruction)
+    assert_match(/<repository-state-tool> inventory\s+--expect/i, instruction)
+    assert_match(/<repository-state-tool> advance\s+--allow-worktree/i, instruction)
     status = output.fetch("verdict") == "continue" ? "continue" : "blocked"
     body = <<~MD
       Workflow-Status: #{status}

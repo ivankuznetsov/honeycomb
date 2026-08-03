@@ -34,23 +34,25 @@ class RootCauseRepairCandidateTest < Minitest::Test
       [name, File.read(File.join(ROOT_CAUSE_CANDIDATE, "instructions", "#{name}.md"))]
     end
 
-    assert_match(/repository-state\.rb`?\s+`?create/i, instructions.fetch("reproduce"))
+    assert_match(/<repository-state-tool> create/i, instructions.fetch("reproduce"))
     instructions.each do |name, source|
       next if name == "reproduce"
 
-      assert_match(/repository-state\.rb`?\s+`?compare\s+--expect/i, source, name)
+      assert_match(/<repository-state-tool> compare\s+--expect/i, source, name)
     end
     instructions.each do |name, source|
-      assert_match(/repository-state\.rb`?\s+`?inventory\s+--expect/i, source, name)
-      assert_match(/repository-state\.rb`?\s+`?advance\s+--allow-worktree\s+<worktree-change-digest>\s+--expect/i, source, name)
+      assert_match(/<repository-state-tool> inventory\s+--expect/i, source, name)
+      assert_match(/<repository-state-tool> advance\s+--allow-worktree\s+<worktree-change-digest>\s+--expect/i, source, name)
+      assert_match(/Declared\s+package\s+tools:/i, source, name)
+      refute_match(/`tools\/repository-state\.rb (?:create|compare|inventory|advance)/, source, name)
       assert_match(/checkpoint digest/i, source, name)
       assert_match(/verdict.*blocked|blocked.*verdict/i, source, name)
       assert_match(/unrelated.*ref/i, source, name)
     end
 
     certificate = File.read(File.join(ROOT_CAUSE_CANDIDATE, "instructions", "certificate.md"))
-    assert_operator certificate.scan(/repository-state\.rb`?\s+`?compare\s+--expect/i).length, :>=, 2
-    refute_match(/repository-state\.rb`?\s+`?advance/i, certificate)
+    assert_operator certificate.scan(/<repository-state-tool> compare\s+--expect/i).length, :>=, 2
+    refute_match(/<repository-state-tool> advance/i, certificate)
   end
 
   def test_candidate_contract_pins_verdicts_bounds_and_terminal_outcomes
@@ -66,6 +68,8 @@ class RootCauseRepairCandidateTest < Minitest::Test
     assert_match(/non-current local branch/i, contract)
     assert_match(/tags?.*stash.*ambiguous/i, contract)
     assert_match(/phase-scoped|stage checkpoint/i, contract)
+    assert_match(/Declared\s+package\s+tools:/, contract)
+    assert_match(/Never invoke a relative `tools\/repository-state\.rb`/, contract)
 
     certificate = File.read(File.join(ROOT_CAUSE_CANDIDATE, "instructions", "certificate.md"))
     assert_match(/Outcome: verified\|not-reproduced\|blocked/, certificate)

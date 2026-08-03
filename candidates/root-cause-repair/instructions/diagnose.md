@@ -10,9 +10,12 @@ If `reproduce.md` says `Workflow-Status: not-reproduced` or
 target. Return `diagnose.md` with the same first-line `Workflow-Status`, cite the
 upstream reason, and state that diagnosis was intentionally skipped.
 
-Otherwise, take the latest checkpoint digest from `reproduce.md`. From the
+Otherwise, take the latest checkpoint digest from `reproduce.md`. Use the exact
+absolute `<repository-state-tool>` path printed after `Declared package tools:`
+in the Hive-managed host preamble; never invoke a relative
+`tools/repository-state.rb` path. From the
 current task folder, run
-`tools/repository-state.rb compare --expect <checkpoint-digest>` before any
+`<repository-state-tool> compare --expect <checkpoint-digest>` before any
 investigation. Require `status: ok` and `verdict: continue`. Record every
 unrelated ref delta and continue; on a blocked verdict or any tool error,
 including `state_changed`, stop blocked without attempting restoration.
@@ -25,9 +28,9 @@ edit implementation or test sources.
 
 After the probes, inspect all target worktree changes and confirm none edits
 implementation or tests. Run
-`tools/repository-state.rb inventory --expect <checkpoint-digest>`, reconcile its
+`<repository-state-tool> inventory --expect <checkpoint-digest>`, reconcile its
 worktree-change keys and digest with the complete path-level inventory, then run
-`tools/repository-state.rb advance --allow-worktree <worktree-change-digest> --expect <checkpoint-digest>`.
+`<repository-state-tool> advance --allow-worktree <worktree-change-digest> --expect <checkpoint-digest>`.
 The second command recaptures the target and authorizes only the exact delta that
 was inventoried. An extra or changed mutation, relevant or ambiguous ref change,
 HEAD or index drift, or repeated `state_changed` is blocked.

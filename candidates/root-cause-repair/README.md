@@ -63,6 +63,11 @@ its partial bytes remain unattributed and the next attempt blocks safely; the
 owner must reconcile them or begin from a fresh baseline rather than letting a
 retry silently adopt them.
 
+Each stage resolves the repository-state executable from the exact absolute
+path Hive prints after `Declared package tools:` in the managed host preamble.
+Instructions deliberately reject a relative `tools/repository-state.rb` command
+because managed actors run from the task folder, not the immutable package root.
+
 The terminal descriptor declares `verified` and `not-reproduced` as completing
 outcomes and `blocked` as a blocking outcome. A compatible Hive runtime
 validates the certificate's exact first line before its completion commit, so

@@ -9,9 +9,12 @@ An upstream `Workflow-Status: not-reproduced` or `Workflow-Status: blocked`
 makes verification a no-op: do not run commands and do not change the target.
 Return `Verdict: ready` only to let certificate propagate that status.
 
-For continuing work, take the latest checkpoint digest from `repair.md`. From
-the current task folder, run
-`tools/repository-state.rb compare --expect <checkpoint-digest>` before any
+For continuing work, take the latest checkpoint digest from `repair.md`. Use the
+exact absolute `<repository-state-tool>` path printed after `Declared package
+tools:` in the Hive-managed host preamble; never invoke a relative
+`tools/repository-state.rb` path. From the
+current task folder, run
+`<repository-state-tool> compare --expect <checkpoint-digest>` before any
 test. Require `status: ok` and `verdict: continue`. Record unrelated ref changes
 and continue; a blocked verdict or tool error, including repeated
 `state_changed`, requires `Verdict: changes_requested` with a blocking finding.
@@ -24,9 +27,9 @@ test by itself is not causal proof. Inspect the diff and ensure it matches the
 repair inventory without unrelated edits.
 
 After decisive checks, inventory any new test byproducts and run
-`tools/repository-state.rb inventory --expect <checkpoint-digest>`. Reconcile its
+`<repository-state-tool> inventory --expect <checkpoint-digest>`. Reconcile its
 worktree-change keys and digest with the complete path-level inventory, then run
-`tools/repository-state.rb advance --allow-worktree <worktree-change-digest> --expect <checkpoint-digest>`.
+`<repository-state-tool> advance --allow-worktree <worktree-change-digest> --expect <checkpoint-digest>`.
 Advancement recaptures and authorizes only that exact delta. An extra mutation,
 HEAD or index movement, relevant or ambiguous ref drift, or repeated
 `state_changed` requires changes_requested and leaves the old checkpoint intact.

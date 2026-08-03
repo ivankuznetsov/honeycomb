@@ -15,8 +15,10 @@ says `Workflow-Status: blocked`, no-op in the same way and return
 either propagated status based on reviewer readiness.
 
 For continuing work, take the latest checkpoint digest from the final repair or
-verification artifact. From the current task folder, run
-`tools/repository-state.rb compare --expect <checkpoint-digest>`. Do not advance
+verification artifact. Use the exact absolute `<repository-state-tool>` path
+printed after `Declared package tools:` in the Hive-managed host preamble; never invoke a relative
+`tools/repository-state.rb` path. From the current task folder, run
+`<repository-state-tool> compare --expect <checkpoint-digest>`. Do not advance
 the checkpoint. Require `status: ok` and `verdict: continue`. Record unrelated
 ref deltas. A blocked verdict or any tool error, including `state_changed` after
 the one measurement retry, produces `Outcome: blocked`; never restore drift.
@@ -29,7 +31,7 @@ current checkpoint did not authorize, issue blocked rather than advance during
 certificate.
 
 After every optional command, run a terminal
-`tools/repository-state.rb compare --expect <same-checkpoint-digest>`. This second
+`<repository-state-tool> compare --expect <same-checkpoint-digest>`. This second
 comparison is the final repository-authority evidence. Require `status: ok` and
 `verdict: continue`; any target or ambiguous drift is blocked. Verify that each
 stage's checkpoint sequence increments by one and its `previous_digest` equals
