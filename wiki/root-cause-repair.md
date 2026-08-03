@@ -65,8 +65,10 @@ before committing completion, present the task as `Blocked`, retain guarded
 explicit retry, and do not archive or automatically retry it. The immutable
 1.0.0 package remains unchanged and does not carry this descriptor field.
 The candidate-only execution gate runs in a separate Ruby process against Hive
-commit `83ac363cb761a41345798ca05ad5f704c60b9795`; released-package gates retain
-their existing immutable runtime pin.
+commit `eba67e8b8ded57abac149be0ee37e839f0b418a6`; this runtime exposes the
+registered project root to managed `yolo` actors and no longer contradicts that
+authority with an unconditional task-folder-only prompt. Released-package gates
+retain their existing immutable runtime pin.
 
 ## Evidence and boundary
 

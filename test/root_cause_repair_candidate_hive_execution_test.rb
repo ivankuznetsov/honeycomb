@@ -6,7 +6,7 @@ require "json"
 require "stringio"
 require "yaml"
 
-ROOT_CAUSE_CANDIDATE_HIVE_REVISION = "83ac363cb761a41345798ca05ad5f704c60b9795"
+ROOT_CAUSE_CANDIDATE_HIVE_REVISION = "eba67e8b8ded57abac149be0ee37e839f0b418a6"
 root_cause_candidate_hive_source = ENV["HONEYCOMB_HIVE_SOURCE"].to_s
 ROOT_CAUSE_CANDIDATE_HIVE_ERROR = begin
   if root_cause_candidate_hive_source.empty?
@@ -125,6 +125,29 @@ class RootCauseRepairCandidateHiveExecutionTest < Minitest::Test
       comparison = JSON.parse(diagnose[/Repository-Authority: (\{.*\})$/, 1])
       assert_equal "blocked", comparison.fetch("verdict")
       assert_equal "target_changed", comparison.fetch("reason")
+    end
+  end
+
+  def test_managed_repair_prompt_preserves_authorized_target_write_scope
+    with_sandbox do |registry, project, _state_root|
+      install(registry, project)
+      repair_path = move_task(project, create_task(project, "repair-write-authority"), "repair")
+      captured = nil
+      original = Hive::Stages::Base.method(:spawn_agent)
+      Hive::Stages::Base.define_singleton_method(:spawn_agent) do |task, prompt:, **kwargs|
+        captured = {prompt: prompt, kwargs: kwargs}
+        File.write(task.state_file, "Workflow-Status: blocked\n\n<!-- COMPLETE -->\n")
+        {status: :ok}
+      end
+
+      Hive::Stages::Agent.run!(Hive::Task.new(repair_path), {})
+
+      assert_includes captured.fetch(:prompt),
+                      "The registered project root may be available as target context"
+      refute_includes captured.fetch(:prompt), "Do not modify files outside the task folder"
+      assert_includes captured.dig(:kwargs, :add_dirs), File.realpath(project)
+    ensure
+      Hive::Stages::Base.define_singleton_method(:spawn_agent, original) if original
     end
   end
 

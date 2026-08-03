@@ -70,7 +70,9 @@ validates the certificate's exact first line before its completion commit, so
 task instead of being archived as successful completion.
 
 The candidate execution regression runs separately against Hive commit
-`83ac363cb761a41345798ca05ad5f704c60b9795`. Released package compatibility
+`eba67e8b8ded57abac149be0ee37e839f0b418a6`. That runtime both exposes the
+registered project root and keeps the generic managed prompt aligned with the
+stage's declared target-write authority. Released package compatibility
 tests continue to run against their immutable Hive 0.6.7 pin.
 
 Intermediate artifacts use `Workflow-Status`. A `not-reproduced` or `blocked`
