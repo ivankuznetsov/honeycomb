@@ -33,6 +33,14 @@ jobs:
           path: hive
           persist-credentials: false
 
+      - name: Check out Root Cause Repair candidate Hive source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: ivankuznetsov/hive
+          ref: 5c7a324b4ec2d1f3482fca41f7329ceb604c19c9
+          path: hive-root-cause-candidate
+          persist-credentials: false
+
       - name: Check out protected listing evidence
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -46,6 +54,13 @@ jobs:
           HONEYCOMB_HIVE_SOURCE: ${{ github.workspace }}/hive
           RUBYLIB: ${{ github.workspace }}/hive/lib
         run: ruby test/run.rb
+
+      - name: Verify Root Cause Repair candidate against patched Hive
+        working-directory: source
+        env:
+          HONEYCOMB_HIVE_SOURCE: ${{ github.workspace }}/hive-root-cause-candidate
+          RUBYLIB: ${{ github.workspace }}/hive-root-cause-candidate/lib
+        run: ruby -Itest test/root_cause_repair_candidate_hive_execution_test.rb
 
       - name: Verify canonical catalog against protected evidence
         working-directory: source

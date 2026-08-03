@@ -29,6 +29,12 @@ when current protected evidence projects it into the generated catalog;
 package presence alone is not a public-install claim. Disposable-registry
 acceptance also passes explicit high-risk escalation but remains local evidence.
 
+`candidates/root-cause-repair/` is not an installable catalog version. Tests may
+synthesize a temporary manifest and catalog outside the repository to exercise
+native Hive installation, but no user-facing `hive workflow install` resolution
+can select the candidate. A successor package version and publication require a
+separate owner-authorized promotion.
+
 Hive installation asks for agent mappings for all seven semantic slots and
 suggests supported defaults, as it does during Hive initialization. The choices
 configure execution identity; they do not become part of the workflow or

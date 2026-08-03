@@ -64,6 +64,18 @@ catalog renderer.
   disposable canonical registry and exercises released Hive at the exact clean
   pinned source revision; this is local behavioral evidence, while protected
   listing evidence and catalog projection separately authorize public install.
+- `candidates/root-cause-repair/` is the manifest-free correction for the
+  immutable release's aggregate-ref concurrency flaw. Its state tool keeps
+  complete content-blind ref records in a task-local checkpoint while stage
+  evidence exposes only bounded deltas. The pinned branch and per-worktree refs
+  are relevant, non-current branches and remote-tracking refs are unrelated,
+  and tags, stash, and unknown namespaces are ambiguous. Each active stage
+  compares against the preceding digest before acting, inventories an exact
+  content-blind worktree delta, and advances only when a fresh capture matches
+  that accepted digest. Checkpoint sequence/previous-digest links and a terminal
+  certificate comparison make the phase chain explicit. A temporary registry test uses a real linked
+  `.hive-state` worktree and native Hive Agent stages to prove normal state
+  commits and concurrent branch creation reach diagnosis.
 - `packages/reviewer-panel/1.0.0` is another immutable high-risk package with a
   registry-original canonical manifest. It binds correctness, security,
   reliability, and test-evidence reviews to one Git state, permits at most three
