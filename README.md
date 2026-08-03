@@ -92,15 +92,16 @@ development mapping performs a focused small-to-medium repair in an isolated
 worktree; Hive validates the committed result and owns the exact branch push
 and draft-PR creation or adoption. Its canonical manifest binds the behavior
 bytes to a preserved source commit and requires released Hive 0.6.7. The
-package remains absent from `catalog.json`: protected listing evidence, site
-publication, public-install acceptance, and a provider-backed run are separate
+protected repository-owner decision for the exact reviewed head now projects
+the package into `catalog.json`. Site publication, public-install acceptance, a
+provider-backed run, and any Hive-template removal remain separate
 owner-controlled gates.
 
 ```sh
 ruby script/honeycomb-manifest --check --all
 ruby script/honeycomb-validate --all --json
 ruby script/honeycomb-catalog --check \
-  --evidence test/fixtures/listing-evidence/empty.json
+  --evidence test/fixtures/listing-evidence/production.json
 ruby script/honeycomb-security-lint --help
 ruby script/honeycomb-listing-approval --help
 ruby script/honeycomb-reviews

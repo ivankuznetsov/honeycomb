@@ -132,8 +132,10 @@ depth, and requires no security-lint suppression requests.
   configurable high-risk development mapping, and a medium-effort
   recommendation. Tests copy it into a disposable two-commit registry and
   install it through exact released Hive bytes. Package presence and passing
-  execution evidence do not authorize protected listing evidence, catalog or
-  site publication, deployment, or Hive workflow removal.
+  execution evidence did not authorize publication; the separate protected
+  repository-owner decision now projects it into the generated catalog. Site
+  publication, deployment, public-install acceptance, provider-backed
+  execution, and Hive workflow removal remain separate gates.
 - Root Cause Repair: `packages/root-cause-repair/1.0.0` is an immutable package
   whose canonical manifest binds its registry-original behavior source. Package
   and disposable-registry tests are behavioral evidence; protected listing
