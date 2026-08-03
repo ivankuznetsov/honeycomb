@@ -86,9 +86,10 @@ credentials, bounded cleanup, an exact host-validated summary, and denied
 provider, GitHub, Git transport, release, registry, and deployment seams. The
 proof covers an explicit mapping override, daemon draft-PR creation, terminal
 idempotency, recoverable PR-create failure, and mutation-free manual adoption.
-The package is absent from `catalog.json`; protected listing evidence, site
-publication, deployment, public-install acceptance, provider-backed execution,
-and any Hive-template removal remain separate owner-authorized gates.
+Protected repository-owner evidence for the exact reviewed head now projects
+the package into `catalog.json`. Site publication, deployment, public-install
+acceptance, provider-backed execution, and any Hive-template removal remain
+separate owner-authorized gates.
 
 ## Video Production Candidate Status
 

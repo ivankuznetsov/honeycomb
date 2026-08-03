@@ -115,8 +115,9 @@ catalog renderer.
   that preserves one pushed branch until a manual `hive run` adopts the pending
   PR without repeating either mutation. Source fingerprints are identical
   before and after the run. The canonical manifest binds its registry-original
-  behavior source, while protected evidence remains absent and therefore keeps
-  the package out of `catalog.json`.
+  behavior source. Protected repository-owner evidence for the exact reviewed
+  head now projects the package into `catalog.json`; site publication, public
+  installation, and provider-backed execution remain separate gates.
 
 ## Intended Product Shape
 
@@ -195,14 +196,15 @@ gate are shipped on this branch. Analyzer/exporter code is deterministic and
 offline; only the trusted reporter and approval issuer use GitHub HTTPS metadata
 APIs. Protected normalized evidence now projects the listed Community
 `task-inspect/0.1.0`, `architecture/1.0.1`, `writing/1.0.1`,
-`seo-content/1.0.1`, `root-cause-repair/1.0.0`, and `reviewer-panel/1.0.0`
-releases into `catalog.json`. The static site consumes that exact snapshot
-without reconstructing entries, and released Hive v0.6.0
-installs it from the official registry with immutable catalog/digest task pins
-and task-local read-only runtime policy. Evidence branch/environment protection
-remains live; static-site publication, public flagship acceptance, emergency
-lifecycle transitions, and positive community-review identity cases remain
-rollout operations. Managed-repair site publication and clean public
+`seo-content/1.0.1`, `root-cause-repair/1.0.0`, `reviewer-panel/1.0.0`, and
+`async-fix/0.1.0` releases into `catalog.json`. Released Hive v0.6.7 consumes
+the official registry with immutable catalog/digest task pins and task-local
+read-only runtime policy. The static site still needs to consume the new Async
+Fix snapshot; it does not reconstruct entries from manifests. Evidence
+branch/environment protection remains live; Async Fix site publication and
+public acceptance, public flagship acceptance, emergency lifecycle
+transitions, and positive community-review identity cases remain rollout
+operations. Managed-repair site publication and clean public
 install/task-creation acceptance are complete.
 
 The flagship packages target that released runtime: their per-slot agent

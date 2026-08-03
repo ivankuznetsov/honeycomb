@@ -131,9 +131,10 @@ It carries independent release/current tier, permission risk, lifecycle,
 verification, transition history, and advisory fields. Discovery/latest include
 only listed entries; exact soft-hidden/yanked versions remain resolvable and
 revoked versions fail closed. The catalog currently lists the
-`task-inspect/0.1.0` production canary. Package source directories that lack
-eligible protected evidence do not appear in discovery, even when their
-behavior tests pass.
+`task-inspect/0.1.0` production canary, the three flagship 1.0.1 releases,
+Root Cause Repair 1.0.0, Reviewer Panel 1.0.0, and Async Fix 0.1.0. Package
+source directories that lack eligible protected evidence do not appear in
+discovery, even when their behavior tests pass.
 `hivecli.sh/honeycombs` remains a documented external static rendering surface;
 no route, handler, or site code is implemented here.
 
@@ -148,8 +149,10 @@ separately recorded owner-controlled gates.
 Candidate sources live outside `packages/`, so package-wide validation and
 catalog commands do not silently treat a manifest-free candidate as a release
 submission. Async Fix has crossed that explicit boundary as version `0.1.0`:
-manifest and validation commands now include it, while catalog generation still
-excludes it because no protected listing evidence exists.
+manifest and validation commands include it, and exact-head repository-owner
+evidence now projects it into the generated catalog. The catalog decision does
+not publish the site, prove a clean public install, execute a provider-backed
+run, deploy, or remove a Hive template.
 
 Reviewer Panel follows the same explicit release boundary. Its source and
 manifest commits are complete, while disposable-registry tests cannot issue
