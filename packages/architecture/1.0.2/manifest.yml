@@ -1,0 +1,56 @@
+schema: "honeycomb-manifest/v1"
+name: "architecture"
+version: "1.0.2"
+description: "Turn repository and current web evidence into a concise architecture record"
+author:
+  name: "Honeycomb Maintainers"
+  url: "https://github.com/ivankuznetsov/honeycomb"
+license: "MIT"
+hive_min_version: "0.6.0"
+source:
+  url: "https://github.com/ivankuznetsov/honeycomb/tree/13e6e6372adf4a8ac99f461d53fac93c36ad950b/packages/architecture/1.0.2"
+  revision: "13e6e6372adf4a8ac99f461d53fac93c36ad950b"
+permissions:
+  risk: "moderate"
+  capabilities:
+    - "filesystem-read"
+    - "filesystem-write"
+    - "network"
+  network_hosts:
+    - "*"
+  filesystem_read:
+    - "repository"
+    - "task"
+  filesystem_write:
+    - "task/architecture.md"
+    - "task/draft.md"
+    - "task/repo-research.md"
+    - "task/research.md"
+    - "task/reviews/**"
+    - "task/web-research.md"
+  secrets: []
+files:
+  "packages/architecture/1.0.2/README.md": "f430253050d54f242d6c06324aff9adc8ca279ec8f81a7b46229803703c62260"
+  "packages/architecture/1.0.2/instructions/architecture.md": "f82fb45f02f56d0db98ce0499d2d5b21d21af0a92182b724ded4e48b1df78e91"
+  "packages/architecture/1.0.2/instructions/draft.md": "4b00bcb24ab0b5ed48646da3574a354e88ccaf0ca54c0b5b3413c7e75debcf50"
+  "packages/architecture/1.0.2/instructions/repo-research.md": "f4916d30e3a45c6c2e47fd7fa337f598a1042943db3f538c2bdd97b0ec15a86f"
+  "packages/architecture/1.0.2/instructions/research.md": "73e28b8f077f9f34652ab701353d20a9f42d9824cc27bb25b85c41b1fa63369b"
+  "packages/architecture/1.0.2/instructions/revise.md": "cf8e2acd23a07f31592ee7741296b09e66a38c15f5fe0995a0171668431778aa"
+  "packages/architecture/1.0.2/instructions/web-research.md": "febc9f24b933b92a79a17be32f21544447aa3dcfa0e53b679d9198de6e618711"
+  "packages/architecture/1.0.2/workflow.yml": "a2929ecee3a15b768986fd50f38a5500ec68b74469b471a0478a485f8c32d89d"
+release_sha256: "9a597f69d0c0fd1b4ce77a3b96ab864b4101051d6bd25f793689ea543a4e8341"
+x-hive:
+  tools: []
+  prompt_assets: []
+  optional_inputs: []
+x-provenance:
+  kind: "registry-original"
+  source_paths:
+    - "README.md"
+    - "workflow.yml"
+    - "instructions/architecture.md"
+    - "instructions/draft.md"
+    - "instructions/repo-research.md"
+    - "instructions/research.md"
+    - "instructions/revise.md"
+    - "instructions/web-research.md"
