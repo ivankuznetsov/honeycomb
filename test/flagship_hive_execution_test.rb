@@ -125,9 +125,14 @@ class FlagshipHiveExecutionTest < Minitest::Test
     architecture = flagship_fixture("architecture", "architecture.md")
     assert_match(/`[^`]+:\d+`/, architecture)
     assert_match(%r{https://[^\s)]+}, architecture)
-    %w[constraints tradeoffs components data\ flow operations observability migration rollback test\ plan].each do |term|
+    %w[constraints tradeoffs components ownership interfaces dependencies rationale data\ flow control\ flow
+       security operations observability migration rollout rollback test\ plan].each do |term|
       assert_match(/#{term}/i, architecture)
     end
+    assert_includes architecture, "## Selected design and component contracts"
+    assert_includes architecture, "## Ordered data and control flow"
+    assert_match(/^\| Finding \| Status \| Reason \| Section \|$/, architecture)
+    assert_match(/\|\s*(resolved|deferred|rejected)\s*\|[^\n]+\|\s*\[[^\]]+\]\(#[^)]+\)\s*\|/i, architecture)
     assert_includes architecture, "## Decisions needing owner input"
     assert_includes architecture, "## Reviewer findings"
     assert_match(/\|\s*(resolved|deferred|rejected)\s*\|/i, architecture)
@@ -168,10 +173,17 @@ class FlagshipHiveExecutionTest < Minitest::Test
           task_paths[name] = create_managed_task(project, name)
         end
 
-        with_deterministic_agents(:ready) do
+        with_deterministic_agents(:ready) do |events|
           architecture = run_workflow_engines(project, task_paths.fetch("architecture"))
           assert_equal :complete, Hive::Markers.current(File.join(architecture, "architecture.md")).name
           assert_includes File.read(File.join(architecture, "architecture.md")), "architecture engine proof"
+          web_prompt = events.find { |event| event.fetch(:label) == "web-research" }.fetch(:prompt)
+          refute_includes web_prompt, "RAW REPOSITORY EVIDENCE"
+          %w[research draft architecture].each do |label|
+            prompt = events.find { |event| event.fetch(:label) == label }.fetch(:prompt)
+            refute_includes prompt, "RAW REPOSITORY EVIDENCE", label
+            refute_includes prompt, "RAW WEB EVIDENCE", label
+          end
         end
 
         cap_task = create_managed_task(
@@ -183,7 +195,7 @@ class FlagshipHiveExecutionTest < Minitest::Test
           assert_equal :complete, review_marker.name
           assert_equal "max_rounds", review_marker.attrs.fetch("reason")
           assert_equal 2, review_marker.attrs.fetch("round").to_i
-          assert_equal 1, events.count { |label| label.end_with?("-revise") }
+          assert_equal 1, events.count { |event| event.fetch(:label).end_with?("-revise") }
           assert_includes File.read(File.join(architecture, "reviews", "triage.md")), "changes requested"
           final = File.read(File.join(architecture, "architecture.md"))
           assert_includes final, "## Decisions needing owner input"
@@ -237,7 +249,7 @@ class FlagshipHiveExecutionTest < Minitest::Test
     original = Hive::Stages::Base.method(:spawn_agent)
     events = []
     Hive::Stages::Base.define_singleton_method(:spawn_agent) do |task, prompt:, cwd:, log_label:, expected_output: nil, **_kwargs|
-      events << log_label
+      events << { label: log_label, prompt: prompt }
       if expected_output
         if log_label.end_with?("-revise")
           File.write(expected_output, "# Revised draft\n\nDeterministic revision.\n\n<!-- COMPLETE -->\n")
@@ -254,6 +266,10 @@ class FlagshipHiveExecutionTest < Minitest::Test
         output_path = File.join(cwd, state_file)
         body = "# #{log_label}\n\nDeterministic engine proof.\n"
         case log_label
+        when "repo-research"
+          body << "\nRAW REPOSITORY EVIDENCE\n"
+        when "web-research"
+          body << "\nRAW WEB EVIDENCE\n"
         when "architecture"
           body << "\narchitecture engine proof with constraints, tradeoffs, components, and data flow.\n"
           if scenario == :architecture_max_rounds

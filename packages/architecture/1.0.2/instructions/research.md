@@ -1,6 +1,6 @@
 # Synthesize decision evidence
 
-Read `brief.md`, `repo-research.md`, and `web-research.md`. Return a concise
+Read `brief.md`, `repo-research.txt`, and `web-research.txt`. Return a concise
 `research.md` that tells the architect what is known, what is inferred, and
 what remains an owner decision. Do not perform new repository or web research.
 

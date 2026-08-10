@@ -2,7 +2,7 @@
 
 Read `brief.md`, then inspect the project repository four directories above the
 task folder. Do not modify either the repository or task files directly; return
-the complete state-file content for Hive to record as `repo-research.md`.
+the complete state-file content for Hive to record as `repo-research.txt`.
 
 Keep the report below 2,500 words and include:
 
