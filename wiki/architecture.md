@@ -35,8 +35,8 @@ catalog renderer.
   evidence branch.
 - `packages/<name>/<semver>/` is the immutable release store. The historical
   `bench/0.1.0`, `docs-sync/0.1.0`, and production canary
-  `task-inspect/0.1.0` are present, alongside canonical but not-yet-listed
-  Architecture, Writing, and SEO Content 1.0.1 packages.
+  `task-inspect/0.1.0` are present alongside the listed flagship releases and
+  the unlisted Architecture 1.0.2 source candidate.
 - `reviews/<name>/<version>/<github-user>.md` is the mutable, external
   community-review namespace; checked documentation fixtures demonstrate its
   strict record shape without creating production reviews.
@@ -224,6 +224,14 @@ mapping, configuration digest, exact actor policy, optional input, prompt-asset,
 and package-root contracts require Hive 0.6.0. Protected reviews and catalog
 projection are complete. Site publication, public installs, complete workflow
 runs, and claimed provider evidence remain ordered gates.
+
+Architecture 1.0.2 keeps repository access out of its web-research actor and
+keeps network access out of its repository-research actor. A task-only
+synthesis stage combines traceable evidence before drafting. The two reviewers
+may report at most five load-bearing blockers each, the council completes after
+at most two rounds, and final delivery preserves unresolved owner decisions
+instead of growing an unbounded review transcript. This candidate does not
+replace listed 1.0.1 until its own protected publication evidence exists.
 
 ## Root Cause Repair authority boundary
 
