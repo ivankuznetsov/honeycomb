@@ -20,20 +20,21 @@ public advisories independent; only listed versions participate in discovery.
 Strict community-review validation runs as trusted base code and binds review
 identity to the canonical package and catalog without executing submitted code.
 
-The repository also contains the behavior sources for three flagship 1.0.1
-packages:
+The repository contains behavior sources for three flagship packages. Writing
+and SEO Content remain at 1.0.1; Architecture 1.0.2 is the current source
+candidate while the catalog continues to serve listed Architecture 1.0.1:
 
-- `architecture` — repository research, proposal, council review, revision,
-  and an implementation-ready architecture record;
+- `architecture` — isolated repository and web research, decision-focused
+  synthesis, a bounded two-round council, and a concise implementation-ready
+  architecture record;
 - `writing` — journalist research and an adversarial writer/editor loop with
   honest ungrounded and round-cap outcomes;
 - `seo-content` — research, intent, outline, draft, fact-check, humanization,
   and optimization, including an immutable package-local analyzer.
 
-Package presence is not catalog listing. The three immutable manifests require
-the released Hive 0.6.0 runtime; until each package has protected lint evidence
-plus the required independent approvals, it is not discoverable or publicly
-installable from `honeycomb/<name>`.
+Package presence is not catalog listing. A new immutable version remains
+unlisted until protected lint and approval evidence project it into the
+catalog; the existing listed releases remain installable meanwhile.
 
 ## Managed repair packages
 

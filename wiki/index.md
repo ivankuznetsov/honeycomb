@@ -39,14 +39,15 @@ link to policy rather than restating it.
 
 ## Flagship Package Status
 
-Architecture, Writing, and SEO Content 1.0.1 packages and canonical manifests
-are present under `packages/` with a Hive 0.6.0 minimum. They are agent-agnostic
-and exercised through Hive's real registry install, configuration-pin,
-task-creation, Agent, Council, and package-root paths using deterministic test
-agents. Hive 0.6.0 is released, protected repository-owner publication records
-exist for the exact listing head, and the normalized evidence now projects all
-three flagships into `catalog.json`. Static-site sync and public install/live
-acceptance remain rollout gates.
+Architecture 1.0.2 is an unlisted source candidate that separates repository
+and web research, synthesizes decision evidence, limits the main document to
+5,000 words, and bounds council review to two rounds. Writing and SEO Content
+remain at 1.0.1, and the catalog continues to project the protected listed
+Architecture 1.0.1 release until 1.0.2 completes its own lint and approval
+cycle. The flagship tests exercise each current source through Hive's real
+registry install, configuration-pin, task-creation, Agent, Council, and
+package-root paths using deterministic test agents. Public provider-backed
+acceptance remains a separate rollout gate.
 
 ## Managed Repair Package Status
 

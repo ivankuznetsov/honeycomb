@@ -23,7 +23,11 @@ end
 
 class FlagshipHiveExecutionTest < Minitest::Test
   FLAGSHIPS = %w[architecture writing seo-content].freeze
-  FLAGSHIP_VERSION = "1.0.1"
+  FLAGSHIP_VERSIONS = {
+    "architecture" => "1.0.2",
+    "writing" => "1.0.1",
+    "seo-content" => "1.0.1"
+  }.freeze
   OPTIONAL_SEO_INPUTS = %w[
     AHREFS_API_KEY
     DATAFORSEO_LOGIN
@@ -59,7 +63,7 @@ class FlagshipHiveExecutionTest < Minitest::Test
                              []
                            end
           installed[name] = Hive::Commands::Workflow::Install.new(
-            "honeycomb/#{name}@#{FLAGSHIP_VERSION}", project_root: project, json: true, yes: true,
+            "honeycomb/#{name}@#{flagship_version(name)}", project_root: project, json: true, yes: true,
             allow_escalation: true, mapping_overrides: mapping_overrides,
             input_bindings: input_bindings, stdout: StringIO.new,
             registry_client: client, committer: ->(*) { }
@@ -120,9 +124,19 @@ class FlagshipHiveExecutionTest < Minitest::Test
   def test_deterministic_terminal_artifacts_satisfy_package_quality_rubrics
     architecture = flagship_fixture("architecture", "architecture.md")
     assert_match(/`[^`]+:\d+`/, architecture)
-    %w[constraints tradeoffs components data\ flow reviewer\ resolution].each do |term|
+    assert_match(%r{https://[^\s)]+}, architecture)
+    %w[constraints tradeoffs components ownership interfaces dependencies rationale data\ flow control\ flow
+       security operations observability migration rollout rollback test\ plan].each do |term|
       assert_match(/#{term}/i, architecture)
     end
+    assert_match(/^## Selected design: components, ownership, interfaces, dependencies, and rationale$/, architecture)
+    assert_includes architecture, "## Ordered data flow and control flow"
+    assert_match(/^\| Finding \| Status \| Reason \| Section \|$/, architecture)
+    assert_match(/\|\s*(resolved|deferred|rejected)\s*\|[^\n]+\|\s*\[[^\]]+\]\(#[^)]+\)\s*\|/i, architecture)
+    assert_includes architecture, "## Decisions needing owner input"
+    assert_includes architecture, "## Reviewer findings"
+    assert_match(/\|\s*(resolved|deferred|rejected)\s*\|/i, architecture)
+    assert_operator architecture.split.size, :<=, 5_000
 
     writing_verifications = %w[ready ungrounded five-round-cap].map do |outcome|
       flagship_fixture("writing", "verification-#{outcome}.md")
@@ -152,17 +166,40 @@ class FlagshipHiveExecutionTest < Minitest::Test
         task_paths = {}
         FLAGSHIPS.each do |name|
           Hive::Commands::Workflow::Install.new(
-            "honeycomb/#{name}@#{FLAGSHIP_VERSION}", project_root: project, json: true, yes: true,
+            "honeycomb/#{name}@#{flagship_version(name)}", project_root: project, json: true, yes: true,
             allow_escalation: true, mapping_overrides: [], input_bindings: [],
             stdout: StringIO.new, registry_client: client, committer: ->(*) { }
           ).call!
           task_paths[name] = create_managed_task(project, name)
         end
 
-        with_deterministic_agents(:ready) do
+        with_deterministic_agents(:ready) do |events|
           architecture = run_workflow_engines(project, task_paths.fetch("architecture"))
           assert_equal :complete, Hive::Markers.current(File.join(architecture, "architecture.md")).name
           assert_includes File.read(File.join(architecture, "architecture.md")), "architecture engine proof"
+          web_prompt = events.find { |event| event.fetch(:label) == "web-research" }.fetch(:prompt)
+          refute_includes web_prompt, "RAW REPOSITORY EVIDENCE"
+          %w[research draft architecture].each do |label|
+            prompt = events.find { |event| event.fetch(:label) == label }.fetch(:prompt)
+            refute_includes prompt, "RAW REPOSITORY EVIDENCE", label
+            refute_includes prompt, "RAW WEB EVIDENCE", label
+          end
+        end
+
+        cap_task = create_managed_task(
+          project, "architecture", slug: "flagship-architecture-cap-260810-aa"
+        )
+        with_deterministic_agents(:architecture_max_rounds) do |events|
+          architecture = run_workflow_engines(project, cap_task)
+          review_marker = Hive::Markers.current(File.join(architecture, "review.md"))
+          assert_equal :complete, review_marker.name
+          assert_equal "max_rounds", review_marker.attrs.fetch("reason")
+          assert_equal 2, review_marker.attrs.fetch("round").to_i
+          assert_equal 1, events.count { |event| event.fetch(:label).end_with?("-revise") }
+          assert_includes File.read(File.join(architecture, "reviews", "triage.md")), "changes requested"
+          final = File.read(File.join(architecture, "architecture.md"))
+          assert_includes final, "## Decisions needing owner input"
+          assert_includes final, "| deferred |"
         end
 
         with_deterministic_agents(:five_round_cap) do
@@ -210,14 +247,17 @@ class FlagshipHiveExecutionTest < Minitest::Test
 
   def with_deterministic_agents(scenario)
     original = Hive::Stages::Base.method(:spawn_agent)
+    events = []
     Hive::Stages::Base.define_singleton_method(:spawn_agent) do |task, prompt:, cwd:, log_label:, expected_output: nil, **_kwargs|
+      events << { label: log_label, prompt: prompt }
       if expected_output
         if log_label.end_with?("-revise")
           File.write(expected_output, "# Revised draft\n\nDeterministic revision.\n\n<!-- COMPLETE -->\n")
         else
-          verdict = scenario == :five_round_cap ? "changes_requested" : "ready"
+          verdict = %i[five_round_cap architecture_max_rounds].include?(scenario) ? "changes_requested" : "ready"
           FileUtils.mkdir_p(File.dirname(expected_output))
-          File.write(expected_output, "Verdict: #{verdict}\n\n# Findings\n\nDeterministic.\n\n# Required edits\n\nNone.\n")
+          required_edit = verdict == "ready" ? "None." : "- Resolve the deterministic blocker."
+          File.write(expected_output, "Verdict: #{verdict}\n\n## Findings\n\n- Deterministic blocker.\n\n## Required edits\n\n#{required_edit}\n")
         end
       else
         state_file = prompt[/^State file: (.+)$/, 1]
@@ -226,8 +266,16 @@ class FlagshipHiveExecutionTest < Minitest::Test
         output_path = File.join(cwd, state_file)
         body = "# #{log_label}\n\nDeterministic engine proof.\n"
         case log_label
+        when "repo-research"
+          body << "\nRAW REPOSITORY EVIDENCE\n"
+        when "web-research"
+          body << "\nRAW WEB EVIDENCE\n"
         when "architecture"
           body << "\narchitecture engine proof with constraints, tradeoffs, components, and data flow.\n"
+          if scenario == :architecture_max_rounds
+            body << "\n## Decisions needing owner input\n\n- Choose the safe rollout boundary.\n"
+            body << "\n## Reviewer findings\n\n| Status | Finding |\n| --- | --- |\n| deferred | Deterministic blocker |\n"
+          end
         when "provider-data"
           tool = task.managed_runtime_context("stages.provider-data").fetch(:tools)
                      .find { |path| File.basename(path) == "provider-metrics.rb" }
@@ -253,7 +301,7 @@ class FlagshipHiveExecutionTest < Minitest::Test
       end
       {status: :ok}
     end
-    yield
+    yield events
   ensure
     Hive::Stages::Base.define_singleton_method(:spawn_agent, original)
   end
@@ -288,16 +336,17 @@ class FlagshipHiveExecutionTest < Minitest::Test
     git!(path, "config", "user.email", "flagship@example.test")
     git!(path, "config", "user.name", "Flagship fixture")
     FLAGSHIPS.each do |name|
-      destination = File.join(path, "packages", name, FLAGSHIP_VERSION)
+      version = flagship_version(name)
+      destination = File.join(path, "packages", name, version)
       FileUtils.mkdir_p(File.dirname(destination))
-      FileUtils.cp_r(File.join(ROOT, "packages", name, FLAGSHIP_VERSION), destination)
+      FileUtils.cp_r(File.join(ROOT, "packages", name, version), destination)
     end
     git!(path, "add", "packages")
     git!(path, "commit", "-m", "fixture behavior source")
     source_revision = git!(path, "rev-parse", "HEAD").strip
 
     manifests = FLAGSHIPS.to_h do |name|
-      package_path = File.join(path, "packages", name, FLAGSHIP_VERSION)
+      package_path = File.join(path, "packages", name, flagship_version(name))
       File.write(File.join(package_path, "manifest.yml"), YAML.dump(
         manifest_metadata(name, source_revision)
       ))
@@ -327,7 +376,7 @@ class FlagshipHiveExecutionTest < Minitest::Test
     metadata = {
       "schema" => "honeycomb-manifest/v1",
       "name" => name,
-      "version" => FLAGSHIP_VERSION,
+      "version" => flagship_version(name),
       "description" => "Deterministic #{name} flagship fixture",
       "author" => { "name" => "Honeycomb maintainers", "url" => "https://example.test/honeycomb" },
       "license" => "MIT",
@@ -352,10 +401,11 @@ class FlagshipHiveExecutionTest < Minitest::Test
 
   def catalog_entry(name, manifest, source_revision:, review_head:)
     permissions = manifest.fetch("permissions")
+    version = flagship_version(name)
     {
       "name" => name,
-      "version" => FLAGSHIP_VERSION,
-      "latest_version" => FLAGSHIP_VERSION,
+      "version" => version,
+      "latest_version" => version,
       "description" => manifest.fetch("description"),
       "release_tier" => "community",
       "current_tier" => "community",
@@ -371,8 +421,8 @@ class FlagshipHiveExecutionTest < Minitest::Test
       "hive_min_version" => manifest.fetch("hive_min_version"),
       "permissions" => permissions,
       "install_command" => "hive workflow install honeycomb/#{name}",
-      "package_url" => "https://example.test/packages/#{name}/#{FLAGSHIP_VERSION}",
-      "reviews_url" => "https://example.test/reviews/#{name}/#{FLAGSHIP_VERSION}",
+      "package_url" => "https://example.test/packages/#{name}/#{version}",
+      "reviews_url" => "https://example.test/reviews/#{name}/#{version}",
       "community_reviews_url" => nil,
       "source_sha" => source_revision,
       "listing_approval" => {
@@ -409,8 +459,11 @@ class FlagshipHiveExecutionTest < Minitest::Test
     path
   end
 
-  def create_managed_task(project, workflow)
-    slug = "flagship-#{workflow}-260718-aa"
+  def flagship_version(name)
+    FLAGSHIP_VERSIONS.fetch(name)
+  end
+
+  def create_managed_task(project, workflow, slug: "flagship-#{workflow}-260718-aa")
     capture_io do
       Hive::Commands::New.new(
         File.basename(project), "Run the #{workflow} flagship fixture",

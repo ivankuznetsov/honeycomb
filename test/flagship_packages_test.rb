@@ -7,7 +7,11 @@ require "psych"
 
 class FlagshipPackagesTest < Minitest::Test
   FLAGSHIPS = %w[architecture writing seo-content].freeze
-  FLAGSHIP_VERSION = "1.0.1"
+  FLAGSHIP_VERSIONS = {
+    "architecture" => "1.0.2",
+    "writing" => "1.0.1",
+    "seo-content" => "1.0.1"
+  }.freeze
   IDENTITY_KEYS = %w[agent model effort].freeze
   AGENT_PLUGINS_REVISION = "e2caed2878ff1996f235ad0122bf7fea2eea3a27"
 
@@ -31,10 +35,27 @@ class FlagshipPackagesTest < Minitest::Test
   def test_architecture_has_research_council_revision_and_terminal_deliverable
     workflow = load_workflow("architecture")
 
-    assert_equal %w[inbox research draft review architecture], stage_names(workflow)
+    assert_equal %w[inbox repo-research web-research research draft review architecture],
+                 stage_names(workflow)
+    repo_permissions = stage(workflow, "repo-research").fetch("permissions")
+    web_permissions = stage(workflow, "web-research").fetch("permissions")
+    assert_equal ["../../../.."], repo_permissions.fetch("dirs")
+    assert_equal %w[Read LS Grep Glob Edit(./repo-research.txt)], repo_permissions.fetch("tools")
+    refute_includes repo_permissions.fetch("tools"), "WebSearch"
+    refute_includes repo_permissions.fetch("tools"), "WebFetch"
+    assert_equal ["Read(./brief.md)", "Edit(./web-research.txt)", "WebSearch", "WebFetch"],
+                 web_permissions.fetch("tools")
+    refute web_permissions.key?("dirs")
+    assert_equal "repo-research.txt", stage(workflow, "repo-research").fetch("state_file")
+    assert_equal "web-research.txt", stage(workflow, "web-research").fetch("state_file")
+
+    manifest = Psych.safe_load_file(package_path("architecture", "manifest.yml"), permitted_classes: [], aliases: false)
+    assert_equal "high", manifest.dig("permissions", "risk")
+
     review = stage(workflow, "review")
     assert_equal 2, review.dig("council", "quorum")
-    assert_equal 3, review.dig("council", "max_rounds")
+    assert_equal 2, review.dig("council", "max_rounds")
+    assert_equal "complete", review.dig("council", "on_max_rounds")
     assert_equal 2, review.fetch("reviewers").size
     assert review.dig("council", "revise")
     assert_equal "architecture.md", stage(workflow, "architecture").fetch("deliverable")
@@ -43,6 +64,39 @@ class FlagshipPackagesTest < Minitest::Test
     %w[evidence constraints tradeoffs components data-flow reviewer].each do |term|
       assert_includes final_instruction.downcase, term
     end
+
+    corpus = package_markdown("architecture").downcase
+    assert_includes corpus, "untrusted evidence"
+    assert_includes corpus, "5,000 words"
+    assert_includes corpus, "decisions needing owner input"
+    review.fetch("reviewers").each do |reviewer|
+      assert_includes reviewer.fetch("prompt"), "at most five"
+    end
+  end
+
+  def test_architecture_manifest_binds_registry_original_source_bytes
+    root = package_path("architecture")
+    package = HoneycombRegistry::Package.new(root, root: ROOT)
+    manifest = HoneycombRegistry::SafeYAML.load_file(package.manifest_path)
+    revision = manifest.dig("source", "revision")
+
+    assert_equal "registry-original", manifest.dig("x-provenance", "kind")
+    assert_includes manifest.dig("source", "url"), revision
+    _stdout, stderr, ancestry = Open3.capture3(
+      "git", "merge-base", "--is-ancestor", revision, "HEAD", chdir: ROOT
+    )
+    assert ancestry.success?, stderr
+
+    manifest.dig("x-provenance", "source_paths").each do |path|
+      source, source_error, status = Open3.capture3(
+        "git", "show", "#{revision}:packages/architecture/1.0.2/#{path}", chdir: ROOT
+      )
+      assert status.success?, source_error
+      assert_equal File.binread(File.join(root, path)), source.b, path
+    end
+
+    checked = HoneycombRegistry::Manifest.check(package)
+    refute checked.findings.errors?, checked.findings.to_h.inspect
   end
 
   def test_writing_has_grounded_journalism_and_a_five_round_editorial_cap
@@ -131,7 +185,7 @@ class FlagshipPackagesTest < Minitest::Test
   end
 
   def test_provider_adapter_exposes_only_fixed_reviewable_network_origins
-    version_root = "packages/seo-content/#{FLAGSHIP_VERSION}"
+    version_root = "packages/seo-content/#{flagship_version("seo-content")}"
     policy = HoneycombSecurityLint::Policy.load(File.join(ROOT, "policy", "security-lint.yml"))
     files = HoneycombSecurityLint::TextFiles.new(root: ROOT, limits: policy.limits)
                                                .collect(version_root).files
@@ -181,7 +235,11 @@ class FlagshipPackagesTest < Minitest::Test
   private
 
   def package_path(name, *parts)
-    File.join(ROOT, "packages", name, FLAGSHIP_VERSION, *parts)
+    File.join(ROOT, "packages", name, flagship_version(name), *parts)
+  end
+
+  def flagship_version(name)
+    FLAGSHIP_VERSIONS.fetch(name)
   end
 
   def load_workflow(name)
