@@ -1,0 +1,209 @@
+{
+  "artifact_digest": "981892d9eef5a33cb3727ff12a44caa19c1b15e71e6566388566a7867370f7a1",
+  "base_sha": "73cb2a73ba3da7a7eb8aa351b3fb1721226c6fd8",
+  "event": {
+    "action": "labeled",
+    "gate": "applied",
+    "label_sha": "02826c39f298b3b38c3e3408a53bef9b9be24c91"
+  },
+  "head_sha": "02826c39f298b3b38c3e3408a53bef9b9be24c91",
+  "packages": [
+    {
+      "commands": [],
+      "counts": {
+        "advisory": 12,
+        "downgraded": 0,
+        "hard": 0
+      },
+      "findings": [
+        {
+          "approval": null,
+          "category": "permission",
+          "column": 1,
+          "disposition": "advisory",
+          "fingerprint": "e66c8a5810c30773ab69734622e7dd062167559e35b73dca6d90e42d75795c2f",
+          "line": 1,
+          "message": "Broad declared permissions require human review",
+          "original_severity": "advisory",
+          "path": "manifest.yml",
+          "redacted_evidence": "Broad permissions declared",
+          "request": null,
+          "rule_id": "permission.broad-declaration"
+        }
+      ],
+      "hosts": [],
+      "identity": {
+        "name": "architecture",
+        "path": "packages/architecture/1.0.2",
+        "release_sha256": "0e0598287b59b6a737beecf03b1777cd7f35fc165ccb80866718e3ecba2b12a6",
+        "version": "1.0.2"
+      },
+      "requested_permissions": {
+        "capabilities": [
+          "filesystem-read",
+          "filesystem-write",
+          "network"
+        ],
+        "filesystem_read": [
+          "repository",
+          "task",
+          "task/brief.md"
+        ],
+        "filesystem_write": [
+          "task/architecture.md",
+          "task/draft.md",
+          "task/repo-research.txt",
+          "task/research.md",
+          "task/reviews/**",
+          "task/web-research.txt"
+        ],
+        "network_hosts": [
+          "*"
+        ],
+        "risk": "high",
+        "secrets": []
+      },
+      "scanned_files": [
+        {
+          "bytes": 2093,
+          "kind": "text",
+          "path": "packages/architecture/1.0.2/README.md",
+          "sha256": "90371c539fedcf31fee2852ae3a991af0988e643a94035eeb65409df6184cd0e"
+        },
+        {
+          "bytes": 1462,
+          "kind": "text",
+          "path": "packages/architecture/1.0.2/instructions/architecture.md",
+          "sha256": "f82fb45f02f56d0db98ce0499d2d5b21d21af0a92182b724ded4e48b1df78e91"
+        },
+        {
+          "bytes": 1150,
+          "kind": "text",
+          "path": "packages/architecture/1.0.2/instructions/draft.md",
+          "sha256": "4b00bcb24ab0b5ed48646da3574a354e88ccaf0ca54c0b5b3413c7e75debcf50"
+        },
+        {
+          "bytes": 1115,
+          "kind": "text",
+          "path": "packages/architecture/1.0.2/instructions/repo-research.md",
+          "sha256": "c90ba0ce95075b9db611cda1ffcb8de7692b65e5948631c9430d69bc45a29844"
+        },
+        {
+          "bytes": 1104,
+          "kind": "text",
+          "path": "packages/architecture/1.0.2/instructions/research.md",
+          "sha256": "995666b52d8636fef74335fc6903240551e4b4022c5a0a55fdb54abd3155dcf5"
+        },
+        {
+          "bytes": 802,
+          "kind": "text",
+          "path": "packages/architecture/1.0.2/instructions/revise.md",
+          "sha256": "cf8e2acd23a07f31592ee7741296b09e66a38c15f5fe0995a0171668431778aa"
+        },
+        {
+          "bytes": 1153,
+          "kind": "text",
+          "path": "packages/architecture/1.0.2/instructions/web-research.md",
+          "sha256": "7ec4719e356c9d5781386e5d1855edf7e1c8a5f4a42c06c7d7b4de73ee3a99cd"
+        },
+        {
+          "bytes": 2323,
+          "kind": "text",
+          "path": "packages/architecture/1.0.2/manifest.yml",
+          "sha256": "959863a589e2e88f388409ed1688e67c04f200448b6e3f62249dc7722735fc6f"
+        },
+        {
+          "bytes": 3866,
+          "kind": "text",
+          "path": "packages/architecture/1.0.2/workflow.yml",
+          "sha256": "83224787cf660a28252de78b5caa0928200381d9fc9887efd2fd107ce9eafad1"
+        }
+      ],
+      "suppressions": [],
+      "validator_findings": [
+        {
+          "code": "hive.compatible",
+          "message": "descriptor parsed with Hive 0.6.7",
+          "path": "packages/architecture/1.0.2/workflow.yml",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.2/workflow.yml.stages[1] contributes scoped tools permissions",
+          "path": "packages/architecture/1.0.2/workflow.yml.stages[1].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.2/workflow.yml.stages[2] contributes scoped tools permissions",
+          "path": "packages/architecture/1.0.2/workflow.yml.stages[2].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/architecture/1.0.2/workflow.yml.stages[2] requests unbounded access",
+          "path": "packages/architecture/1.0.2/workflow.yml.stages[2].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.2/workflow.yml.stages[3] contributes scoped tools permissions",
+          "path": "packages/architecture/1.0.2/workflow.yml.stages[3].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.2/workflow.yml.stages[4] contributes scoped tools permissions",
+          "path": "packages/architecture/1.0.2/workflow.yml.stages[4].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.2/workflow.yml.stages[5].council.revise contributes scoped tools permissions",
+          "path": "packages/architecture/1.0.2/workflow.yml.stages[5].council.revise.permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.2/workflow.yml.stages[5] contributes read-only permissions",
+          "path": "packages/architecture/1.0.2/workflow.yml.stages[5].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.2/workflow.yml.stages[5].reviewers[0] contributes scoped tools permissions",
+          "path": "packages/architecture/1.0.2/workflow.yml.stages[5].reviewers[0].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.2/workflow.yml.stages[5].reviewers[1] contributes scoped tools permissions",
+          "path": "packages/architecture/1.0.2/workflow.yml.stages[5].reviewers[1].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.2/workflow.yml.stages[6] contributes scoped tools permissions",
+          "path": "packages/architecture/1.0.2/workflow.yml.stages[6].permissions",
+          "severity": "info"
+        }
+      ],
+      "verdict": "pass"
+    }
+  ],
+  "pull_request": 39,
+  "run": {
+    "attempt": 1,
+    "id": 31424652144,
+    "repository": "ivankuznetsov/honeycomb",
+    "workflow": "Security lint"
+  },
+  "schema": "honeycomb.security-lint/v1",
+  "state": "pass",
+  "totals": {
+    "advisory": 12,
+    "downgraded": 0,
+    "hard": 0
+  },
+  "verdict": "Security lint passed"
+}
