@@ -3,6 +3,19 @@ stages:
   - name: inbox
     kind: terminal
     state_file: brief.md
+  - name: web-research
+    kind: agent
+    state_file: web-research.md
+    instruction: instructions/web-research.md
+    mapping_role: planning
+    mapping_contract: architecture-web-research-v2
+    permissions:
+      preset: scoped
+      tools:
+        - Read(./brief.md)
+        - Edit(./web-research.md)
+        - WebSearch
+        - WebFetch
   - name: repo-research
     kind: agent
     state_file: repo-research.md
@@ -19,20 +32,6 @@ stages:
         - Edit(./repo-research.md)
       dirs:
         - ../../../..
-  - name: web-research
-    kind: agent
-    state_file: web-research.md
-    instruction: instructions/web-research.md
-    mapping_role: planning
-    mapping_contract: architecture-web-research-v2
-    permissions:
-      preset: scoped
-      tools:
-        - Read
-        - LS
-        - WebSearch
-        - WebFetch
-        - Edit(./web-research.md)
   - name: research
     kind: agent
     state_file: research.md

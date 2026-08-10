@@ -35,15 +35,20 @@ class FlagshipPackagesTest < Minitest::Test
   def test_architecture_has_research_council_revision_and_terminal_deliverable
     workflow = load_workflow("architecture")
 
-    assert_equal %w[inbox repo-research web-research research draft review architecture],
+    assert_equal %w[inbox web-research repo-research research draft review architecture],
                  stage_names(workflow)
     repo_permissions = stage(workflow, "repo-research").fetch("permissions")
     web_permissions = stage(workflow, "web-research").fetch("permissions")
-    assert_includes repo_permissions.fetch("dirs"), "../../../.."
+    assert_equal ["../../../.."], repo_permissions.fetch("dirs")
+    assert_equal %w[Read LS Grep Glob Edit(./repo-research.md)], repo_permissions.fetch("tools")
     refute_includes repo_permissions.fetch("tools"), "WebSearch"
-    assert_includes web_permissions.fetch("tools"), "WebSearch"
-    assert_includes web_permissions.fetch("tools"), "WebFetch"
+    refute_includes repo_permissions.fetch("tools"), "WebFetch"
+    assert_equal ["Read(./brief.md)", "Edit(./web-research.md)", "WebSearch", "WebFetch"],
+                 web_permissions.fetch("tools")
     refute web_permissions.key?("dirs")
+
+    manifest = Psych.safe_load_file(package_path("architecture", "manifest.yml"), permitted_classes: [], aliases: false)
+    assert_equal "high", manifest.dig("permissions", "risk")
 
     review = stage(workflow, "review")
     assert_equal 2, review.dig("council", "quorum")

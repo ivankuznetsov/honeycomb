@@ -225,8 +225,8 @@ and package-root contracts require Hive 0.6.0. Protected reviews and catalog
 projection are complete. Site publication, public installs, complete workflow
 runs, and claimed provider evidence remain ordered gates.
 
-Architecture 1.0.2 keeps repository access out of its web-research actor and
-keeps network access out of its repository-research actor. A task-only
+Architecture 1.0.2 runs web research first with access only to `brief.md`, then
+runs repository research without network access. A task-only
 synthesis stage combines traceable evidence before drafting. The two reviewers
 may report at most five load-bearing blockers each, the council completes after
 at most two rounds, and final delivery preserves unresolved owner decisions

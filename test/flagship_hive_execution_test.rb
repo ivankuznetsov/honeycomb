@@ -124,9 +124,14 @@ class FlagshipHiveExecutionTest < Minitest::Test
   def test_deterministic_terminal_artifacts_satisfy_package_quality_rubrics
     architecture = flagship_fixture("architecture", "architecture.md")
     assert_match(/`[^`]+:\d+`/, architecture)
-    %w[constraints tradeoffs components data\ flow reviewer\ resolution].each do |term|
+    assert_match(%r{https://[^\s)]+}, architecture)
+    %w[constraints tradeoffs components data\ flow operations observability migration rollback test\ plan].each do |term|
       assert_match(/#{term}/i, architecture)
     end
+    assert_includes architecture, "## Decisions needing owner input"
+    assert_includes architecture, "## Reviewer findings"
+    assert_match(/\|\s*(resolved|deferred|rejected)\s*\|/i, architecture)
+    assert_operator architecture.split.size, :<=, 5_000
 
     writing_verifications = %w[ready ungrounded five-round-cap].map do |outcome|
       flagship_fixture("writing", "verification-#{outcome}.md")
@@ -167,6 +172,22 @@ class FlagshipHiveExecutionTest < Minitest::Test
           architecture = run_workflow_engines(project, task_paths.fetch("architecture"))
           assert_equal :complete, Hive::Markers.current(File.join(architecture, "architecture.md")).name
           assert_includes File.read(File.join(architecture, "architecture.md")), "architecture engine proof"
+        end
+
+        cap_task = create_managed_task(
+          project, "architecture", slug: "flagship-architecture-cap-260810-aa"
+        )
+        with_deterministic_agents(:architecture_max_rounds) do |events|
+          architecture = run_workflow_engines(project, cap_task)
+          review_marker = Hive::Markers.current(File.join(architecture, "review.md"))
+          assert_equal :complete, review_marker.name
+          assert_equal "max_rounds", review_marker.attrs.fetch("reason")
+          assert_equal 2, review_marker.attrs.fetch("round").to_i
+          assert_equal 1, events.count { |label| label.end_with?("-revise") }
+          assert_includes File.read(File.join(architecture, "reviews", "triage.md")), "changes requested"
+          final = File.read(File.join(architecture, "architecture.md"))
+          assert_includes final, "## Decisions needing owner input"
+          assert_includes final, "| deferred |"
         end
 
         with_deterministic_agents(:five_round_cap) do
@@ -214,14 +235,17 @@ class FlagshipHiveExecutionTest < Minitest::Test
 
   def with_deterministic_agents(scenario)
     original = Hive::Stages::Base.method(:spawn_agent)
+    events = []
     Hive::Stages::Base.define_singleton_method(:spawn_agent) do |task, prompt:, cwd:, log_label:, expected_output: nil, **_kwargs|
+      events << log_label
       if expected_output
         if log_label.end_with?("-revise")
           File.write(expected_output, "# Revised draft\n\nDeterministic revision.\n\n<!-- COMPLETE -->\n")
         else
-          verdict = scenario == :five_round_cap ? "changes_requested" : "ready"
+          verdict = %i[five_round_cap architecture_max_rounds].include?(scenario) ? "changes_requested" : "ready"
           FileUtils.mkdir_p(File.dirname(expected_output))
-          File.write(expected_output, "Verdict: #{verdict}\n\n# Findings\n\nDeterministic.\n\n# Required edits\n\nNone.\n")
+          required_edit = verdict == "ready" ? "None." : "- Resolve the deterministic blocker."
+          File.write(expected_output, "Verdict: #{verdict}\n\n## Findings\n\n- Deterministic blocker.\n\n## Required edits\n\n#{required_edit}\n")
         end
       else
         state_file = prompt[/^State file: (.+)$/, 1]
@@ -232,6 +256,10 @@ class FlagshipHiveExecutionTest < Minitest::Test
         case log_label
         when "architecture"
           body << "\narchitecture engine proof with constraints, tradeoffs, components, and data flow.\n"
+          if scenario == :architecture_max_rounds
+            body << "\n## Decisions needing owner input\n\n- Choose the safe rollout boundary.\n"
+            body << "\n## Reviewer findings\n\n| Status | Finding |\n| --- | --- |\n| deferred | Deterministic blocker |\n"
+          end
         when "provider-data"
           tool = task.managed_runtime_context("stages.provider-data").fetch(:tools)
                      .find { |path| File.basename(path) == "provider-metrics.rb" }
@@ -257,7 +285,7 @@ class FlagshipHiveExecutionTest < Minitest::Test
       end
       {status: :ok}
     end
-    yield
+    yield events
   ensure
     Hive::Stages::Base.define_singleton_method(:spawn_agent, original)
   end
@@ -419,8 +447,7 @@ class FlagshipHiveExecutionTest < Minitest::Test
     FLAGSHIP_VERSIONS.fetch(name)
   end
 
-  def create_managed_task(project, workflow)
-    slug = "flagship-#{workflow}-260718-aa"
+  def create_managed_task(project, workflow, slug: "flagship-#{workflow}-260718-aa")
     capture_io do
       Hive::Commands::New.new(
         File.basename(project), "Run the #{workflow} flagship fixture",

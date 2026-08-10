@@ -1,8 +1,8 @@
 # Architecture
 
 Turn an architecture brief into a concise, implementation-ready
-`architecture.md`. The workflow keeps repository evidence and untrusted web
-evidence separate, synthesizes only decision-relevant facts, drafts the
+`architecture.md`. The workflow collects untrusted web evidence before any
+repository artifact exists, keeps the two evidence scopes separate, synthesizes only decision-relevant facts, drafts the
 smallest coherent design, runs a bounded two-reviewer council, and records any
 remaining owner decisions explicitly.
 
@@ -15,8 +15,8 @@ inventing facts.
 
 ## Durable artifacts
 
-- `repo-research.md` maps relevant repository behavior and constraints.
 - `web-research.md` records current external evidence with stable URLs.
+- `repo-research.md` maps relevant repository behavior and constraints.
 - `research.md` is the decision-focused synthesis of both evidence streams.
 - `draft.md` is the proposal revised by the council.
 - `reviews/*.md` and `reviews/triage.md` preserve focused findings and their
@@ -34,6 +34,6 @@ and a visible disposition for unresolved decisions and council findings.
 The package contains no agent, model, or effort choices. Installation maps each
 declared planning or reviewer slot to project-selected agents. Repository
 research can read the project repository but cannot use the network. Web
-research can search and fetch public pages but cannot read the project
-repository. Later actors read only task artifacts. No stage has shell, secret,
-or repository-write access.
+research runs first, can read only `brief.md`, and can search and fetch public
+pages; it cannot read repository or later task artifacts. Later actors read
+only task artifacts. No stage has shell, secret, or repository-write access.
