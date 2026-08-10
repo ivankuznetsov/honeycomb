@@ -35,8 +35,8 @@ catalog renderer.
   evidence branch.
 - `packages/<name>/<semver>/` is the immutable release store. The historical
   `bench/0.1.0`, `docs-sync/0.1.0`, and production canary
-  `task-inspect/0.1.0` are present alongside the listed flagship releases and
-  the unlisted Architecture 1.0.2 source candidate.
+  `task-inspect/0.1.0` are present alongside the listed flagship releases,
+  including current Architecture 1.0.2 and immutable Architecture 1.0.1.
 - `reviews/<name>/<version>/<github-user>.md` is the mutable, external
   community-review namespace; checked documentation fixtures demonstrate its
   strict record shape without creating production reviews.
@@ -207,10 +207,11 @@ Author tooling, seed packages, security-lint CI, and the read-only catalog drift
 gate are shipped on this branch. Analyzer/exporter code is deterministic and
 offline; only the trusted reporter and approval issuer use GitHub HTTPS metadata
 APIs. Protected normalized evidence now projects the listed Community
-`task-inspect/0.1.0`, `architecture/1.0.1`, `writing/1.0.1`,
-`seo-content/1.0.1`, `root-cause-repair/1.0.0`, `reviewer-panel/1.0.0`, and
-`async-fix/0.1.0` releases into `catalog.json`. Released Hive v0.6.7 consumes
-the official registry with immutable catalog/digest task pins and task-local
+`task-inspect/0.1.0`, `architecture/1.0.1`, `architecture/1.0.2`,
+`writing/1.0.1`, `seo-content/1.0.1`, `root-cause-repair/1.0.0`,
+`reviewer-panel/1.0.0`, and `async-fix/0.1.0` releases into `catalog.json`.
+Released Hive v0.6.7 consumes the official registry with immutable
+catalog/digest task pins and task-local
 read-only runtime policy. The static site still needs to consume the new Async
 Fix snapshot; it does not reconstruct entries from manifests. Evidence
 branch/environment protection remains live; Async Fix site publication and
@@ -234,8 +235,9 @@ read scope, while portable runners that cannot enforce it are rejected. The
 two reviewers may report at most five load-bearing blockers each, the council
 completes after at most two rounds, and final delivery preserves unresolved
 owner decisions instead of growing an unbounded review transcript. This
-candidate does not replace listed 1.0.1 until its own protected publication
-evidence exists.
+release is the current Architecture default after exact-head security lint and
+repository-owner publication approval. Listed 1.0.1 remains available through
+exact-version resolution.
 
 ## Root Cause Repair authority boundary
 

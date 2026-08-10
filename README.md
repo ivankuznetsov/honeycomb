@@ -20,9 +20,9 @@ public advisories independent; only listed versions participate in discovery.
 Strict community-review validation runs as trusted base code and binds review
 identity to the canonical package and catalog without executing submitted code.
 
-The repository contains behavior sources for three flagship packages. Writing
-and SEO Content remain at 1.0.1; Architecture 1.0.2 is the current source
-candidate while the catalog continues to serve listed Architecture 1.0.1:
+The repository contains three listed flagship packages. Writing and SEO
+Content remain at 1.0.1; Architecture 1.0.2 is the current listed release,
+while immutable Architecture 1.0.1 remains available by exact version:
 
 - `architecture` — isolated repository and web research, decision-focused
   synthesis, a bounded two-round council, and a concise implementation-ready
