@@ -72,6 +72,31 @@ class FlagshipPackagesTest < Minitest::Test
     end
   end
 
+  def test_architecture_manifest_binds_registry_original_source_bytes
+    root = package_path("architecture")
+    package = HoneycombRegistry::Package.new(root, root: ROOT)
+    manifest = HoneycombRegistry::SafeYAML.load_file(package.manifest_path)
+    revision = manifest.dig("source", "revision")
+
+    assert_equal "registry-original", manifest.dig("x-provenance", "kind")
+    assert_includes manifest.dig("source", "url"), revision
+    _stdout, stderr, ancestry = Open3.capture3(
+      "git", "merge-base", "--is-ancestor", revision, "HEAD", chdir: ROOT
+    )
+    assert ancestry.success?, stderr
+
+    manifest.dig("x-provenance", "source_paths").each do |path|
+      source, source_error, status = Open3.capture3(
+        "git", "show", "#{revision}:packages/architecture/1.0.2/#{path}", chdir: ROOT
+      )
+      assert status.success?, source_error
+      assert_equal File.binread(File.join(root, path)), source.b, path
+    end
+
+    checked = HoneycombRegistry::Manifest.check(package)
+    refute checked.findings.errors?, checked.findings.to_h.inspect
+  end
+
   def test_writing_has_grounded_journalism_and_a_five_round_editorial_cap
     workflow = load_workflow("writing")
 
