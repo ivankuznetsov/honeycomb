@@ -99,6 +99,20 @@ class FlagshipPackagesTest < Minitest::Test
     refute checked.findings.errors?, checked.findings.to_h.inspect
   end
 
+  def test_architecture_current_release_is_catalog_listed
+    entry = JSON.parse(File.read(File.join(ROOT, "catalog.json"))).fetch("entries").find do |candidate|
+      candidate.fetch("name") == "architecture" && candidate.fetch("version") == "1.0.2"
+    end
+
+    refute_nil entry
+    assert_equal "1.0.2", entry.fetch("latest_version")
+    assert_equal "high", entry.fetch("permission_risk")
+    assert_equal "0e0598287b59b6a737beecf03b1777cd7f35fc165ccb80866718e3ecba2b12a6",
+                 entry.dig("listing_approval", "release_sha256")
+    assert_equal ["repository_owner"],
+                 entry.dig("listing_approval", "reviews").map { |review| review.fetch("authority") }
+  end
+
   def test_writing_has_grounded_journalism_and_a_five_round_editorial_cap
     workflow = load_workflow("writing")
 

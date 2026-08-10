@@ -39,15 +39,14 @@ link to policy rather than restating it.
 
 ## Flagship Package Status
 
-Architecture 1.0.2 is an unlisted source candidate that separates repository
-and web research, synthesizes decision evidence, limits the main document to
-5,000 words, and bounds council review to two rounds. Writing and SEO Content
-remain at 1.0.1, and the catalog continues to project the protected listed
-Architecture 1.0.1 release until 1.0.2 completes its own lint and approval
-cycle. The flagship tests exercise each current source through Hive's real
-registry install, configuration-pin, task-creation, Agent, Council, and
-package-root paths using deterministic test agents. Public provider-backed
-acceptance remains a separate rollout gate.
+Architecture 1.0.2 is the current listed Community release. It separates
+repository and web research, synthesizes decision evidence, limits the main
+document to 5,000 words, and bounds council review to two rounds. Writing and
+SEO Content remain at 1.0.1, while immutable Architecture 1.0.1 remains
+available by exact version. The flagship tests exercise each current source
+through Hive's real registry install, configuration-pin, task-creation, Agent,
+Council, and package-root paths using deterministic test agents. Public
+provider-backed acceptance remains a separate rollout gate.
 
 ## Managed Repair Package Status
 
