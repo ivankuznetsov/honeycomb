@@ -18,7 +18,7 @@ does not add a second installer or permit active tasks to change package bytes.
 Keep immutable bytes and fail closed on provenance mismatch. This trades a
 larger retained snapshot for reproducible task execution and auditability.
 
-## Selected design and component contracts
+## Selected design: components, ownership, interfaces, dependencies, and rationale
 
 - The registry owns immutable package bytes and exposes a versioned read
   interface to the installer. It depends only on validated source metadata.
@@ -31,7 +31,7 @@ These boundaries are selected because they preserve the existing trust model
 while making the installed task reproducible; a mutable shared package cache
 was rejected because it could silently change an active task.
 
-## Ordered data and control flow
+## Ordered data flow and control flow
 
 1. The installer asks the registry for validated package bytes and records both
    package and configuration digests in the task.
@@ -50,7 +50,7 @@ Validate source bytes before installation, keep credentials outside artifacts,
 and deny repository reads to the networked public-web actor. A provenance
 mismatch fails closed before any untrusted package instruction executes.
 
-## Operations, observability, migration, and rollback
+## Operations, observability, migration, rollout, and rollback
 
 Log the immutable package, catalog, and configuration digests at admission and
 each stage transition. Migrate by installing the new version for new tasks;
@@ -73,7 +73,7 @@ back by selecting the prior listed version without rewriting active tasks.
 
 | Finding | Status | Reason | Section |
 | --- | --- | --- | --- |
-| Pin installation configuration | resolved | The digest travels with the task. | [Selected design and component contracts](#selected-design-and-component-contracts) |
+| Pin installation configuration | resolved | The digest travels with the task. | [Selected design and component contracts](#selected-design-components-ownership-interfaces-dependencies-and-rationale) |
 | Prove provider-backed execution | deferred | Publication remains owner-gated. | [Decisions needing owner input](#decisions-needing-owner-input) |
 
 <!-- COMPLETE -->

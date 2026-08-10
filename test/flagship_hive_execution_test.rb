@@ -129,8 +129,8 @@ class FlagshipHiveExecutionTest < Minitest::Test
        security operations observability migration rollout rollback test\ plan].each do |term|
       assert_match(/#{term}/i, architecture)
     end
-    assert_includes architecture, "## Selected design and component contracts"
-    assert_includes architecture, "## Ordered data and control flow"
+    assert_match(/^## Selected design: components, ownership, interfaces, dependencies, and rationale$/, architecture)
+    assert_includes architecture, "## Ordered data flow and control flow"
     assert_match(/^\| Finding \| Status \| Reason \| Section \|$/, architecture)
     assert_match(/\|\s*(resolved|deferred|rejected)\s*\|[^\n]+\|\s*\[[^\]]+\]\(#[^)]+\)\s*\|/i, architecture)
     assert_includes architecture, "## Decisions needing owner input"
