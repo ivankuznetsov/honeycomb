@@ -1,0 +1,20 @@
+{
+  "approvals": [
+    {
+      "approved_suppressions": [],
+      "authority": "repository_owner",
+      "decision": "approved",
+      "evidence_digest": "981892d9eef5a33cb3727ff12a44caa19c1b15e71e6566388566a7867370f7a1",
+      "head_sha": "02826c39f298b3b38c3e3408a53bef9b9be24c91",
+      "name": "architecture",
+      "notes": "Publish Architecture 1.0.2 after merged PR #39, exact-head security lint, package execution, Hive compatibility, and bounded managed-read-root validation.",
+      "path": "packages/architecture/1.0.2",
+      "release_sha256": "0e0598287b59b6a737beecf03b1777cd7f35fc165ccb80866718e3ecba2b12a6",
+      "review_url": "https://github.com/ivankuznetsov/honeycomb/actions/runs/31429339945",
+      "reviewed_at": "2026-08-10T20:30:13Z",
+      "reviewer": "ivankuznetsov",
+      "version": "1.0.2"
+    }
+  ],
+  "schema": "honeycomb.listing-approval/v1"
+}
