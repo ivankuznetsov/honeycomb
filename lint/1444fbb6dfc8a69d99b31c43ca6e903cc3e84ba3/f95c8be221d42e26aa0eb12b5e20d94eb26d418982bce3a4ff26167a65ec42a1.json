@@ -1,0 +1,1781 @@
+{
+  "artifact_digest": "f95c8be221d42e26aa0eb12b5e20d94eb26d418982bce3a4ff26167a65ec42a1",
+  "base_sha": "95890f7476048deec6addabb7de940577d4e1afa",
+  "event": {
+    "action": "labeled",
+    "gate": "applied",
+    "label_sha": "1444fbb6dfc8a69d99b31c43ca6e903cc3e84ba3"
+  },
+  "head_sha": "1444fbb6dfc8a69d99b31c43ca6e903cc3e84ba3",
+  "packages": [
+    {
+      "commands": [],
+      "counts": {
+        "advisory": 20,
+        "downgraded": 0,
+        "hard": 0
+      },
+      "findings": [
+        {
+          "approval": null,
+          "category": "permission",
+          "column": 1,
+          "disposition": "advisory",
+          "fingerprint": "57bd77e9287255f8f9c35c11589f82f2806dc26e96e7b94c21366b149cf31cbb",
+          "line": 1,
+          "message": "Broad declared permissions require human review",
+          "original_severity": "advisory",
+          "path": "manifest.yml",
+          "redacted_evidence": "Broad permissions declared",
+          "request": null,
+          "rule_id": "permission.broad-declaration"
+        }
+      ],
+      "hosts": [],
+      "identity": {
+        "name": "architecture",
+        "path": "packages/architecture/1.0.3",
+        "release_sha256": "7754ca35f8cd00b1c8ac591c87eb21ba14dc5a374c0d7d5e94411b845196f511",
+        "version": "1.0.3"
+      },
+      "requested_permissions": {
+        "capabilities": [
+          "filesystem-read",
+          "filesystem-write",
+          "network",
+          "shell"
+        ],
+        "filesystem_read": [
+          "*"
+        ],
+        "filesystem_write": [
+          "*"
+        ],
+        "network_hosts": [
+          "*"
+        ],
+        "risk": "high",
+        "secrets": [
+          "*"
+        ]
+      },
+      "scanned_files": [
+        {
+          "bytes": 2337,
+          "kind": "text",
+          "path": "packages/architecture/1.0.3/README.md",
+          "sha256": "514543f7b4221bccf04972d312d99e50cdb7df31c7db366e2d93674affddc32b"
+        },
+        {
+          "bytes": 1462,
+          "kind": "text",
+          "path": "packages/architecture/1.0.3/instructions/architecture.md",
+          "sha256": "f82fb45f02f56d0db98ce0499d2d5b21d21af0a92182b724ded4e48b1df78e91"
+        },
+        {
+          "bytes": 1149,
+          "kind": "text",
+          "path": "packages/architecture/1.0.3/instructions/draft.md",
+          "sha256": "6dfbe1a77f82f9211d2b5271dc06dc9dd3a235093aaef050960c278f2fdb08fc"
+        },
+        {
+          "bytes": 1086,
+          "kind": "text",
+          "path": "packages/architecture/1.0.3/instructions/repo-research.md",
+          "sha256": "f0202130d91cfbaec8cab4e5ed894655fb3ef32004fad15d9ca4f52a726c2ffd"
+        },
+        {
+          "bytes": 1104,
+          "kind": "text",
+          "path": "packages/architecture/1.0.3/instructions/research.md",
+          "sha256": "995666b52d8636fef74335fc6903240551e4b4022c5a0a55fdb54abd3155dcf5"
+        },
+        {
+          "bytes": 802,
+          "kind": "text",
+          "path": "packages/architecture/1.0.3/instructions/revise.md",
+          "sha256": "cf8e2acd23a07f31592ee7741296b09e66a38c15f5fe0995a0171668431778aa"
+        },
+        {
+          "bytes": 1062,
+          "kind": "text",
+          "path": "packages/architecture/1.0.3/instructions/web-research.md",
+          "sha256": "8585ce0387ea36bd62ce54ae5f7ab9a5e7c8400de7762873f558a7393f2c28c3"
+        },
+        {
+          "bytes": 2149,
+          "kind": "text",
+          "path": "packages/architecture/1.0.3/manifest.yml",
+          "sha256": "597f9a7b24858b5d520d1ae51bd13ebd6bad07e1edf719146964ffaf7ebf2140"
+        },
+        {
+          "bytes": 2792,
+          "kind": "text",
+          "path": "packages/architecture/1.0.3/workflow.yml",
+          "sha256": "94fea767698904cec4bdc374c3a7866755b4858e08000af00b1d8c519b4c871f"
+        }
+      ],
+      "suppressions": [],
+      "validator_findings": [
+        {
+          "code": "hive.compatible",
+          "message": "descriptor parsed with Hive 0.6.7",
+          "path": "packages/architecture/1.0.3/workflow.yml",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.3/workflow.yml.stages[1] contributes yolo permissions",
+          "path": "packages/architecture/1.0.3/workflow.yml.stages[1].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/architecture/1.0.3/workflow.yml.stages[1] requests unbounded access",
+          "path": "packages/architecture/1.0.3/workflow.yml.stages[1].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.3/workflow.yml.stages[2] contributes yolo permissions",
+          "path": "packages/architecture/1.0.3/workflow.yml.stages[2].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/architecture/1.0.3/workflow.yml.stages[2] requests unbounded access",
+          "path": "packages/architecture/1.0.3/workflow.yml.stages[2].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.3/workflow.yml.stages[3] contributes yolo permissions",
+          "path": "packages/architecture/1.0.3/workflow.yml.stages[3].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/architecture/1.0.3/workflow.yml.stages[3] requests unbounded access",
+          "path": "packages/architecture/1.0.3/workflow.yml.stages[3].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.3/workflow.yml.stages[4] contributes yolo permissions",
+          "path": "packages/architecture/1.0.3/workflow.yml.stages[4].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/architecture/1.0.3/workflow.yml.stages[4] requests unbounded access",
+          "path": "packages/architecture/1.0.3/workflow.yml.stages[4].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.3/workflow.yml.stages[5].council.revise contributes yolo permissions",
+          "path": "packages/architecture/1.0.3/workflow.yml.stages[5].council.revise.permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/architecture/1.0.3/workflow.yml.stages[5].council.revise requests unbounded access",
+          "path": "packages/architecture/1.0.3/workflow.yml.stages[5].council.revise.permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.3/workflow.yml.stages[5] contributes yolo permissions",
+          "path": "packages/architecture/1.0.3/workflow.yml.stages[5].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/architecture/1.0.3/workflow.yml.stages[5] requests unbounded access",
+          "path": "packages/architecture/1.0.3/workflow.yml.stages[5].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.3/workflow.yml.stages[5].reviewers[0] contributes yolo permissions",
+          "path": "packages/architecture/1.0.3/workflow.yml.stages[5].reviewers[0].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/architecture/1.0.3/workflow.yml.stages[5].reviewers[0] requests unbounded access",
+          "path": "packages/architecture/1.0.3/workflow.yml.stages[5].reviewers[0].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.3/workflow.yml.stages[5].reviewers[1] contributes yolo permissions",
+          "path": "packages/architecture/1.0.3/workflow.yml.stages[5].reviewers[1].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/architecture/1.0.3/workflow.yml.stages[5].reviewers[1] requests unbounded access",
+          "path": "packages/architecture/1.0.3/workflow.yml.stages[5].reviewers[1].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.3/workflow.yml.stages[6] contributes yolo permissions",
+          "path": "packages/architecture/1.0.3/workflow.yml.stages[6].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/architecture/1.0.3/workflow.yml.stages[6] requests unbounded access",
+          "path": "packages/architecture/1.0.3/workflow.yml.stages[6].permissions",
+          "severity": "warning"
+        }
+      ],
+      "verdict": "pass"
+    },
+    {
+      "commands": [
+        {
+          "column": 1,
+          "kind": "fenced",
+          "line": 13,
+          "path": "packages/docs-sync/0.1.1/README.md",
+          "redacted": "hive workflow install honeycomb/docs-sync"
+        }
+      ],
+      "counts": {
+        "advisory": 6,
+        "downgraded": 0,
+        "hard": 0
+      },
+      "findings": [
+        {
+          "approval": null,
+          "category": "permission",
+          "column": 1,
+          "disposition": "advisory",
+          "fingerprint": "57bd77e9287255f8f9c35c11589f82f2806dc26e96e7b94c21366b149cf31cbb",
+          "line": 1,
+          "message": "Broad declared permissions require human review",
+          "original_severity": "advisory",
+          "path": "manifest.yml",
+          "redacted_evidence": "Broad permissions declared",
+          "request": null,
+          "rule_id": "permission.broad-declaration"
+        }
+      ],
+      "hosts": [],
+      "identity": {
+        "name": "docs-sync",
+        "path": "packages/docs-sync/0.1.1",
+        "release_sha256": "9e79ffaa918650cb3f6d9bfc316a2658d05c466c8e62d55e5b3e854f8abd96a8",
+        "version": "0.1.1"
+      },
+      "requested_permissions": {
+        "capabilities": [
+          "filesystem-read",
+          "filesystem-write",
+          "network",
+          "shell"
+        ],
+        "filesystem_read": [
+          "*"
+        ],
+        "filesystem_write": [
+          "*"
+        ],
+        "network_hosts": [
+          "*"
+        ],
+        "risk": "high",
+        "secrets": [
+          "*"
+        ]
+      },
+      "scanned_files": [
+        {
+          "bytes": 1445,
+          "kind": "text",
+          "path": "packages/docs-sync/0.1.1/README.md",
+          "sha256": "caab298079f15b90248e946a6ab776eba5a197b0d24aedb440cbe33771071c27"
+        },
+        {
+          "bytes": 842,
+          "kind": "text",
+          "path": "packages/docs-sync/0.1.1/instructions/inspect.md",
+          "sha256": "dc8a9c6b0cd0737d97419528ea536c4302dd6ddd66a8f87c101cb37f3349133a"
+        },
+        {
+          "bytes": 618,
+          "kind": "text",
+          "path": "packages/docs-sync/0.1.1/instructions/update-docs.md",
+          "sha256": "e8d9f5fc15bb1c21e5fd2dc1405e799affebf075bf9dd1b4d8b239c7a963fd4e"
+        },
+        {
+          "bytes": 1436,
+          "kind": "text",
+          "path": "packages/docs-sync/0.1.1/manifest.yml",
+          "sha256": "d98a8b4a7c5ed2b672e56b5baa49ff401d195abd3bea44b5224fddf4f0d433dc"
+        },
+        {
+          "bytes": 429,
+          "kind": "text",
+          "path": "packages/docs-sync/0.1.1/workflow.yml",
+          "sha256": "ddcc3cde6bc733e712e7734bd255cb8cde56c5a7f44983b697797a8dd77704cd"
+        }
+      ],
+      "suppressions": [],
+      "validator_findings": [
+        {
+          "code": "hive.compatible",
+          "message": "descriptor parsed with Hive 0.6.7",
+          "path": "packages/docs-sync/0.1.1/workflow.yml",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/docs-sync/0.1.1/workflow.yml.stages[0] contributes yolo permissions",
+          "path": "packages/docs-sync/0.1.1/workflow.yml.stages[0].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/docs-sync/0.1.1/workflow.yml.stages[0] requests unbounded access",
+          "path": "packages/docs-sync/0.1.1/workflow.yml.stages[0].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/docs-sync/0.1.1/workflow.yml.stages[1] contributes yolo permissions",
+          "path": "packages/docs-sync/0.1.1/workflow.yml.stages[1].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/docs-sync/0.1.1/workflow.yml.stages[1] requests unbounded access",
+          "path": "packages/docs-sync/0.1.1/workflow.yml.stages[1].permissions",
+          "severity": "warning"
+        }
+      ],
+      "verdict": "pass"
+    },
+    {
+      "commands": [
+        {
+          "column": 13,
+          "kind": "inline",
+          "line": 7,
+          "path": "packages/reviewer-panel/1.0.1/assets/evidence-contract.md",
+          "redacted": "HEAD"
+        },
+        {
+          "column": 34,
+          "kind": "inline",
+          "line": 7,
+          "path": "packages/reviewer-panel/1.0.1/assets/evidence-contract.md",
+          "redacted": "HEAD"
+        },
+        {
+          "column": 1,
+          "kind": "plain",
+          "line": 24,
+          "path": "packages/reviewer-panel/1.0.1/assets/evidence-contract.md",
+          "redacted": "Git root. It fails with canonical structured JSON and a nonzero exit status for"
+        },
+        {
+          "column": 2,
+          "kind": "inline",
+          "line": 38,
+          "path": "packages/reviewer-panel/1.0.1/assets/evidence-contract.md",
+          "redacted": "HEAD"
+        },
+        {
+          "column": 71,
+          "kind": "inline",
+          "line": 11,
+          "path": "packages/reviewer-panel/1.0.1/instructions/basis.md",
+          "redacted": "HEAD"
+        },
+        {
+          "column": 39,
+          "kind": "inline",
+          "line": 17,
+          "path": "packages/reviewer-panel/1.0.1/instructions/basis.md",
+          "redacted": "HEAD"
+        },
+        {
+          "column": 9,
+          "kind": "ruby",
+          "line": 252,
+          "path": "packages/reviewer-panel/1.0.1/tools/repository-state.rb",
+          "redacted": "        File.readlink(path).b"
+        },
+        {
+          "column": 5,
+          "kind": "ruby",
+          "line": 301,
+          "path": "packages/reviewer-panel/1.0.1/tools/repository-state.rb",
+          "redacted": "    File.open(path, flags) do |file|"
+        },
+        {
+          "column": 7,
+          "kind": "ruby",
+          "line": 307,
+          "path": "packages/reviewer-panel/1.0.1/tools/repository-state.rb",
+          "redacted": "      while (chunk = file.read(READ_CHUNK_BYTES))"
+        },
+        {
+          "column": 5,
+          "kind": "ruby",
+          "line": 371,
+          "path": "packages/reviewer-panel/1.0.1/tools/repository-state.rb",
+          "redacted": "    Open3.popen3(GIT_ENV, *command) do |stdin, stdout_io, stderr_io, wait_thread|"
+        }
+      ],
+      "counts": {
+        "advisory": 18,
+        "downgraded": 0,
+        "hard": 0
+      },
+      "findings": [
+        {
+          "approval": null,
+          "category": "permission",
+          "column": 1,
+          "disposition": "advisory",
+          "fingerprint": "57bd77e9287255f8f9c35c11589f82f2806dc26e96e7b94c21366b149cf31cbb",
+          "line": 1,
+          "message": "Broad declared permissions require human review",
+          "original_severity": "advisory",
+          "path": "manifest.yml",
+          "redacted_evidence": "Broad permissions declared",
+          "request": null,
+          "rule_id": "permission.broad-declaration"
+        }
+      ],
+      "hosts": [],
+      "identity": {
+        "name": "reviewer-panel",
+        "path": "packages/reviewer-panel/1.0.1",
+        "release_sha256": "b0bb7610900aca349fe787f631a4c31a77e3c916374a1cf29927173883626ca9",
+        "version": "1.0.1"
+      },
+      "requested_permissions": {
+        "capabilities": [
+          "filesystem-read",
+          "filesystem-write",
+          "network",
+          "shell"
+        ],
+        "filesystem_read": [
+          "*"
+        ],
+        "filesystem_write": [
+          "*"
+        ],
+        "network_hosts": [
+          "*"
+        ],
+        "risk": "high",
+        "secrets": [
+          "*"
+        ]
+      },
+      "scanned_files": [
+        {
+          "bytes": 3810,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.1/README.md",
+          "sha256": "d2d969d8bf102a6de6c22f2bbcea6e4c298c0164a13ff0b432c69aa4e8af4137"
+        },
+        {
+          "bytes": 2742,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.1/assets/evidence-contract.md",
+          "sha256": "ab285f6a729658c2eb136dc7473b33925d9e123fb329d03c5bf12a2cd8ceca2c"
+        },
+        {
+          "bytes": 3352,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.1/instructions/basis.md",
+          "sha256": "3b9398f42a35d827d40164d396e50b240b352717c9cea0ee076b829dba95508a"
+        },
+        {
+          "bytes": 3251,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.1/instructions/readiness.md",
+          "sha256": "726a78b5e049a9f3387f14935918851e6d90fbde56ad75203d8b05cd5628ef7b"
+        },
+        {
+          "bytes": 3432,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.1/instructions/repair.md",
+          "sha256": "17b0864c96e403a7f66103bcf8a68078116178ca3c9aaf187f039cd9d9b50f7c"
+        },
+        {
+          "bytes": 2227,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.1/instructions/review-correctness.md",
+          "sha256": "c2c31196202ad32c92ccde92106f90f6144f4e982eb32ca8642f96d2a64a2336"
+        },
+        {
+          "bytes": 2249,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.1/instructions/review-reliability.md",
+          "sha256": "fe1286a8094cf608480950b12a38c96ee5a9ac15eb1cc1592975e07e63ea52cc"
+        },
+        {
+          "bytes": 2302,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.1/instructions/review-security.md",
+          "sha256": "9f33bde1273189dbdcad1981964dad65b88c588d075d274ee2aefd6c89585695"
+        },
+        {
+          "bytes": 2954,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.1/instructions/review-test-evidence.md",
+          "sha256": "48ce21cb8613c893dc3bf0ea6520c6f4aac1dcfa85fd1b92994505aa4d0aea1c"
+        },
+        {
+          "bytes": 2880,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.1/manifest.yml",
+          "sha256": "5a03d8bd03187dbe2aa631dd464792c41365000a9512640e3865c3d933e77dd3"
+        },
+        {
+          "bytes": 20220,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.1/tools/repository-state.rb",
+          "sha256": "99539859ff74d4e235bf8ea7e02b4f98f47a22a2f3da37927c01643c15d8fb0b"
+        },
+        {
+          "bytes": 1973,
+          "kind": "text",
+          "path": "packages/reviewer-panel/1.0.1/workflow.yml",
+          "sha256": "119f170fd7eaa30ec4534d1409050b9bc9a42fd8aed88731c50b760e735e1f80"
+        }
+      ],
+      "suppressions": [],
+      "validator_findings": [
+        {
+          "code": "hive.compatible",
+          "message": "descriptor parsed with Hive 0.6.7",
+          "path": "packages/reviewer-panel/1.0.1/workflow.yml",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/reviewer-panel/1.0.1/workflow.yml.stages[1] contributes yolo permissions",
+          "path": "packages/reviewer-panel/1.0.1/workflow.yml.stages[1].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/reviewer-panel/1.0.1/workflow.yml.stages[1] requests unbounded access",
+          "path": "packages/reviewer-panel/1.0.1/workflow.yml.stages[1].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2].council.revise contributes yolo permissions",
+          "path": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2].council.revise.permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2].council.revise requests unbounded access",
+          "path": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2].council.revise.permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2] contributes yolo permissions",
+          "path": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2] requests unbounded access",
+          "path": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2].reviewers[0] contributes yolo permissions",
+          "path": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2].reviewers[0].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2].reviewers[0] requests unbounded access",
+          "path": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2].reviewers[0].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2].reviewers[1] contributes yolo permissions",
+          "path": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2].reviewers[1].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2].reviewers[1] requests unbounded access",
+          "path": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2].reviewers[1].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2].reviewers[2] contributes yolo permissions",
+          "path": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2].reviewers[2].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2].reviewers[2] requests unbounded access",
+          "path": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2].reviewers[2].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2].reviewers[3] contributes yolo permissions",
+          "path": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2].reviewers[3].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2].reviewers[3] requests unbounded access",
+          "path": "packages/reviewer-panel/1.0.1/workflow.yml.stages[2].reviewers[3].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/reviewer-panel/1.0.1/workflow.yml.stages[3] contributes yolo permissions",
+          "path": "packages/reviewer-panel/1.0.1/workflow.yml.stages[3].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/reviewer-panel/1.0.1/workflow.yml.stages[3] requests unbounded access",
+          "path": "packages/reviewer-panel/1.0.1/workflow.yml.stages[3].permissions",
+          "severity": "warning"
+        }
+      ],
+      "verdict": "pass"
+    },
+    {
+      "commands": [
+        {
+          "column": 5,
+          "kind": "ruby",
+          "line": 18,
+          "path": "packages/seo-content/1.0.2/tools/provider-metrics.rb",
+          "redacted": "    \"ahrefs\" => \"https://api.ahrefs.com\","
+        },
+        {
+          "column": 5,
+          "kind": "ruby",
+          "line": 19,
+          "path": "packages/seo-content/1.0.2/tools/provider-metrics.rb",
+          "redacted": "    \"dataforseo\" => \"https://api.dataforseo.com\","
+        },
+        {
+          "column": 5,
+          "kind": "ruby",
+          "line": 20,
+          "path": "packages/seo-content/1.0.2/tools/provider-metrics.rb",
+          "redacted": "    \"ga4\" => \"https://analyticsdata.googleapis.com\","
+        },
+        {
+          "column": 5,
+          "kind": "ruby",
+          "line": 21,
+          "path": "packages/seo-content/1.0.2/tools/provider-metrics.rb",
+          "redacted": "    \"gsc\" => \"https://www.googleapis.com\""
+        },
+        {
+          "column": 5,
+          "kind": "ruby",
+          "line": 178,
+          "path": "packages/seo-content/1.0.2/tools/provider-metrics.rb",
+          "redacted": "    request_class = method == :post ? Net\\::HTTP\\::Post : Net\\::HTTP\\::Get # https://analyticsdata.googleapis.com https://www.googleapis.com https://api.dataforseo.com https://api.ahrefs.com"
+        },
+        {
+          "column": 5,
+          "kind": "ruby",
+          "line": 187,
+          "path": "packages/seo-content/1.0.2/tools/provider-metrics.rb",
+          "redacted": "    response = Net\\::HTTP.start(uri.host, uri.port, use_ssl: true, open_timeout: CONNECT_TIMEOUT, read_timeout: READ_TIMEOUT) do |http| # https://analyticsdata.googleapis.com https://www.googleapis.com https://api.dataforseo.com https://api.ahrefs.com"
+        },
+        {
+          "column": 5,
+          "kind": "ruby",
+          "line": 195,
+          "path": "packages/seo-content/1.0.2/tools/provider-metrics.rb",
+          "redacted": "    raise IOError, \"provider returned HTTP #{response.code}\" unless response.is_a?(Net\\::HTTPSuccess)"
+        },
+        {
+          "column": 1,
+          "kind": "ruby",
+          "line": 18,
+          "path": "packages/seo-content/1.0.2/tools/seo-analyze.rb",
+          "redacted": "text = File.read(path, encoding: \"UTF-8\")"
+        }
+      ],
+      "counts": {
+        "advisory": 24,
+        "downgraded": 0,
+        "hard": 0
+      },
+      "findings": [
+        {
+          "approval": null,
+          "category": "permission",
+          "column": 1,
+          "disposition": "advisory",
+          "fingerprint": "57bd77e9287255f8f9c35c11589f82f2806dc26e96e7b94c21366b149cf31cbb",
+          "line": 1,
+          "message": "Broad declared permissions require human review",
+          "original_severity": "advisory",
+          "path": "manifest.yml",
+          "redacted_evidence": "Broad permissions declared",
+          "request": null,
+          "rule_id": "permission.broad-declaration"
+        }
+      ],
+      "hosts": [
+        {
+          "column": 22,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "api.ahrefs.com",
+          "line": 18,
+          "path": "packages/seo-content/1.0.2/tools/provider-metrics.rb",
+          "reason": "Queries Ahrefs organic keyword metrics for the configured site"
+        },
+        {
+          "column": 26,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "api.dataforseo.com",
+          "line": 19,
+          "path": "packages/seo-content/1.0.2/tools/provider-metrics.rb",
+          "reason": "Queries DataForSEO search-volume metrics for the bounded keyword set"
+        },
+        {
+          "column": 19,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "analyticsdata.googleapis.com",
+          "line": 20,
+          "path": "packages/seo-content/1.0.2/tools/provider-metrics.rb",
+          "reason": "Queries the configured GA4 property reporting API"
+        },
+        {
+          "column": 19,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "www.googleapis.com",
+          "line": 21,
+          "path": "packages/seo-content/1.0.2/tools/provider-metrics.rb",
+          "reason": "Queries Google Search Console performance for the configured site"
+        },
+        {
+          "column": 78,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "analyticsdata.googleapis.com",
+          "line": 178,
+          "path": "packages/seo-content/1.0.2/tools/provider-metrics.rb",
+          "reason": "Queries the configured GA4 property reporting API"
+        },
+        {
+          "column": 115,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "www.googleapis.com",
+          "line": 178,
+          "path": "packages/seo-content/1.0.2/tools/provider-metrics.rb",
+          "reason": "Queries Google Search Console performance for the configured site"
+        },
+        {
+          "column": 142,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "api.dataforseo.com",
+          "line": 178,
+          "path": "packages/seo-content/1.0.2/tools/provider-metrics.rb",
+          "reason": "Queries DataForSEO search-volume metrics for the bounded keyword set"
+        },
+        {
+          "column": 169,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "api.ahrefs.com",
+          "line": 178,
+          "path": "packages/seo-content/1.0.2/tools/provider-metrics.rb",
+          "reason": "Queries Ahrefs organic keyword metrics for the configured site"
+        },
+        {
+          "column": 142,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "analyticsdata.googleapis.com",
+          "line": 187,
+          "path": "packages/seo-content/1.0.2/tools/provider-metrics.rb",
+          "reason": "Queries the configured GA4 property reporting API"
+        },
+        {
+          "column": 179,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "www.googleapis.com",
+          "line": 187,
+          "path": "packages/seo-content/1.0.2/tools/provider-metrics.rb",
+          "reason": "Queries Google Search Console performance for the configured site"
+        },
+        {
+          "column": 206,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "api.dataforseo.com",
+          "line": 187,
+          "path": "packages/seo-content/1.0.2/tools/provider-metrics.rb",
+          "reason": "Queries DataForSEO search-volume metrics for the bounded keyword set"
+        },
+        {
+          "column": 233,
+          "declared": true,
+          "disposition": "advisory",
+          "host": "api.ahrefs.com",
+          "line": 187,
+          "path": "packages/seo-content/1.0.2/tools/provider-metrics.rb",
+          "reason": "Queries Ahrefs organic keyword metrics for the configured site"
+        }
+      ],
+      "identity": {
+        "name": "seo-content",
+        "path": "packages/seo-content/1.0.2",
+        "release_sha256": "c5fa464734ce9ff633b7429f19b6ea392900dfcde1d6b768c90f2d33217705b2",
+        "version": "1.0.2"
+      },
+      "requested_permissions": {
+        "capabilities": [
+          "filesystem-read",
+          "filesystem-write",
+          "network",
+          "shell"
+        ],
+        "filesystem_read": [
+          "*"
+        ],
+        "filesystem_write": [
+          "*"
+        ],
+        "network_hosts": [
+          "*"
+        ],
+        "risk": "high",
+        "secrets": [
+          "*"
+        ]
+      },
+      "scanned_files": [
+        {
+          "bytes": 1206,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.2/NOTICE.md",
+          "sha256": "854a43eab3ed1d1b2fcfb8600c52d6cb39bb5b793a60acf85042c9d6d24ea800"
+        },
+        {
+          "bytes": 3991,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.2/README.md",
+          "sha256": "4ddd350ce0de1635793d95a5a51d8df08be05c0972702e2b12837d7ad876d18b"
+        },
+        {
+          "bytes": 929,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.2/assets/quality-rubric.md",
+          "sha256": "8f3258b7101d53d64ef8d52e3ede415315288a48818deaa1d51f3fd17e7d084c"
+        },
+        {
+          "bytes": 487,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.2/instructions/analyze.md",
+          "sha256": "fa714a0b95422e6196e56b54efa28e355d74fc162e325734be221feeb88e9a29"
+        },
+        {
+          "bytes": 673,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.2/instructions/draft.md",
+          "sha256": "e01c635aef1e7712a7d4adafda14c7a95029b41023a808082ceb194f6f44ee4f"
+        },
+        {
+          "bytes": 727,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.2/instructions/fact-check.md",
+          "sha256": "976e496898231803e08fa00693529cf80b6bd19ac10d4836175c30b52fed41ef"
+        },
+        {
+          "bytes": 707,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.2/instructions/humanize.md",
+          "sha256": "a50c5232e9d25bd01e196e93079bceff754b51e738efa5819595292fe592ca9d"
+        },
+        {
+          "bytes": 689,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.2/instructions/intent.md",
+          "sha256": "2207fb8b197a2a1039d58a51386b6e2e5652326bbe48429e13a2a0e347fce3c1"
+        },
+        {
+          "bytes": 1091,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.2/instructions/optimize.md",
+          "sha256": "cb0faeece268706b4a6da910705ff95f4121d3f6dbb366084518d1d8a5bb9866"
+        },
+        {
+          "bytes": 604,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.2/instructions/outline.md",
+          "sha256": "70d156b6061b4c176b04a6c462dd4cfb89e5439cf8636a98c26bf869a273f5eb"
+        },
+        {
+          "bytes": 702,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.2/instructions/provider-data.md",
+          "sha256": "d4a823e3aa9d76633405fe300f05f9f2df150d0629ba18e44dc14e8dba126fe6"
+        },
+        {
+          "bytes": 381,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.2/instructions/repo-research.md",
+          "sha256": "663951bcf63a2df1db042ed5510ac649d13e24b6755ec79b9e13ac6c3a392a4c"
+        },
+        {
+          "bytes": 1230,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.2/instructions/research.md",
+          "sha256": "24072e3aafc9a452d1f04f3bb7c639f4846859dcc2dd5ac07c50cce0bf04509b"
+        },
+        {
+          "bytes": 449,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.2/instructions/web-research.md",
+          "sha256": "b4d6ed40b5659f2153bad616d2d34392ef38dc1389d4e0c7011b82930558a54c"
+        },
+        {
+          "bytes": 4658,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.2/manifest.yml",
+          "sha256": "74d8f98b9529abb706c1d2e2148e1bee6a081c27df9c82f6b1fb90721f7dc930"
+        },
+        {
+          "bytes": 8877,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.2/tools/provider-metrics.rb",
+          "sha256": "3e03e1797a9ae4de2a13662b4660fee29ac43cbd97e31d37132e389f6f7d6e9f"
+        },
+        {
+          "bytes": 2502,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.2/tools/seo-analyze.rb",
+          "sha256": "a8d426f391794e164acd4c8bc63fc6500452c6af2aaefe9ba9dfd3b7c70d8c76"
+        },
+        {
+          "bytes": 2273,
+          "kind": "text",
+          "path": "packages/seo-content/1.0.2/workflow.yml",
+          "sha256": "077078886a2c78973dd5ca39e44bc5d73a2a9a8564f6c99ef61aa3f076f8532d"
+        }
+      ],
+      "suppressions": [],
+      "validator_findings": [
+        {
+          "code": "hive.compatible",
+          "message": "descriptor parsed with Hive 0.6.7",
+          "path": "packages/seo-content/1.0.2/workflow.yml",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/seo-content/1.0.2/workflow.yml.stages[10] contributes yolo permissions",
+          "path": "packages/seo-content/1.0.2/workflow.yml.stages[10].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/seo-content/1.0.2/workflow.yml.stages[10] requests unbounded access",
+          "path": "packages/seo-content/1.0.2/workflow.yml.stages[10].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/seo-content/1.0.2/workflow.yml.stages[11] contributes yolo permissions",
+          "path": "packages/seo-content/1.0.2/workflow.yml.stages[11].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/seo-content/1.0.2/workflow.yml.stages[11] requests unbounded access",
+          "path": "packages/seo-content/1.0.2/workflow.yml.stages[11].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/seo-content/1.0.2/workflow.yml.stages[1] contributes yolo permissions",
+          "path": "packages/seo-content/1.0.2/workflow.yml.stages[1].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/seo-content/1.0.2/workflow.yml.stages[1] requests unbounded access",
+          "path": "packages/seo-content/1.0.2/workflow.yml.stages[1].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/seo-content/1.0.2/workflow.yml.stages[2] contributes yolo permissions",
+          "path": "packages/seo-content/1.0.2/workflow.yml.stages[2].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/seo-content/1.0.2/workflow.yml.stages[2] requests unbounded access",
+          "path": "packages/seo-content/1.0.2/workflow.yml.stages[2].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/seo-content/1.0.2/workflow.yml.stages[3] contributes yolo permissions",
+          "path": "packages/seo-content/1.0.2/workflow.yml.stages[3].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/seo-content/1.0.2/workflow.yml.stages[3] requests unbounded access",
+          "path": "packages/seo-content/1.0.2/workflow.yml.stages[3].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/seo-content/1.0.2/workflow.yml.stages[4] contributes yolo permissions",
+          "path": "packages/seo-content/1.0.2/workflow.yml.stages[4].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/seo-content/1.0.2/workflow.yml.stages[4] requests unbounded access",
+          "path": "packages/seo-content/1.0.2/workflow.yml.stages[4].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/seo-content/1.0.2/workflow.yml.stages[5] contributes yolo permissions",
+          "path": "packages/seo-content/1.0.2/workflow.yml.stages[5].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/seo-content/1.0.2/workflow.yml.stages[5] requests unbounded access",
+          "path": "packages/seo-content/1.0.2/workflow.yml.stages[5].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/seo-content/1.0.2/workflow.yml.stages[6] contributes yolo permissions",
+          "path": "packages/seo-content/1.0.2/workflow.yml.stages[6].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/seo-content/1.0.2/workflow.yml.stages[6] requests unbounded access",
+          "path": "packages/seo-content/1.0.2/workflow.yml.stages[6].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/seo-content/1.0.2/workflow.yml.stages[7] contributes yolo permissions",
+          "path": "packages/seo-content/1.0.2/workflow.yml.stages[7].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/seo-content/1.0.2/workflow.yml.stages[7] requests unbounded access",
+          "path": "packages/seo-content/1.0.2/workflow.yml.stages[7].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/seo-content/1.0.2/workflow.yml.stages[8] contributes yolo permissions",
+          "path": "packages/seo-content/1.0.2/workflow.yml.stages[8].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/seo-content/1.0.2/workflow.yml.stages[8] requests unbounded access",
+          "path": "packages/seo-content/1.0.2/workflow.yml.stages[8].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/seo-content/1.0.2/workflow.yml.stages[9] contributes yolo permissions",
+          "path": "packages/seo-content/1.0.2/workflow.yml.stages[9].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/seo-content/1.0.2/workflow.yml.stages[9] requests unbounded access",
+          "path": "packages/seo-content/1.0.2/workflow.yml.stages[9].permissions",
+          "severity": "warning"
+        }
+      ],
+      "verdict": "pass"
+    },
+    {
+      "commands": [
+        {
+          "column": 1,
+          "kind": "fenced",
+          "line": 9,
+          "path": "packages/task-inspect/0.1.1/README.md",
+          "redacted": "hive workflow install honeycomb/task-inspect"
+        }
+      ],
+      "counts": {
+        "advisory": 4,
+        "downgraded": 0,
+        "hard": 0
+      },
+      "findings": [
+        {
+          "approval": null,
+          "category": "permission",
+          "column": 1,
+          "disposition": "advisory",
+          "fingerprint": "57bd77e9287255f8f9c35c11589f82f2806dc26e96e7b94c21366b149cf31cbb",
+          "line": 1,
+          "message": "Broad declared permissions require human review",
+          "original_severity": "advisory",
+          "path": "manifest.yml",
+          "redacted_evidence": "Broad permissions declared",
+          "request": null,
+          "rule_id": "permission.broad-declaration"
+        }
+      ],
+      "hosts": [],
+      "identity": {
+        "name": "task-inspect",
+        "path": "packages/task-inspect/0.1.1",
+        "release_sha256": "b93420a34ef432cd1e6cd47b61242931a126436c5ab465017f2bac05b16b0cd9",
+        "version": "0.1.1"
+      },
+      "requested_permissions": {
+        "capabilities": [
+          "filesystem-read",
+          "filesystem-write",
+          "network",
+          "shell"
+        ],
+        "filesystem_read": [
+          "*"
+        ],
+        "filesystem_write": [
+          "*"
+        ],
+        "network_hosts": [
+          "*"
+        ],
+        "risk": "high",
+        "secrets": [
+          "*"
+        ]
+      },
+      "scanned_files": [
+        {
+          "bytes": 863,
+          "kind": "text",
+          "path": "packages/task-inspect/0.1.1/README.md",
+          "sha256": "071c45ba18a8c7027a8d2d184ed2916ec65208ebb3e478c8bb49b0fbcda3c7ac"
+        },
+        {
+          "bytes": 327,
+          "kind": "text",
+          "path": "packages/task-inspect/0.1.1/instructions/inspect.md",
+          "sha256": "34dea90f6301aaa76e8ddb821450caa5bf6db4cf72e91ff3ca43dc973acd3807"
+        },
+        {
+          "bytes": 1274,
+          "kind": "text",
+          "path": "packages/task-inspect/0.1.1/manifest.yml",
+          "sha256": "ec30ef6a12836e9c713603608e85664de7149f7667845471cc6580bd450f49c2"
+        },
+        {
+          "bytes": 222,
+          "kind": "text",
+          "path": "packages/task-inspect/0.1.1/workflow.yml",
+          "sha256": "6d4015e9e6940d37f3a34addceb82cbbac2e530e7074ec77e8de9fb8db9b008a"
+        }
+      ],
+      "suppressions": [],
+      "validator_findings": [
+        {
+          "code": "hive.compatible",
+          "message": "descriptor parsed with Hive 0.6.7",
+          "path": "packages/task-inspect/0.1.1/workflow.yml",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/task-inspect/0.1.1/workflow.yml.stages[0] contributes yolo permissions",
+          "path": "packages/task-inspect/0.1.1/workflow.yml.stages[0].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/task-inspect/0.1.1/workflow.yml.stages[0] requests unbounded access",
+          "path": "packages/task-inspect/0.1.1/workflow.yml.stages[0].permissions",
+          "severity": "warning"
+        }
+      ],
+      "verdict": "pass"
+    },
+    {
+      "commands": [
+        {
+          "column": 1,
+          "kind": "plain",
+          "line": 35,
+          "path": "packages/video-production/0.1.1/README.md",
+          "redacted": "OpenSSL 3 without exposing the private key to Hive:"
+        },
+        {
+          "column": 1,
+          "kind": "fenced",
+          "line": 38,
+          "path": "packages/video-production/0.1.1/README.md",
+          "redacted": "openssl pkeyutl -sign -rawin -inkey owner-private.pem \\"
+        },
+        {
+          "column": 3,
+          "kind": "fenced",
+          "line": 39,
+          "path": "packages/video-production/0.1.1/README.md",
+          "redacted": "  -in capture-approval.md -out capture-approval.sig"
+        },
+        {
+          "column": 1,
+          "kind": "fenced",
+          "line": 149,
+          "path": "packages/video-production/0.1.1/README.md",
+          "redacted": "Git revision, run these commands from the repository root before the separate"
+        },
+        {
+          "column": 1,
+          "kind": "plain",
+          "line": 154,
+          "path": "packages/video-production/0.1.1/README.md",
+          "redacted": "ruby -e 'path, revision = ARGV; bytes = File.binread(path); raise \"unexpected seed\" unless bytes.scan(\"SOURCE_COMMIT_REQUIRED\").length == 2; File.binwrite(path, bytes.gsub(\"SOURCE_COMMIT_REQUIRED\", revision))' packages/video-production/0.1.1/manifest.yml \"$source_revision\""
+        },
+        {
+          "column": 1,
+          "kind": "plain",
+          "line": 155,
+          "path": "packages/video-production/0.1.1/README.md",
+          "redacted": "ruby script/honeycomb-manifest packages/video-production/0.1.1"
+        },
+        {
+          "column": 1,
+          "kind": "plain",
+          "line": 156,
+          "path": "packages/video-production/0.1.1/README.md",
+          "redacted": "ruby script/honeycomb-manifest --check packages/video-production/0.1.1"
+        },
+        {
+          "column": 1,
+          "kind": "plain",
+          "line": 157,
+          "path": "packages/video-production/0.1.1/README.md",
+          "redacted": "ruby script/honeycomb-validate packages/video-production/0.1.1"
+        }
+      ],
+      "counts": {
+        "advisory": 14,
+        "downgraded": 0,
+        "hard": 0
+      },
+      "findings": [
+        {
+          "approval": null,
+          "category": "permission",
+          "column": 1,
+          "disposition": "advisory",
+          "fingerprint": "57bd77e9287255f8f9c35c11589f82f2806dc26e96e7b94c21366b149cf31cbb",
+          "line": 1,
+          "message": "Broad declared permissions require human review",
+          "original_severity": "advisory",
+          "path": "manifest.yml",
+          "redacted_evidence": "Broad permissions declared",
+          "request": null,
+          "rule_id": "permission.broad-declaration"
+        }
+      ],
+      "hosts": [],
+      "identity": {
+        "name": "video-production",
+        "path": "packages/video-production/0.1.1",
+        "release_sha256": "84e4ba55ff4612a5b596cadbd7ecf99efe694b291e277e6598d55762584f8714",
+        "version": "0.1.1"
+      },
+      "requested_permissions": {
+        "capabilities": [
+          "filesystem-read",
+          "filesystem-write",
+          "network",
+          "shell"
+        ],
+        "filesystem_read": [
+          "*"
+        ],
+        "filesystem_write": [
+          "*"
+        ],
+        "network_hosts": [
+          "*"
+        ],
+        "risk": "high",
+        "secrets": [
+          "*"
+        ]
+      },
+      "scanned_files": [
+        {
+          "bytes": 2210,
+          "kind": "text",
+          "path": "packages/video-production/0.1.1/DEPENDENCIES.md",
+          "sha256": "c4e40e295ca2e24d077e1639f23a725ee581eae02a182f192fd52dfd1404c662"
+        },
+        {
+          "bytes": 9024,
+          "kind": "text",
+          "path": "packages/video-production/0.1.1/README.md",
+          "sha256": "7f36ee2614c9f85bc3024d3d7e0251d4cf49302ecbd7fa7eb324dc8e5fd3b566"
+        },
+        {
+          "bytes": 1501,
+          "kind": "text",
+          "path": "packages/video-production/0.1.1/instructions/capture-approval.md",
+          "sha256": "86b32d164497b66389dc0fc9022a08d86ee961a3c7c371578bb165916c67fba1"
+        },
+        {
+          "bytes": 1810,
+          "kind": "text",
+          "path": "packages/video-production/0.1.1/instructions/capture.md",
+          "sha256": "65b827a0a20694f4c42919aed08392d42d27326466f98f86f5835e8886a7b987"
+        },
+        {
+          "bytes": 1000,
+          "kind": "text",
+          "path": "packages/video-production/0.1.1/instructions/editorial-approval.md",
+          "sha256": "df36997ca5fa16aebc33cb1a570bac98f4b06b6b4abc12c746a25fb166533c27"
+        },
+        {
+          "bytes": 1079,
+          "kind": "text",
+          "path": "packages/video-production/0.1.1/instructions/prepare.md",
+          "sha256": "fc944592bf730c5d15f1e9d3a92b618d6dd31fb655b70dbaae3687457459e0dd"
+        },
+        {
+          "bytes": 908,
+          "kind": "text",
+          "path": "packages/video-production/0.1.1/instructions/publish-ready.md",
+          "sha256": "7857aa59349e0032d8701b5c5dca53914786561ebc0ad5de6d8a57aa149513c9"
+        },
+        {
+          "bytes": 1072,
+          "kind": "text",
+          "path": "packages/video-production/0.1.1/instructions/verify.md",
+          "sha256": "758758c8f1263a44197d18dec528e1ed3a12aebae5e876f12181c7f2ff190c83"
+        },
+        {
+          "bytes": 3890,
+          "kind": "text",
+          "path": "packages/video-production/0.1.1/manifest.yml",
+          "sha256": "50e7abe9d3b37f5e0c0e3bc894954566cf083801047df5ca58cd0abff2f48a20"
+        },
+        {
+          "bytes": 193,
+          "kind": "text",
+          "path": "packages/video-production/0.1.1/tools/video-approval-request.rb",
+          "sha256": "a32ce350b8cbf703ef367f280da1298fc84ef48ed466cdc35dc1f0a136ef0634"
+        },
+        {
+          "bytes": 173,
+          "kind": "text",
+          "path": "packages/video-production/0.1.1/tools/video-capture.rb",
+          "sha256": "71f4b8515351f2b8294eb70e0c8ccee9cf61ab5c2f0a304b49742fd77ba14d6f"
+        },
+        {
+          "bytes": 168,
+          "kind": "text",
+          "path": "packages/video-production/0.1.1/tools/video-prepare.rb",
+          "sha256": "ec5af76fa53fac5876a12235489840533595495c470622a4139266cc63d016bf"
+        },
+        {
+          "bytes": 61964,
+          "kind": "text",
+          "path": "packages/video-production/0.1.1/tools/video-production.rb",
+          "sha256": "d8b81cfbb1168d4b0983118361a986593b8322d232e40640fd3a2363b09bd901"
+        },
+        {
+          "bytes": 185,
+          "kind": "text",
+          "path": "packages/video-production/0.1.1/tools/video-publish-ready.rb",
+          "sha256": "0e88c56b448675e25ed6991bf72ec3589e7664bee40aa6a679577c9da4d3fa16"
+        },
+        {
+          "bytes": 171,
+          "kind": "text",
+          "path": "packages/video-production/0.1.1/tools/video-verify.rb",
+          "sha256": "35bd6a6f9a292ba06f45ce32c71c4e39872b06cfe64b774620a4b2c553188221"
+        },
+        {
+          "bytes": 1446,
+          "kind": "text",
+          "path": "packages/video-production/0.1.1/workflow.yml",
+          "sha256": "58da258eb53cd7affa05c20f1963c28eb53c6133d634332fadcc8d9e5a395811"
+        }
+      ],
+      "suppressions": [],
+      "validator_findings": [
+        {
+          "code": "hive.compatible",
+          "message": "descriptor parsed with Hive 0.6.7",
+          "path": "packages/video-production/0.1.1/workflow.yml",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/video-production/0.1.1/workflow.yml.stages[1] contributes yolo permissions",
+          "path": "packages/video-production/0.1.1/workflow.yml.stages[1].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/video-production/0.1.1/workflow.yml.stages[1] requests unbounded access",
+          "path": "packages/video-production/0.1.1/workflow.yml.stages[1].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/video-production/0.1.1/workflow.yml.stages[2] contributes yolo permissions",
+          "path": "packages/video-production/0.1.1/workflow.yml.stages[2].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/video-production/0.1.1/workflow.yml.stages[2] requests unbounded access",
+          "path": "packages/video-production/0.1.1/workflow.yml.stages[2].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/video-production/0.1.1/workflow.yml.stages[3] contributes yolo permissions",
+          "path": "packages/video-production/0.1.1/workflow.yml.stages[3].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/video-production/0.1.1/workflow.yml.stages[3] requests unbounded access",
+          "path": "packages/video-production/0.1.1/workflow.yml.stages[3].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/video-production/0.1.1/workflow.yml.stages[4] contributes yolo permissions",
+          "path": "packages/video-production/0.1.1/workflow.yml.stages[4].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/video-production/0.1.1/workflow.yml.stages[4] requests unbounded access",
+          "path": "packages/video-production/0.1.1/workflow.yml.stages[4].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/video-production/0.1.1/workflow.yml.stages[5] contributes yolo permissions",
+          "path": "packages/video-production/0.1.1/workflow.yml.stages[5].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/video-production/0.1.1/workflow.yml.stages[5] requests unbounded access",
+          "path": "packages/video-production/0.1.1/workflow.yml.stages[5].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/video-production/0.1.1/workflow.yml.stages[6] contributes yolo permissions",
+          "path": "packages/video-production/0.1.1/workflow.yml.stages[6].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/video-production/0.1.1/workflow.yml.stages[6] requests unbounded access",
+          "path": "packages/video-production/0.1.1/workflow.yml.stages[6].permissions",
+          "severity": "warning"
+        }
+      ],
+      "verdict": "pass"
+    },
+    {
+      "commands": [],
+      "counts": {
+        "advisory": 20,
+        "downgraded": 0,
+        "hard": 0
+      },
+      "findings": [
+        {
+          "approval": null,
+          "category": "permission",
+          "column": 1,
+          "disposition": "advisory",
+          "fingerprint": "57bd77e9287255f8f9c35c11589f82f2806dc26e96e7b94c21366b149cf31cbb",
+          "line": 1,
+          "message": "Broad declared permissions require human review",
+          "original_severity": "advisory",
+          "path": "manifest.yml",
+          "redacted_evidence": "Broad permissions declared",
+          "request": null,
+          "rule_id": "permission.broad-declaration"
+        }
+      ],
+      "hosts": [],
+      "identity": {
+        "name": "writing",
+        "path": "packages/writing/1.0.2",
+        "release_sha256": "e02af5b46adf763f84918d247e5e42d8da99d08305962bbb7c442fa9ba7c3183",
+        "version": "1.0.2"
+      },
+      "requested_permissions": {
+        "capabilities": [
+          "filesystem-read",
+          "filesystem-write",
+          "network",
+          "shell"
+        ],
+        "filesystem_read": [
+          "*"
+        ],
+        "filesystem_write": [
+          "*"
+        ],
+        "network_hosts": [
+          "*"
+        ],
+        "risk": "high",
+        "secrets": [
+          "*"
+        ]
+      },
+      "scanned_files": [
+        {
+          "bytes": 1151,
+          "kind": "text",
+          "path": "packages/writing/1.0.2/NOTICE.md",
+          "sha256": "b8ccf56f1fe45243638cfd7531059db1e41bb11cd5057b94e67727a72851f646"
+        },
+        {
+          "bytes": 2488,
+          "kind": "text",
+          "path": "packages/writing/1.0.2/README.md",
+          "sha256": "c6865df07a68650b00910beb10860caa431e1caaa8b1d8e7808cf2a4fb86b597"
+        },
+        {
+          "bytes": 1182,
+          "kind": "text",
+          "path": "packages/writing/1.0.2/instructions/deliver.md",
+          "sha256": "b0c425f7c9669fb6c4c32f42f64e1f76aa2306b9561025644a50b441fe8a8d0d"
+        },
+        {
+          "bytes": 876,
+          "kind": "text",
+          "path": "packages/writing/1.0.2/instructions/draft.md",
+          "sha256": "4a283310fe566bbd453e0cd228045186e8d87d12dc38174dc8065da4ce70fd5f"
+        },
+        {
+          "bytes": 407,
+          "kind": "text",
+          "path": "packages/writing/1.0.2/instructions/repo-research.md",
+          "sha256": "17646581fdf4eb88346e216ce8c09775eb3740b06ed4b1beff4159949de38883"
+        },
+        {
+          "bytes": 1211,
+          "kind": "text",
+          "path": "packages/writing/1.0.2/instructions/research.md",
+          "sha256": "e4d78f0987aff32e3983c2a9296dda2d837161f0e7a019eca3a0f52cf55940c0"
+        },
+        {
+          "bytes": 729,
+          "kind": "text",
+          "path": "packages/writing/1.0.2/instructions/revise.md",
+          "sha256": "2cba643a828b31e6fa38bb2ba9086e4cbdda812847f762c6385d533135f0b666"
+        },
+        {
+          "bytes": 515,
+          "kind": "text",
+          "path": "packages/writing/1.0.2/instructions/web-research.md",
+          "sha256": "8637e54d67b30e6e60240b75771dc2ccecbccf1cec4cd7c92bd18c0cb30c48e3"
+        },
+        {
+          "bytes": 2234,
+          "kind": "text",
+          "path": "packages/writing/1.0.2/manifest.yml",
+          "sha256": "e942f771c80f1644ec5ffb9b14b375c316dde633b0af8865d0eb176aa8b966ce"
+        },
+        {
+          "bytes": 2699,
+          "kind": "text",
+          "path": "packages/writing/1.0.2/workflow.yml",
+          "sha256": "e5c137df0913f99e76e9c646cb0bfb35e26f6712c49a32b999ecd243b39fc7bd"
+        }
+      ],
+      "suppressions": [],
+      "validator_findings": [
+        {
+          "code": "hive.compatible",
+          "message": "descriptor parsed with Hive 0.6.7",
+          "path": "packages/writing/1.0.2/workflow.yml",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/writing/1.0.2/workflow.yml.stages[1] contributes yolo permissions",
+          "path": "packages/writing/1.0.2/workflow.yml.stages[1].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/writing/1.0.2/workflow.yml.stages[1] requests unbounded access",
+          "path": "packages/writing/1.0.2/workflow.yml.stages[1].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/writing/1.0.2/workflow.yml.stages[2] contributes yolo permissions",
+          "path": "packages/writing/1.0.2/workflow.yml.stages[2].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/writing/1.0.2/workflow.yml.stages[2] requests unbounded access",
+          "path": "packages/writing/1.0.2/workflow.yml.stages[2].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/writing/1.0.2/workflow.yml.stages[3] contributes yolo permissions",
+          "path": "packages/writing/1.0.2/workflow.yml.stages[3].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/writing/1.0.2/workflow.yml.stages[3] requests unbounded access",
+          "path": "packages/writing/1.0.2/workflow.yml.stages[3].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/writing/1.0.2/workflow.yml.stages[4] contributes yolo permissions",
+          "path": "packages/writing/1.0.2/workflow.yml.stages[4].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/writing/1.0.2/workflow.yml.stages[4] requests unbounded access",
+          "path": "packages/writing/1.0.2/workflow.yml.stages[4].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/writing/1.0.2/workflow.yml.stages[5].council.revise contributes yolo permissions",
+          "path": "packages/writing/1.0.2/workflow.yml.stages[5].council.revise.permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/writing/1.0.2/workflow.yml.stages[5].council.revise requests unbounded access",
+          "path": "packages/writing/1.0.2/workflow.yml.stages[5].council.revise.permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/writing/1.0.2/workflow.yml.stages[5] contributes yolo permissions",
+          "path": "packages/writing/1.0.2/workflow.yml.stages[5].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/writing/1.0.2/workflow.yml.stages[5] requests unbounded access",
+          "path": "packages/writing/1.0.2/workflow.yml.stages[5].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/writing/1.0.2/workflow.yml.stages[5].reviewers[0] contributes yolo permissions",
+          "path": "packages/writing/1.0.2/workflow.yml.stages[5].reviewers[0].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/writing/1.0.2/workflow.yml.stages[5].reviewers[0] requests unbounded access",
+          "path": "packages/writing/1.0.2/workflow.yml.stages[5].reviewers[0].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/writing/1.0.2/workflow.yml.stages[5].reviewers[1] contributes yolo permissions",
+          "path": "packages/writing/1.0.2/workflow.yml.stages[5].reviewers[1].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/writing/1.0.2/workflow.yml.stages[5].reviewers[1] requests unbounded access",
+          "path": "packages/writing/1.0.2/workflow.yml.stages[5].reviewers[1].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/writing/1.0.2/workflow.yml.stages[6] contributes yolo permissions",
+          "path": "packages/writing/1.0.2/workflow.yml.stages[6].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/writing/1.0.2/workflow.yml.stages[6] requests unbounded access",
+          "path": "packages/writing/1.0.2/workflow.yml.stages[6].permissions",
+          "severity": "warning"
+        }
+      ],
+      "verdict": "pass"
+    }
+  ],
+  "pull_request": 41,
+  "run": {
+    "attempt": 1,
+    "id": 34278362857,
+    "repository": "ivankuznetsov/honeycomb",
+    "workflow": "Security lint"
+  },
+  "schema": "honeycomb.security-lint/v1",
+  "state": "pass",
+  "totals": {
+    "advisory": 106,
+    "downgraded": 0,
+    "hard": 0
+  },
+  "verdict": "Security lint passed"
+}
