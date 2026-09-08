@@ -1,0 +1,9 @@
+id: task-inspect
+stages:
+  - name: inspect
+    kind: agent
+    state_file: inspect.md
+    instruction: instructions/inspect.md
+    mapping_role: planning
+    mapping_contract: task-inspect-inspect-v1
+    permissions: yolo

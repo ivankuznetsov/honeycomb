@@ -1,0 +1,82 @@
+id: architecture
+stages:
+  - name: inbox
+    kind: terminal
+    state_file: brief.md
+  - name: repo-research
+    kind: agent
+    state_file: repo-research.txt
+    instruction: instructions/repo-research.md
+    mapping_role: planning
+    mapping_contract: architecture-repo-research-v2
+    permissions: yolo
+  - name: web-research
+    kind: agent
+    state_file: web-research.txt
+    instruction: instructions/web-research.md
+    mapping_role: planning
+    mapping_contract: architecture-web-research-v2
+    permissions: yolo
+  - name: research
+    kind: agent
+    state_file: research.md
+    instruction: instructions/research.md
+    mapping_role: planning
+    mapping_contract: architecture-synthesis-v2
+    permissions: yolo
+  - name: draft
+    kind: agent
+    state_file: draft.md
+    instruction: instructions/draft.md
+    mapping_role: planning
+    mapping_contract: architecture-draft-v2
+    permissions: yolo
+  - name: review
+    kind: council
+    state_file: review.md
+    input: draft.md
+    mapping_role: planning
+    mapping_contract: architecture-council-v2
+    permissions: yolo
+    council:
+      quorum: 2
+      max_rounds: 2
+      exit_rule: consensus
+      on_max_rounds: complete
+      triage_output: reviews/triage.md
+      revise:
+        instruction: instructions/revise.md
+        mapping_role: planning
+        mapping_contract: architecture-revise-v2
+        permissions: yolo
+    reviewers:
+      - name: constraints
+        prompt: >-
+          Review the draft against the brief and research. Report at most five
+          load-bearing blocking findings covering unsupported assumptions,
+          missing evidence, unclear constraints, ignored alternatives, or weak
+          tradeoffs. Require one concrete edit per blocker. On later rounds,
+          do not introduce new scope unless a revision created a regression.
+        output_basename: constraints
+        mapping_role: reviewer
+        mapping_contract: architecture-review-v2
+        permissions: yolo
+      - name: operations
+        prompt: >-
+          Review the draft's component boundaries, interfaces, data and control
+          flow, failure modes, security, migration, observability, and tests.
+          Report at most five load-bearing implementation risks and require one
+          concrete edit per blocker. On later rounds, do not introduce new
+          scope unless a revision created a regression.
+        output_basename: operations
+        mapping_role: reviewer
+        mapping_contract: architecture-review-v2
+        permissions: yolo
+  - name: architecture
+    kind: agent
+    state_file: architecture.md
+    deliverable: architecture.md
+    instruction: instructions/architecture.md
+    mapping_role: planning
+    mapping_contract: architecture-delivery-v2
+    permissions: yolo

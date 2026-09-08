@@ -1,0 +1,83 @@
+id: seo-content
+stages:
+  - name: inbox
+    kind: terminal
+    state_file: brief.md
+  - name: repo-research
+    kind: agent
+    state_file: repo-research.md
+    instruction: instructions/repo-research.md
+    mapping_role: planning
+    mapping_contract: seo-repo-research-v1
+    permissions: yolo
+  - name: web-research
+    kind: agent
+    state_file: web-research.md
+    instruction: instructions/web-research.md
+    mapping_role: planning
+    mapping_contract: seo-web-research-v1
+    permissions: yolo
+  - name: provider-data
+    kind: agent
+    state_file: provider-data.md
+    instruction: instructions/provider-data.md
+    mapping_role: planning
+    mapping_contract: seo-provider-data-v1
+    permissions: yolo
+  - name: research
+    kind: agent
+    state_file: research.md
+    instruction: instructions/research.md
+    mapping_role: planning
+    mapping_contract: seo-synthesis-v1
+    permissions: yolo
+  - name: intent
+    kind: agent
+    state_file: intent.md
+    instruction: instructions/intent.md
+    mapping_role: planning
+    mapping_contract: seo-intent-v1
+    permissions: yolo
+  - name: outline
+    kind: agent
+    state_file: outline.md
+    instruction: instructions/outline.md
+    mapping_role: planning
+    mapping_contract: seo-outline-v1
+    permissions: yolo
+  - name: draft
+    kind: agent
+    state_file: draft.md
+    instruction: instructions/draft.md
+    mapping_role: development
+    mapping_contract: seo-draft-v1
+    permissions: yolo
+  - name: fact-check
+    kind: agent
+    state_file: verification.md
+    instruction: instructions/fact-check.md
+    mapping_role: reviewer
+    mapping_contract: seo-fact-check-v1
+    permissions: yolo
+  - name: humanize
+    kind: agent
+    state_file: humanization.md
+    instruction: instructions/humanize.md
+    mapping_role: reviewer
+    mapping_contract: seo-humanize-v1
+    permissions: yolo
+  - name: analyze
+    kind: agent
+    state_file: analysis.md
+    instruction: instructions/analyze.md
+    mapping_role: reviewer
+    mapping_contract: seo-analyze-v1
+    permissions: yolo
+  - name: optimize
+    kind: agent
+    state_file: article.md
+    deliverable: article.md
+    instruction: instructions/optimize.md
+    mapping_role: development
+    mapping_contract: seo-optimize-v1
+    permissions: yolo

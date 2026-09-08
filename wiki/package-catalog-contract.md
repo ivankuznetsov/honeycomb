@@ -25,6 +25,15 @@ permission block; embedded `agent`, `model`, and `effort` are rejected. The
 manifest permission union remains deterministic disclosure/catalog data, not an
 actor execution policy.
 
+Owner-trusted successors Architecture 1.0.3, Writing 1.0.2, SEO Content 1.0.2,
+Reviewer Panel 1.0.1, Video Production 0.1.1, Task Inspect 0.1.1, and Docs Sync
+0.1.1 declare `permissions: yolo` for every executable actor. This selects normal
+agent execution, not workflow sandboxing or provider-specific tool allowlists.
+Evidence structure, review outcomes, owner approvals, and publication authority
+are unchanged. Earlier immutable version directories retain their original
+bytes. Task Inspect and Docs Sync successors also adopt install-time mappings
+instead of their historical embedded Claude identity.
+
 The strict `x-hive` extension has required `tools` and `optional_inputs` plus
 optional `prompt_assets` and `mapping_recommendations`. Tool paths must be
 normalized, manifest-inventoried regular files with Git's trusted executable
