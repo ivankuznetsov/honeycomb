@@ -1,0 +1,20 @@
+{
+  "approvals": [
+    {
+      "approved_suppressions": [],
+      "authority": "repository_owner",
+      "decision": "approved",
+      "evidence_digest": "f95c8be221d42e26aa0eb12b5e20d94eb26d418982bce3a4ff26167a65ec42a1",
+      "head_sha": "1444fbb6dfc8a69d99b31c43ca6e903cc3e84ba3",
+      "name": "writing",
+      "notes": "Owner explicitly requested trusted workflows without agent sandboxing, publication and local dogfood. Broad permissions are intentional; stage and completion contracts retained.",
+      "path": "packages/writing/1.0.2",
+      "release_sha256": "e02af5b46adf763f84918d247e5e42d8da99d08305962bbb7c442fa9ba7c3183",
+      "review_url": "https://github.com/ivankuznetsov/honeycomb/actions/runs/34278818384",
+      "reviewed_at": "2026-09-08T21:07:52Z",
+      "reviewer": "ivankuznetsov",
+      "version": "1.0.2"
+    }
+  ],
+  "schema": "honeycomb.listing-approval/v1"
+}
