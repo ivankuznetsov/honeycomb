@@ -1,0 +1,40 @@
+schema: "honeycomb-manifest/v1"
+name: "task-inspect"
+version: "0.1.1"
+description: "Inspect a Hive task workspace without mutation"
+author:
+  name: "Honeycomb Maintainers"
+  url: "https://github.com/ivankuznetsov/honeycomb"
+license: "MIT"
+hive_min_version: "0.6.0"
+source:
+  url: "https://github.com/ivankuznetsov/honeycomb/tree/a916efa9a98bcbc9d02f4f9bfa16b39b5c729bd6/packages/task-inspect/0.1.1"
+  revision: "a916efa9a98bcbc9d02f4f9bfa16b39b5c729bd6"
+permissions:
+  risk: "high"
+  capabilities:
+    - "filesystem-read"
+    - "filesystem-write"
+    - "network"
+    - "shell"
+  network_hosts:
+    - "*"
+  filesystem_read:
+    - "*"
+  filesystem_write:
+    - "*"
+  secrets:
+    - "*"
+files:
+  "packages/task-inspect/0.1.1/README.md": "071c45ba18a8c7027a8d2d184ed2916ec65208ebb3e478c8bb49b0fbcda3c7ac"
+  "packages/task-inspect/0.1.1/instructions/inspect.md": "34dea90f6301aaa76e8ddb821450caa5bf6db4cf72e91ff3ca43dc973acd3807"
+  "packages/task-inspect/0.1.1/workflow.yml": "6d4015e9e6940d37f3a34addceb82cbbac2e530e7074ec77e8de9fb8db9b008a"
+release_sha256: "b93420a34ef432cd1e6cd47b61242931a126436c5ab465017f2bac05b16b0cd9"
+x-hive:
+  tools: []
+  optional_inputs: []
+x-provenance:
+  kind: "registry-original"
+  source_paths:
+    - "workflow.yml"
+    - "instructions/inspect.md"
