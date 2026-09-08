@@ -1,0 +1,52 @@
+schema: "honeycomb-manifest/v1"
+name: "architecture"
+version: "1.0.3"
+description: "Turn repository and current web evidence into a concise architecture record"
+author:
+  name: "Honeycomb Maintainers"
+  url: "https://github.com/ivankuznetsov/honeycomb"
+license: "MIT"
+hive_min_version: "0.6.0"
+source:
+  url: "https://github.com/ivankuznetsov/honeycomb/tree/a916efa9a98bcbc9d02f4f9bfa16b39b5c729bd6/packages/architecture/1.0.3"
+  revision: "a916efa9a98bcbc9d02f4f9bfa16b39b5c729bd6"
+permissions:
+  risk: "high"
+  capabilities:
+    - "filesystem-read"
+    - "filesystem-write"
+    - "network"
+    - "shell"
+  network_hosts:
+    - "*"
+  filesystem_read:
+    - "*"
+  filesystem_write:
+    - "*"
+  secrets:
+    - "*"
+files:
+  "packages/architecture/1.0.3/README.md": "514543f7b4221bccf04972d312d99e50cdb7df31c7db366e2d93674affddc32b"
+  "packages/architecture/1.0.3/instructions/architecture.md": "f82fb45f02f56d0db98ce0499d2d5b21d21af0a92182b724ded4e48b1df78e91"
+  "packages/architecture/1.0.3/instructions/draft.md": "6dfbe1a77f82f9211d2b5271dc06dc9dd3a235093aaef050960c278f2fdb08fc"
+  "packages/architecture/1.0.3/instructions/repo-research.md": "f0202130d91cfbaec8cab4e5ed894655fb3ef32004fad15d9ca4f52a726c2ffd"
+  "packages/architecture/1.0.3/instructions/research.md": "995666b52d8636fef74335fc6903240551e4b4022c5a0a55fdb54abd3155dcf5"
+  "packages/architecture/1.0.3/instructions/revise.md": "cf8e2acd23a07f31592ee7741296b09e66a38c15f5fe0995a0171668431778aa"
+  "packages/architecture/1.0.3/instructions/web-research.md": "8585ce0387ea36bd62ce54ae5f7ab9a5e7c8400de7762873f558a7393f2c28c3"
+  "packages/architecture/1.0.3/workflow.yml": "94fea767698904cec4bdc374c3a7866755b4858e08000af00b1d8c519b4c871f"
+release_sha256: "7754ca35f8cd00b1c8ac591c87eb21ba14dc5a374c0d7d5e94411b845196f511"
+x-hive:
+  tools: []
+  prompt_assets: []
+  optional_inputs: []
+x-provenance:
+  kind: "registry-original"
+  source_paths:
+    - "README.md"
+    - "workflow.yml"
+    - "instructions/architecture.md"
+    - "instructions/draft.md"
+    - "instructions/repo-research.md"
+    - "instructions/research.md"
+    - "instructions/revise.md"
+    - "instructions/web-research.md"

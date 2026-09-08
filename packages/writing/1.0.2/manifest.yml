@@ -1,0 +1,53 @@
+schema: "honeycomb-manifest/v1"
+name: "writing"
+version: "1.0.2"
+description: "Produce a grounded article through research and adversarial editorial review"
+author:
+  name: "Honeycomb Maintainers"
+  url: "https://github.com/ivankuznetsov/honeycomb"
+license: "MIT"
+hive_min_version: "0.6.0"
+source:
+  url: "https://github.com/ivankuznetsov/honeycomb/tree/a916efa9a98bcbc9d02f4f9bfa16b39b5c729bd6/packages/writing/1.0.2"
+  revision: "a916efa9a98bcbc9d02f4f9bfa16b39b5c729bd6"
+permissions:
+  risk: "high"
+  capabilities:
+    - "filesystem-read"
+    - "filesystem-write"
+    - "network"
+    - "shell"
+  network_hosts:
+    - "*"
+  filesystem_read:
+    - "*"
+  filesystem_write:
+    - "*"
+  secrets:
+    - "*"
+files:
+  "packages/writing/1.0.2/NOTICE.md": "b8ccf56f1fe45243638cfd7531059db1e41bb11cd5057b94e67727a72851f646"
+  "packages/writing/1.0.2/README.md": "c6865df07a68650b00910beb10860caa431e1caaa8b1d8e7808cf2a4fb86b597"
+  "packages/writing/1.0.2/instructions/deliver.md": "b0c425f7c9669fb6c4c32f42f64e1f76aa2306b9561025644a50b441fe8a8d0d"
+  "packages/writing/1.0.2/instructions/draft.md": "4a283310fe566bbd453e0cd228045186e8d87d12dc38174dc8065da4ce70fd5f"
+  "packages/writing/1.0.2/instructions/repo-research.md": "17646581fdf4eb88346e216ce8c09775eb3740b06ed4b1beff4159949de38883"
+  "packages/writing/1.0.2/instructions/research.md": "e4d78f0987aff32e3983c2a9296dda2d837161f0e7a019eca3a0f52cf55940c0"
+  "packages/writing/1.0.2/instructions/revise.md": "2cba643a828b31e6fa38bb2ba9086e4cbdda812847f762c6385d533135f0b666"
+  "packages/writing/1.0.2/instructions/web-research.md": "8637e54d67b30e6e60240b75771dc2ccecbccf1cec4cd7c92bd18c0cb30c48e3"
+  "packages/writing/1.0.2/workflow.yml": "e5c137df0913f99e76e9c646cb0bfb35e26f6712c49a32b999ecd243b39fc7bd"
+release_sha256: "e02af5b46adf763f84918d247e5e42d8da99d08305962bbb7c442fa9ba7c3183"
+x-hive:
+  tools: []
+  prompt_assets: []
+  optional_inputs: []
+x-provenance:
+  kind: "adaptation"
+  upstream_revision: "e2caed2878ff1996f235ad0122bf7fea2eea3a27"
+  source_paths:
+    - "workflow.yml"
+    - "instructions/deliver.md"
+    - "instructions/draft.md"
+    - "instructions/repo-research.md"
+    - "instructions/research.md"
+    - "instructions/revise.md"
+    - "instructions/web-research.md"

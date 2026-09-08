@@ -1,0 +1,16 @@
+id: docs-sync
+stages:
+  - name: inspect
+    kind: agent
+    state_file: inspect.md
+    instruction: instructions/inspect.md
+    mapping_role: planning
+    mapping_contract: docs-sync-inspect-v1
+    permissions: yolo
+  - name: update-docs
+    kind: agent
+    state_file: update-docs.md
+    instruction: instructions/update-docs.md
+    mapping_role: development
+    mapping_contract: docs-sync-update-docs-v1
+    permissions: yolo
