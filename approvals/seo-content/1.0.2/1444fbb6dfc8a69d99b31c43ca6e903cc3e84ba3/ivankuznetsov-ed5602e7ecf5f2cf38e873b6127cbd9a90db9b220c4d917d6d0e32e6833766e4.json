@@ -1,0 +1,20 @@
+{
+  "approvals": [
+    {
+      "approved_suppressions": [],
+      "authority": "repository_owner",
+      "decision": "approved",
+      "evidence_digest": "f95c8be221d42e26aa0eb12b5e20d94eb26d418982bce3a4ff26167a65ec42a1",
+      "head_sha": "1444fbb6dfc8a69d99b31c43ca6e903cc3e84ba3",
+      "name": "seo-content",
+      "notes": "Owner explicitly requested trusted workflows without agent sandboxing, publication and local dogfood. Broad permissions are intentional; stage and completion contracts retained.",
+      "path": "packages/seo-content/1.0.2",
+      "release_sha256": "c5fa464734ce9ff633b7429f19b6ea392900dfcde1d6b768c90f2d33217705b2",
+      "review_url": "https://github.com/ivankuznetsov/honeycomb/actions/runs/34278646276",
+      "reviewed_at": "2026-09-08T21:06:09Z",
+      "reviewer": "ivankuznetsov",
+      "version": "1.0.2"
+    }
+  ],
+  "schema": "honeycomb.listing-approval/v1"
+}
