@@ -1,0 +1,20 @@
+{
+  "approvals": [
+    {
+      "approved_suppressions": [],
+      "authority": "repository_owner",
+      "decision": "approved",
+      "evidence_digest": "f95c8be221d42e26aa0eb12b5e20d94eb26d418982bce3a4ff26167a65ec42a1",
+      "head_sha": "1444fbb6dfc8a69d99b31c43ca6e903cc3e84ba3",
+      "name": "architecture",
+      "notes": "Owner explicitly requested trusted workflows without agent sandboxing, publication and local dogfood. Broad permissions are intentional; stage and completion contracts retained.",
+      "path": "packages/architecture/1.0.3",
+      "release_sha256": "7754ca35f8cd00b1c8ac591c87eb21ba14dc5a374c0d7d5e94411b845196f511",
+      "review_url": "https://github.com/ivankuznetsov/honeycomb/actions/runs/34278876619",
+      "reviewed_at": "2026-09-08T21:08:27Z",
+      "reviewer": "ivankuznetsov",
+      "version": "1.0.3"
+    }
+  ],
+  "schema": "honeycomb.listing-approval/v1"
+}
