@@ -101,13 +101,13 @@ class FlagshipPackagesTest < Minitest::Test
 
   def test_architecture_current_release_is_catalog_listed
     entry = JSON.parse(File.read(File.join(ROOT, "catalog.json"))).fetch("entries").find do |candidate|
-      candidate.fetch("name") == "architecture" && candidate.fetch("version") == "1.0.3"
+      candidate.fetch("name") == "architecture" && candidate.fetch("version") == "1.0.4"
     end
 
     refute_nil entry
-    assert_equal "1.0.3", entry.fetch("latest_version")
+    assert_equal "1.0.4", entry.fetch("latest_version")
     assert_equal "high", entry.fetch("permission_risk")
-    assert_equal "7754ca35f8cd00b1c8ac591c87eb21ba14dc5a374c0d7d5e94411b845196f511",
+    assert_equal "d8a16220f7ec557b6ad315f59040b90db67feeacf38e41c8e13cfe6d8c72a781",
                  entry.dig("listing_approval", "release_sha256")
     assert_equal ["repository_owner"],
                  entry.dig("listing_approval", "reviews").map { |review| review.fetch("authority") }
