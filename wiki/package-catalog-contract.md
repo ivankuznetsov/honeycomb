@@ -189,3 +189,16 @@ are complete. Production site publication, clean public install/task-creation
 acceptance against released Hive, and deployment verification are also
 complete. Provider-backed live-run evidence and any Hive template removal
 remain separate gates.
+
+## Architecture 1.0.4 completion
+
+Architecture 1.0.4 adds an inert `8-done` stage after `7-architecture`.
+The final document remains `architecture.md`, shared by the writer and Done.
+The writer no longer declares `deliverable`: Hive permits that field only on
+its final active stage, while the inert terminal's state file identifies the
+workflow result. Completed writers become ready to advance through Hive's
+normal transition; no extra agent runs in Done.
+
+The managed workflow updater migrates retained task pins by semantic stage
+name. Tasks stay at the writer during migration, then normal advancement moves
+completed ones to Done. Publishing the package alone does not update projects.
