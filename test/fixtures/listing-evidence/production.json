@@ -92,6 +92,35 @@
       "approvals": [
         {
           "authority": "repository_owner",
+          "evidence_digest": "5402edea98637f62b72884a844b6e67e020f4d9821a01fe06f77a657c931cda9",
+          "head_sha": "de86bdccd9fbf4044a4649f27ae879127da8205a",
+          "release_sha256": "d8a16220f7ec557b6ad315f59040b90db67feeacf38e41c8e13cfe6d8c72a781",
+          "review_url": "https://github.com/ivankuznetsov/honeycomb/actions/runs/35141873120",
+          "reviewed_at": "2026-09-16T19:39:29Z",
+          "reviewer": "ivankuznetsov",
+          "status": "approved"
+        }
+      ],
+      "current_tier": "community",
+      "history": [],
+      "lint": {
+        "checked_at": "2026-09-16T19:43:00Z",
+        "head_sha": "de86bdccd9fbf4044a4649f27ae879127da8205a",
+        "release_sha256": "d8a16220f7ec557b6ad315f59040b90db67feeacf38e41c8e13cfe6d8c72a781",
+        "status": "pass"
+      },
+      "name": "architecture",
+      "permission_risk": "high",
+      "release_tier": "community",
+      "state": "listed",
+      "verification": null,
+      "version": "1.0.4"
+    },
+    {
+      "advisories": [],
+      "approvals": [
+        {
+          "authority": "repository_owner",
           "evidence_digest": "8a947399b65ca96f9a377af886b76e2acc804e87b0882146aa4a1f531cb4c0d5",
           "head_sha": "fb6a249ae06fec17850d2bb541a56535360d0e68",
           "release_sha256": "2c2debc0cbf92a7a9bef05be24a2205ad3f7a70c8ebf0cf691722b619a69cebb",
