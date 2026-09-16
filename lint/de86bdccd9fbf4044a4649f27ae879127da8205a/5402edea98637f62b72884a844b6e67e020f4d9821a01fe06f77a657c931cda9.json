@@ -1,0 +1,253 @@
+{
+  "artifact_digest": "5402edea98637f62b72884a844b6e67e020f4d9821a01fe06f77a657c931cda9",
+  "base_sha": "9d73972ff41f640d97dfc00a832ad98fe9168f6c",
+  "event": {
+    "action": "labeled",
+    "gate": "applied",
+    "label_sha": "de86bdccd9fbf4044a4649f27ae879127da8205a"
+  },
+  "head_sha": "de86bdccd9fbf4044a4649f27ae879127da8205a",
+  "packages": [
+    {
+      "commands": [],
+      "counts": {
+        "advisory": 20,
+        "downgraded": 0,
+        "hard": 0
+      },
+      "findings": [
+        {
+          "approval": null,
+          "category": "permission",
+          "column": 1,
+          "disposition": "advisory",
+          "fingerprint": "57bd77e9287255f8f9c35c11589f82f2806dc26e96e7b94c21366b149cf31cbb",
+          "line": 1,
+          "message": "Broad declared permissions require human review",
+          "original_severity": "advisory",
+          "path": "manifest.yml",
+          "redacted_evidence": "Broad permissions declared",
+          "request": null,
+          "rule_id": "permission.broad-declaration"
+        }
+      ],
+      "hosts": [],
+      "identity": {
+        "name": "architecture",
+        "path": "packages/architecture/1.0.4",
+        "release_sha256": "d8a16220f7ec557b6ad315f59040b90db67feeacf38e41c8e13cfe6d8c72a781",
+        "version": "1.0.4"
+      },
+      "requested_permissions": {
+        "capabilities": [
+          "filesystem-read",
+          "filesystem-write",
+          "network",
+          "shell"
+        ],
+        "filesystem_read": [
+          "*"
+        ],
+        "filesystem_write": [
+          "*"
+        ],
+        "network_hosts": [
+          "*"
+        ],
+        "risk": "high",
+        "secrets": [
+          "*"
+        ]
+      },
+      "scanned_files": [
+        {
+          "bytes": 2548,
+          "kind": "text",
+          "path": "packages/architecture/1.0.4/README.md",
+          "sha256": "15fbb54fe3801bad1e5904877e505f9dd10a35ec4ee73226aa1c257ad451720f"
+        },
+        {
+          "bytes": 1462,
+          "kind": "text",
+          "path": "packages/architecture/1.0.4/instructions/architecture.md",
+          "sha256": "f82fb45f02f56d0db98ce0499d2d5b21d21af0a92182b724ded4e48b1df78e91"
+        },
+        {
+          "bytes": 1149,
+          "kind": "text",
+          "path": "packages/architecture/1.0.4/instructions/draft.md",
+          "sha256": "6dfbe1a77f82f9211d2b5271dc06dc9dd3a235093aaef050960c278f2fdb08fc"
+        },
+        {
+          "bytes": 1086,
+          "kind": "text",
+          "path": "packages/architecture/1.0.4/instructions/repo-research.md",
+          "sha256": "f0202130d91cfbaec8cab4e5ed894655fb3ef32004fad15d9ca4f52a726c2ffd"
+        },
+        {
+          "bytes": 1104,
+          "kind": "text",
+          "path": "packages/architecture/1.0.4/instructions/research.md",
+          "sha256": "995666b52d8636fef74335fc6903240551e4b4022c5a0a55fdb54abd3155dcf5"
+        },
+        {
+          "bytes": 802,
+          "kind": "text",
+          "path": "packages/architecture/1.0.4/instructions/revise.md",
+          "sha256": "cf8e2acd23a07f31592ee7741296b09e66a38c15f5fe0995a0171668431778aa"
+        },
+        {
+          "bytes": 1062,
+          "kind": "text",
+          "path": "packages/architecture/1.0.4/instructions/web-research.md",
+          "sha256": "8585ce0387ea36bd62ce54ae5f7ab9a5e7c8400de7762873f558a7393f2c28c3"
+        },
+        {
+          "bytes": 2149,
+          "kind": "text",
+          "path": "packages/architecture/1.0.4/manifest.yml",
+          "sha256": "899a326967e59ac9ee6dc477c68ca757252c149d4ef99a9dedd35d73cc4d0434"
+        },
+        {
+          "bytes": 2825,
+          "kind": "text",
+          "path": "packages/architecture/1.0.4/workflow.yml",
+          "sha256": "0c5169fae0601c7955f3c126ec90559ea545c6cf481665e7ca38812b014240c7"
+        }
+      ],
+      "suppressions": [],
+      "validator_findings": [
+        {
+          "code": "hive.compatible",
+          "message": "descriptor parsed with Hive 0.6.7",
+          "path": "packages/architecture/1.0.4/workflow.yml",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.4/workflow.yml.stages[1] contributes yolo permissions",
+          "path": "packages/architecture/1.0.4/workflow.yml.stages[1].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/architecture/1.0.4/workflow.yml.stages[1] requests unbounded access",
+          "path": "packages/architecture/1.0.4/workflow.yml.stages[1].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.4/workflow.yml.stages[2] contributes yolo permissions",
+          "path": "packages/architecture/1.0.4/workflow.yml.stages[2].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/architecture/1.0.4/workflow.yml.stages[2] requests unbounded access",
+          "path": "packages/architecture/1.0.4/workflow.yml.stages[2].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.4/workflow.yml.stages[3] contributes yolo permissions",
+          "path": "packages/architecture/1.0.4/workflow.yml.stages[3].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/architecture/1.0.4/workflow.yml.stages[3] requests unbounded access",
+          "path": "packages/architecture/1.0.4/workflow.yml.stages[3].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.4/workflow.yml.stages[4] contributes yolo permissions",
+          "path": "packages/architecture/1.0.4/workflow.yml.stages[4].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/architecture/1.0.4/workflow.yml.stages[4] requests unbounded access",
+          "path": "packages/architecture/1.0.4/workflow.yml.stages[4].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.4/workflow.yml.stages[5].council.revise contributes yolo permissions",
+          "path": "packages/architecture/1.0.4/workflow.yml.stages[5].council.revise.permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/architecture/1.0.4/workflow.yml.stages[5].council.revise requests unbounded access",
+          "path": "packages/architecture/1.0.4/workflow.yml.stages[5].council.revise.permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.4/workflow.yml.stages[5] contributes yolo permissions",
+          "path": "packages/architecture/1.0.4/workflow.yml.stages[5].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/architecture/1.0.4/workflow.yml.stages[5] requests unbounded access",
+          "path": "packages/architecture/1.0.4/workflow.yml.stages[5].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.4/workflow.yml.stages[5].reviewers[0] contributes yolo permissions",
+          "path": "packages/architecture/1.0.4/workflow.yml.stages[5].reviewers[0].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/architecture/1.0.4/workflow.yml.stages[5].reviewers[0] requests unbounded access",
+          "path": "packages/architecture/1.0.4/workflow.yml.stages[5].reviewers[0].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.4/workflow.yml.stages[5].reviewers[1] contributes yolo permissions",
+          "path": "packages/architecture/1.0.4/workflow.yml.stages[5].reviewers[1].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/architecture/1.0.4/workflow.yml.stages[5].reviewers[1] requests unbounded access",
+          "path": "packages/architecture/1.0.4/workflow.yml.stages[5].reviewers[1].permissions",
+          "severity": "warning"
+        },
+        {
+          "code": "permissions.source",
+          "message": "packages/architecture/1.0.4/workflow.yml.stages[6] contributes yolo permissions",
+          "path": "packages/architecture/1.0.4/workflow.yml.stages[6].permissions",
+          "severity": "info"
+        },
+        {
+          "code": "permissions.unbounded",
+          "message": "packages/architecture/1.0.4/workflow.yml.stages[6] requests unbounded access",
+          "path": "packages/architecture/1.0.4/workflow.yml.stages[6].permissions",
+          "severity": "warning"
+        }
+      ],
+      "verdict": "pass"
+    }
+  ],
+  "pull_request": 42,
+  "run": {
+    "attempt": 1,
+    "id": 35141732694,
+    "repository": "ivankuznetsov/honeycomb",
+    "workflow": "Security lint"
+  },
+  "schema": "honeycomb.security-lint/v1",
+  "state": "pass",
+  "totals": {
+    "advisory": 20,
+    "downgraded": 0,
+    "hard": 0
+  },
+  "verdict": "Security lint passed"
+}
