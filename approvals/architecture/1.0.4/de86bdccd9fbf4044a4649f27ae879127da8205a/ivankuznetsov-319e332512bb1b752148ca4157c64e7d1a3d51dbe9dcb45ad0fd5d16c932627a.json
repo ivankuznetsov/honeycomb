@@ -1,0 +1,20 @@
+{
+  "approvals": [
+    {
+      "approved_suppressions": [],
+      "authority": "repository_owner",
+      "decision": "approved",
+      "evidence_digest": "5402edea98637f62b72884a844b6e67e020f4d9821a01fe06f77a657c931cda9",
+      "head_sha": "de86bdccd9fbf4044a4649f27ae879127da8205a",
+      "name": "architecture",
+      "notes": "User approved Architecture 1.0.4 publication, merge, and local installation. Reviewed Done-stage change; permissions and executable instructions match 1.0.3. Security lint passes with no hard findings.",
+      "path": "packages/architecture/1.0.4",
+      "release_sha256": "d8a16220f7ec557b6ad315f59040b90db67feeacf38e41c8e13cfe6d8c72a781",
+      "review_url": "https://github.com/ivankuznetsov/honeycomb/actions/runs/35141873120",
+      "reviewed_at": "2026-09-16T19:39:29Z",
+      "reviewer": "ivankuznetsov",
+      "version": "1.0.4"
+    }
+  ],
+  "schema": "honeycomb.listing-approval/v1"
+}
